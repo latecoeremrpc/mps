@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_filters %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <!--message alert -->
+        {% if messages %}
+            {% for message in messages %}
+                {%include 'app/alerts/alert.html'%}
+            {% endfor %}
+        {% endif %}
+        <!--return back-->
+        <div style='margin-bottom:10px'>
+            <a href="{%url 'division' %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
+            </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary card-outline">
+                    <div class="card-header ui-sortable-handle" >
+                        <h5 class="card-title" ><strong> Product List </strong></h5>
+                        <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                        <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+<div class="card-body table-responsive p-0" style="height: 450px;" >
+
+<div class="card-body " >
+    
+                            
+    <button class="btn btn-outline-primary" data-target="#create" data-toggle="modal" style="margin-bottom: 10px;"> New <i class="fa-solid fa-plus"></i></button>
+    <table class="table table-bordered text-nowrap">
+        <thead >
+            <tr>
+                <th>ID</th>
+                <th>Program</th>
+                <th>Has Treatment</th>
+                <th>Product</th>         
+                <th>Planning</th>
+                <th>Material</th>
+                <th>Calendar</th>
+                <th>Calendar Config Treatment</th>
+                <th>Calendar Config CpOrdo</th>
+                <th>State</th>
+
+                <th colspan="2">Actions</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            
+                {% for d in data %}
+                <tr>
+                <td>{{ d.id}}</td> 
+                <td>{{ d.program}}</td>
+                <td>{{ d.has_treatement}}</td>   
+                <td>{{ d.product}}</td>
+                <td>{{ d.planning}}</td>
+                <td><a href="{% url 'material' d.division d.id  %}" style="text-decoration: none;">Material</a></td>
+                <td><a href="{% url 'calendar' d.division d.id %}" style="text-decoration: none; ">Calendar</a></td>
+                {%if d.has_treatement %}
+                    <td><a href="{% url 'configTrait' d.division d.id %}"style="text-decoration: none; ">Calendar Config Treatment</a></td>
+                    <td><a href="{% url 'configCpordo' d.division d.id %}"style="text-decoration: none; ">Calendar Config CpOrdo</a></td>
+
+                {%else%}
+                    <td>N/A</td>
+                    <td>N/A</td>
+                {%endif%}
+                {% if d.is_deleted%} 
+                <td style="color: red;">Deleted</td> 
+                {%else%} 
+                <td >Active</td> 
+                {%endif%}
+                <td>
+                    {% if d.is_deleted%}
+                    <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                    {%else%}
+                <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-traitement="{{d.has_treatement}}" data-product="{{d.product}}" data-program="{{d.program}}" data-planning="{{d.planning}}"  ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                {%endif%}
+                </td>
+                </tr>
+                {% endfor %}
+        </tbody>               
+    </table>
+
+</div>
+
+ </div>
+     </div>
+     </div>
+    </div>
+    </div>
+</div>
+
+
+<!--create Product modal-->
+<div class="modal" id="create">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action="{% url 'createproduct' division %}">
+        <!-- Security token -->
+        {% csrf_token %}
+       <div class="modal-header">						
+       <h4 class="modal-title">Create New Product</h4>
+       </div>
+       <div class="modal-body">
+            <!-- Using the formset with crispy-->
+            {{ form|crispy}}
+       </div>
+          <div class="modal-footer">
+          <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+          <input type="submit" class="btn btn:hover btn-color" value="Save">
+          </div>
+     </form>
+    </div>
+    </div>
+  </div>
+
+<!--Update Product modal-->
+<div class="modal" id="update" >
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action ="{%url 'updateproduct'%}"> 
+            <!-- Security token by Django -->
+            {% csrf_token %}
+        <div class="modal-header">						
+            <h4 class="modal-title">Edit Product</h4>
+        </div>
+        <div class="modal-body">    
+                 <!-- form with crispy -->
+                 {{ form|crispy}}
+                 <input type="hidden" id="id" name="id" value="">
+                 <input type="checkbox" id="test" name="test">
+                 <input type="checkbox" id="has_has_has" name="test">
+                 
+        </div>
+            <div class="modal-footer">
+                <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
+                <input type="submit"  class="btn btn:hover btn-color " value="update">
+            </div>
+        </form>
+    </div>
+    </div>
+  </div>
+
+
+<!--delete Product modal-->
+<div class="modal" id="delete" >
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Delete Product</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+<!--restore Product modal-->
+<div class="modal" id="restore" >
+    <div class="modal-dialog ">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Restore Product</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='link' class="btn btn-danger" value="Delete">Restore</a>  
+    </div>
+    </div>
+    </div>
+</div>
+<!--******************************************************************************************************************************-->
+
+<!-- Delete Modal  -->
+<script>
+    $('#delete').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var product = $(event.relatedTarget).data('product');
+    $(this).find(".modal-body").text('Are you sure you want to delete these Product: '+ product +'?');
+    document.getElementById("targetlink").href="/app/division/"+id+"/deleteproduct";
+
+    });
+</script>
+
+<!-- restore Modal  -->
+<script>
+    $('#restore').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var product = $(event.relatedTarget).data('product');
+    $(this).find(".modal-body").text('Are you sure you want to restore these Product: '+product +'?');
+    document.getElementById("link").href="/app/division/"+id+"/restoreproduct";
+    });
+</script>
+
+<!-- Edit Modal  -->
+<script>
+    $('#update').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var product = $(event.relatedTarget).data('product');
+    var program = $(event.relatedTarget).data('program');
+    var planning = $(event.relatedTarget).data('planning');
+    var traitement = $(event.relatedTarget).data('traitement');
+    $(this).find(".modal-body #id").val(id);
+    $(this).find(".modal-body #id_product").val(product);
+    $(this).find(".modal-body #id_program").val(program);
+    $(this).find(".modal-body #id_planning").val(planning); 
+    // $(this).find(".modal-body #id_has_treatement").checked=true; 
+    // document.getElementById("has_has_has").checked=true;
+
+    console.log(traitement);
+    if  (traitement === 'True') {
+        document.getElementById("id_has_treatement").checked=true;
+    }else{
+        document.getElementById("id_has_treatement").checked=false;
+    } 
+
+    });
+
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,50 @@
+
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Materials</h2>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            
+           <th>ID</th>
+            <th>Program</th>
+            <th>Product</th>
+            <th>Planning</th>
+            <th>Material</th>
+            <th>Allocated Time</th>
+            <th>Lead Time</th>
+            <th>Delta First Def And Start Manuf</th>
+            <th>Delta Last Def And End Of Manuf</th>
+            <th>Delta Buffer OTD</th>
+            <th>Workstation</th>
+            <th>Allocated Time On Workstation</th>
+            <th>Smooth Family</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        
+           
+            {% for d in data %}
+            <tr>
+              <td>{{ d.id}}</td>
+            <td>{{ d.program}}</td>
+            <td>{{ d.product}}</td>
+            <td>{{ d.planning}}</td>
+            <td>{{ d.material}}</td>
+            <td>{{ d.AllocatedTime}}</td>
+            <td>{{ d.Leadtime}}</td>
+            <td>{{ d.Delta_First_Def_And_StartManuf}}</td>
+            <td>{{ d.Delta_Last_Def_And_End_Of_Manuf}}</td>
+            <td>{{ d.Delta_Buffer_OTD}}</td>
+            <td>{{ d.workstation}}</td>
+            <td>{{ d.Allocated_Time_On_Workstation}}</td>
+            <td>{{ d.Smooth_Family}}</td>
+          
+            </tr>
+            {% endfor %}
+                  
+</table>
+{% endblock %}

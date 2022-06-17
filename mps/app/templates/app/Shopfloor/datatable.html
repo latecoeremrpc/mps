@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+
+{% block content %} 
+
+<div id="dataTable"></div>
+
+
+<script>
+data = [ 
+    ['Mazda', 2001, 2000],
+ ['Pegeout', 2010, 5000], 
+ ['Honda Fit', 2009, 3000], 
+ ['Honda CRV', 2010, 6000], 
+]; 
+$('#dataTable').jexcel({ data:data, colHeaders: ['Model', 'Price', 'Price'],
+ colWidths: [ 300, 80, 100 ] });
+
+</script>
+{% endblock content %} 

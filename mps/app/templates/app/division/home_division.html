@@ -1,0 +1,209 @@
+<!-- Read Modal HTML -->
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <!--message alert -->
+        {% if messages %}
+            {% for message in messages %}
+                {%include 'app/alerts/alert.html'%}
+            {% endfor %}
+        {% endif %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary card-outline">
+                      <div class="card-header ui-sortable-handle" >
+                        <h5 class="card-title" ><strong> Division List</strong></h5>
+                        <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                        <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="card-body table-responsive p-0" style="height: 450px;">
+                      <div class="card-body">
+                        <button class="btn btn-outline-primary" data-target="#create" data-toggle="modal" style="margin-bottom: 10px;"> New <i class="fa-solid fa-plus"></i></button>
+                          <!--<div class="col-2" style="margin-bottom: 10px;">
+                            <button type="button" class="btn btn-outline-primary" data-target="#create" data-toggle="modal" ><span>New</span>
+                            <div class="icon icon-round d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-plus"></i>
+                            </div>
+                            </button>
+                        </div>-->
+                            
+                        <table class="table table-bordered text-nowrap">
+                            <thead>
+                                <tr>
+                                    
+                                    <th>Id </th>
+                                    <th>Name division</th>
+                                    <th>Description division</th>
+                                    <th>Product</th>
+                                    <th>State</th>
+                                    <th colspan="2">Actions</th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                   
+                                    {% for d in data %}
+                                    <tr>
+                                    <td>{{ d.id}}</td>   
+                                    <td>{{ d.name}}</td>
+                                    <td>{{ d.description}}</td>
+                                    <td><a href="{% url 'product' d.id %}" style="text-decoration: none;">Product</a></td> 
+                                    {% if d.is_deleted%} 
+                                    <td style="color: red;">Deleted</td> 
+                                    {%else%} 
+                                    <td >Active</td> 
+                                    {%endif%}
+                                    <td>
+                                        {% if d.is_deleted%}
+                                        <button class="btn" data-target="#restore" data-toggle="modal" data-id="{{d.id}}" data-name="{{d.name}}" ><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+
+                                        {%else%}
+                                            <button class="btn" data-target="#update" data-id="{{d.id}}" data-name="{{d.name}}" data-description="{{d.description}}" data-toggle="modal"><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                            <button class="btn" data-target="#delete" data-id="{{d.id}}" data-name="{{d.name}}" data-toggle="modal" ><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                        {%endif%}
+                                    </td>
+                                </tr>
+                                    {% endfor %} 
+                            </tbody>        
+                                          
+                        </table>
+                      </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--create Division modal-->
+<div class="modal" id="create">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action = "{% url 'create' %}">
+            <!-- Security token -->
+            {% csrf_token %}
+        <div class="modal-header">						
+        <h4 class="modal-title">Create New Division</h4>
+        </div>
+        <div class="modal-body">
+            <!-- Using the formset with crispy -->
+            {{ form|crispy}}
+       </div>
+        
+          <div class="modal-footer">
+          <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+          <input type="submit" class="btn btn:hover btn-color" value="Save">
+          </div>
+     </form>
+    </div>
+    </div>
+  </div>
+
+<!--Update Division modal-->
+<div class="modal" id="update" >
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action ="{%url 'update'%}"> 
+            <!-- Security token by Django -->
+            {% csrf_token %}
+        <div class="modal-header">						
+            <h4 class="modal-title">Edit Division</h4>
+        </div>
+        <div class="modal-body">    
+                 <!-- formset with crispy -->
+                 {{ form|crispy}}
+                 <input type="hidden" id="id" name="id" value="">
+        </div>
+            <div class="modal-footer">
+                <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
+                <input type="submit" class="btn btn:hover btn-color" value="update">
+            </div>
+        </form>
+    </div>
+    </div>
+  </div>
+
+
+<!--delete Division modal-->
+<div class="modal" id="delete" >
+    <div class="modal-dialog ">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Delete Division</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+<!--restore Division modal-->
+<div class="modal" id="restore" >
+    <div class="modal-dialog ">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Restore Division</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='link' class="btn btn-danger" value="Delete">Restore</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+
+<!--******************************************************************************************************************************-->
+<!-- Delete Modal  -->
+<script>
+    $('#delete').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var name = $(event.relatedTarget).data('name');
+    $(this).find(".modal-body").text('Are you sure you want to delete these division: '+name +'?');
+    document.getElementById("targetlink").href="/app/division/"+id+"/delete";
+
+    });
+</script>
+
+
+<!-- restore Modal  -->
+<script>
+    $('#restore').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var name = $(event.relatedTarget).data('name');
+    $(this).find(".modal-body").text('Are you sure you want to restore these division: '+name +'?');
+    document.getElementById("link").href="/app/division/"+id+"/restore";
+    });
+</script>
+
+
+<!-- Edit Modal -->
+<script>
+    $('#update').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var name = $(event.relatedTarget).data('name');
+    var description = $(event.relatedTarget).data('description');
+    $(this).find(".modal-body #id").val(id);
+    $(this).find(".modal-body #id_name").val(name);
+    $(this).find(".modal-body #id_description").val(description);
+
+    });
+</script>
+
+{% endblock %}

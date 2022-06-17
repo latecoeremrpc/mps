@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_filters %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <!--message alert -->
+        {% if messages %}
+            {% for message in messages %}
+                {%include 'app/alerts/alert.html'%}
+            {% endfor %}
+        {% endif %}
+        <!--return back-->
+        <div style='margin-bottom:10px'>
+            <a href="{%url 'product' division  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
+            </div>
+    
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary card-outline">
+                      <div class="card-header ui-sortable-handle" >
+                        <h5 class="card-title" ><strong> Material List</strong></h5>
+                        <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                        <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                      <div class="card-body table-responsive p-0" style="height: 450px;" >
+                        <div class="card-body" >
+                        <button class="btn btn-outline-primary" data-target="#create" data-toggle="modal" style="margin-bottom: 10px;"> New <i class="fa-solid fa-plus"></i></button>
+                        <div>
+                            <table class="table table-bordered text-nowrap">
+                                <thead >
+                                    <tr> 
+                                        <th>ID</th>
+                                        <th>Material</th>
+                                        <th>Allocated Time</th>
+                                        <th>Leadtime</th>
+                                        <th>Delta First Def And Start Manuf</th>
+                                        <th>Delta Last Def And End Of Manuf</th>
+                                        <th>Delta Buffer OTD</th>
+                                        <th>Workstation</th>
+                                        <th>Allocated Time On Workstation</th>
+                                        <th>Smooth Family</th>
+                                        <th>State</th>
+                                        <th colspan="2">Actions</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                       
+                                        {% for d in data %}
+                                        <tr>
+                                        <td>{{ d.id}}</td>   
+                                        <td>{{ d.material}}</td>
+                                        <td>{{ d.AllocatedTime}}</td>
+                                        <td>{{ d.Leadtime}}</td>
+                                        <td>{{ d.Delta_First_Def_And_StartManuf}}</td>
+                                        <td>{{ d.Delta_Last_Def_And_End_Of_Manuf}}</td>
+                                        <td>{{ d.Delta_Buffer_OTD}}</td>
+                                        <td>{{ d.workstation}}</td>
+                                        <td>{{ d.Allocated_Time_On_Workstation}}</td>
+                                        <td>{{ d.Smooth_Family}}</td>
+                                        {% if d.is_deleted%} 
+                                        <td style="color: red;">Deleted</td> 
+                                        {%else%} 
+                                        <td >Active</td> 
+                                        {%endif%}
+                                        <td>
+                                        {% if d.is_deleted%}
+                                        <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-material="{{d.material}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                                        {%else%}
+                                        <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-leadtime="{{d.Leadtime}}" data-smoothfamily="{{d.Smooth_Family}}" data-allocated="{{d.Allocated_Time_On_Workstation}}" data-workstation="{{d.workstation}}" data-deltabuffer="{{d.Delta_Buffer_OTD}}" data-deltalast="{{d.Delta_Last_Def_And_End_Of_Manuf}}" data-allocatedtime="{{d.AllocatedTime}}" data-deltafirst="{{d.Delta_First_Def_And_StartManuf}}" data-material="{{d.material}}" ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                        <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-material="{{d.material}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                        {%endif%}
+                                        </td>
+                                         
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>               
+                            </table>
+                        </div>
+                        
+                      </div>    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<!--create Material modal-->
+<div class="modal" id="create">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action="{% url  'creatematerial' division product  %}">
+        <!-- Security token -->
+        {% csrf_token %}
+       <div class="modal-header">						
+       <h4 class="modal-title">Create New Material</h4>
+       </div>
+       <div class="modal-body">
+            <!-- Using the formset crispy -->
+            {{ form|crispy }}
+       </div>
+        
+          <div class="modal-footer">
+          <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+          <input type="submit" class="btn btn:hover btn-color" value="Save">
+          </div>
+     </form>
+    </div>
+    </div>
+  </div>
+
+<!--Update Material modal-->
+<div class="modal" id="update" >
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action ="{%url 'updatematerial' division %}"> 
+            <!-- Security token by Django -->
+            {% csrf_token %}
+        <div class="modal-header">						
+            <h4 class="modal-title">Edit Material</h4>
+        </div>
+        <div class="modal-body">    
+                 <!-- formset with crispy -->
+                 {{ form|crispy }}
+                 <input type="hidden" id="id" name="id" value="">
+        </div>
+            <div class="modal-footer">
+                <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
+                <input type="submit" class="btn btn:hover btn-color" value="update">
+            </div>
+        </form>
+    </div>
+    </div>
+  </div>
+
+
+  <!--delete Material modal-->
+<div class="modal" id="delete" >
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Delete Material</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+<!--restore Material modal-->
+<div class="modal" id="restore" >
+    <div class="modal-dialog ">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Restore Material</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='link' class="btn btn-danger" value="Delete">Restore</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+
+
+
+
+<!--*******************************************************************************************************************-->
+
+<!-- Delete Modal  -->
+<script>
+    $('#delete').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var division = {{division}};
+    var material = $(event.relatedTarget).data('material');
+    $(this).find(".modal-body").text('Are you sure you want to delete these Material: '+ material +'?');
+    document.getElementById("targetlink").href="/app/division/"+division+"/product/"+id+"/deletematerial";
+
+    });
+</script>
+
+<!-- restore Modal  -->
+<script>
+    $('#restore').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var division = {{division}};
+    var material = $(event.relatedTarget).data('material');
+    $(this).find(".modal-body").text('Are you sure you want to restore these Material: '+material +'?');
+    document.getElementById("link").href="/app/division/"+division+"/product/"+id+"/restoremateriale";
+    });
+</script>
+
+<!-- Edit Modal  -->
+<script>
+    $('#update').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var material = $(event.relatedTarget).data('material');
+    var workstation =$(event.relatedTarget).data('workstation');
+    var deltafirst =$(event.relatedTarget).data('deltafirst');
+    var leadtime = $(event.relatedTarget).data('leadtime');
+    var smoothfamily = $(event.relatedTarget).data('smoothfamily');
+    var allocated = $(event.relatedTarget).data('allocated');
+    var deltabuffer = $(event.relatedTarget).data('deltabuffer');
+    var deltalast = $(event.relatedTarget).data('deltalast');
+    var allocatedtime = $(event.relatedTarget).data('allocatedtime');
+    
+    
+    $(this).find(".modal-body #id").val(id);
+    $(this).find(".modal-body #id_material").val(material);
+    $(this).find(".modal-body #id_workstation").val(workstation);
+    $(this).find(".modal-body #id_Delta_First_Def_And_StartManuf").val(deltafirst);
+    $(this).find(".modal-body #id_Leadtime").val(leadtime);
+    $(this).find(".modal-body #id_Smooth_Family").val(smoothfamily);
+    $(this).find(".modal-body #id_Allocated_Time_On_Workstation").val(allocated);
+    $(this).find(".modal-body #id_Delta_Buffer_OTD").val(deltabuffer);
+    $(this).find(".modal-body #id_Delta_Last_Def_And_End_Of_Manuf").val(deltalast);
+    $(this).find(".modal-body #id_AllocatedTime").val(allocatedtime);
+
+    });
+</script>
+
+
+
+{% endblock %}

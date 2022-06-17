@@ -1,0 +1,27 @@
+<style>
+    .toast-container{
+        padding-top: 20%;
+        width: 400px !important;
+        /* height: 00px !important; */
+    }
+</style>
+<script type="text/javascript">
+    Command: toastr['{{message.tags}}']('{{message}}')
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-top-center",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": 0,
+        "extendedTimeOut": 0,
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut",
+    }
+</script>

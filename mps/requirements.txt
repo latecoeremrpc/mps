@@ -1,0 +1,16 @@
+# Frontend templates
+#AdminLTE  :https://adminlte.io/
+# Icones
+#fontawesome : https://fontawesome.com/icons 
+# Lazy Load Form Fields In Rails with HTMX
+#HTMX 1.7.0  : https://htmx.org/
+#Connect to a PostgreSQL database and execute queries in Python using the Psycopg2 library
+psycopg2 2.9.3
+#Pandas is a data analysis and manipulation library
+pandas 1.4.2
+#Openpyxl is a Python library to read/write Excel 2010 xlsx/xlsm/xltx/xltm files
+openpyxl 3.0.9
+# manage Django forms
+django-crispy-forms
+# Alert
+#toastr : https://codeseven.github.io/toastr/

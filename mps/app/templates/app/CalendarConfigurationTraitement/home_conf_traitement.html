@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_filters %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <!--message alert -->
+        {% if messages %}
+            {% for message in messages %}
+                {%include 'app/alerts/alert.html'%}
+            {% endfor %}
+        {% endif %}
+         <!--return back-->
+         <div style='margin-bottom:10px'>
+            <a href="{%url 'product' division  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
+            </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary card-outline">
+
+                      <div class="card-header ui-sortable-handle" >
+                        <h5 class="card-title" ><strong> Calendar Configuration Treatment List</strong></h5>
+                        <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                        <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="card-body table-responsive p-0" style="height: 450px;" >
+                      <div class="card-body">
+                        <button class="btn btn-outline-primary" data-target="#create" data-toggle="modal"  style="margin-bottom: 10px;"> New <i class="fa-solid fa-plus"></i></button>
+                        
+                        <table class="table table-bordered text-nowrap">
+                            <thead >
+                                <tr>
+                                    
+                                    <th>Id </th>
+                                    <th>Version</th>
+                                    <th>Treatment Number</th>
+                                    <th>End date</th>
+                                    <th>State</th>
+                                    <th colspan="2">Actions</th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                   
+                                {% for d in data %}
+                                <tr>
+                                <td>{{ d.id}}</td>  
+                                <td>{{ d.Version}}</td>
+                                <td>{{ d.TreatementNumber}}</td>
+                                <td>{{ d.EndDate}}</td>
+                                {% if d.is_deleted%} 
+                                    <td style="color: red;">Deleted</td> 
+                                    {%else%} 
+                                    <td >Active</td> 
+                                    {%endif%}
+                                <td>
+                                {% if d.is_deleted%}  
+                                <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-version="{{d.Version}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                                {%else%}  
+                                <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-version="{{d.Version}}" data-treatementnumber="{{d.TreatementNumber}}" data-enddate="{{d.EndDate}}" ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-version="{{d.Version}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                {%endif%}
+                               
+                            </td>
+                                </tr>
+                                {% endfor %}            
+                            </tbody>               
+                        </table>
+                      </div>
+                      
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--create Calendar Configuration Treatment modal-->
+<div class="modal" id="create">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action="{% url 'createconfigTrait' division product %}">
+        <!-- Security token -->
+        {% csrf_token %}
+       <div class="modal-header">						
+       <h4 class="modal-title">Create New Calendar Configuration Treatment</h4>
+       </div>
+       <div class="modal-body">
+            <!-- Using the formset crispy -->
+            {{ form|crispy }}
+       </div>
+        
+          <div class="modal-footer">
+          <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+          <input type="submit" class="btn btn:hover btn-color" value="Save">
+          </div>
+     </form>
+    </div>
+    </div>
+  </div>
+
+  <!--Update Calendar Configuration Treatment modal-->
+<div class="modal" id="update" >
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action ="{%url 'updateconfigTrait' division %}"> 
+            <!-- Security token by Django -->
+            {% csrf_token %}
+        <div class="modal-header">						
+            <h4 class="modal-title">Edit Calendar Configuration Treatment</h4>
+        </div>
+        <div class="modal-body">    
+                 <!-- form crispy -->
+                 {{ form|crispy }}
+                 <input type="hidden" id="id" name="id" value="">
+        </div>
+            <div class="modal-footer">
+                <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
+                <input type="submit" class="btn btn:hover btn-color" value="update">
+            </div>
+        </form>
+    </div>
+    </div>
+  </div>
+
+
+<!--delete Calendar Configuration Treatment modal-->
+<div class="modal" id="delete" >
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Delete Calendar Configuration Treatment</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+<!--restore Calendar Configuration Treatment modal-->
+<div class="modal" id="restore" >
+    <div class="modal-dialog ">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Restore Calendar Configuration Treatment</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='link' class="btn btn-danger" value="Delete">Restore</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+
+
+
+<!--*******************************************************************************************************************-->
+
+<!-- Delete Modal  -->
+<script>
+    $('#delete').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var division = {{division}};
+    var version = $(event.relatedTarget).data('version');
+    $(this).find(".modal-body").text('Are you sure you want to delete these Calendar Configuration Treatment: '+ version +'?');
+    document.getElementById("targetlink").href="/app/division/"+division+"/product/"+id+"/deleteconfigTrait";
+
+    });
+</script>
+
+<!-- restore Modal  -->
+<script>
+    $('#restore').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var division = {{division}};
+    var version = $(event.relatedTarget).data('version');
+    $(this).find(".modal-body").text('Are you sure you want to restore these Calendar Configuration Treatment: '+version +'?');
+    document.getElementById("link").href="/app/division/"+division+"/product/"+id+"/restoreconfigTrait";
+    });
+</script>
+
+
+<!-- Edit Modal  -->
+<script>
+    $('#update').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var version = $(event.relatedTarget).data('version');
+    var treatementnumber = $(event.relatedTarget).data('treatementnumber');
+    var enddate = $(event.relatedTarget).data('enddate');
+    $(this).find(".modal-body #id").val(id);
+    $(this).find(".modal-body #id_Version").val(version);
+    $(this).find(".modal-body #id_TreatementNumber").val(treatementnumber);
+    $(this).find(".modal-body #id_EndDate").val(enddate); 
+    
+});
+
+</script>
+
+{% endblock %}

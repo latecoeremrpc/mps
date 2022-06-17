@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+
+{% block content %} 
+
+<div class="content">
+    <div class="container-fluid">
+        <!--message alert -->
+        {% if messages %}
+            {% for message in messages %}
+                {%include 'app/alerts/alert.html'%}
+            {% endfor %}
+        {% endif %}
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary card-outline">
+                      <div class="card-header">
+                        <h5 class="m-0">Planning</h5>
+                      </div>
+                      <div class="card-body table-responsive p-0 " style="height: 400px;">
+                      <div class="card-body">
+                        <form method="POST" action="{%url 'createshopfloor' %}">
+                            <!-- Security token -->
+                            {% csrf_token %}
+                        					
+                         <table id="dataTable" class="table table-bordered table-head-fixed text-nowrap">
+                            <thead >
+                                <tr>
+                                    <th>id</th>
+                                    <th>Plant</th>
+                                    <th>Profit Centre</th>
+                                    <th>Order</th>
+                                    <th>Material Number</th>         
+                                    <th>Material description</th>
+                                    <th>Order Type </th>
+                                    <th>Order quantity</th>
+                                    <th>Begin Date</th>
+                                    <th>End Date</th>
+                                    <th>Freeze </th>
+                                    <th>Reschedule date</th>
+                                    <th>Exception message</th>
+                                    <th>System Status</th>
+                                    <th>Sales Order</th>
+                                    <th>Actual finish date</th>
+                                    <th>Allocated time</th>
+                                    <th>Leadtime</th>
+                                    <th>Workstation</th>
+                                    <th>Allocated time on workstation</th>
+                                    <th>Smooth Family</th>
+                                    <th>Ranking</th>
+                                    <th>Freeze end date</th>
+                                    <th>Remain to do</th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+            
+            
+                                
+                                {% for index,data in records.iterrows %}
+                                <tr>
+                                
+                                    <!--coois-->
+                                    <!-- <td>{{data.id}}</td> -->
+                                    <td><input id="index" name="index" type="number" class="form-control"  value={{data.id}} readonly="readonly"> </td> 
+                                    <td><input id="division" name="division" type="text" class="form-control"  value="{{ data.division }}" readonly="readonly"></td> 
+                                    <td><input id="profit_centre" name="profit_centre" type="text" class="form-control"  value="{{ data.profit_centre}}"readonly="readonly"  ></td>
+                                    <td><input id="order" name="order" type="text" class="form-control"  value="{{data.order}}" readonly="readonly" ></td>   
+                                    <td><input id="material" name="material" type="text" class="form-control"  value="{{data.material}}"readonly="readonly"  ></td>
+                                    <td><input id="designation" name="designation" type="text" class="form-control"  value="{{ data.designation}}"readonly="readonly" readonly="readonly"></td>
+                                    <td><input id="order_type" name="order_type" type="text" class="form-control"  value="{{ data.order_type}}" readonly="readonly" ></td>
+                                    <td><input id="order_quantity" name="order_quantity" type="text" class="form-control"  value="{{ data.order_quantity}}" readonly="readonly"  ></td>
+                                    <td><input id="date_start_plan" name="date_start_plan" type="text" class="form-control"  value="{{ data.date_start_plan | date:'d/m/Y'}}" readonly="readonly"></td>
+                                    <td><input id="date_end_plan" name="date_end_plan" type="text" class="form-control"  value="{{ data.date_end_plan | date:'d/m/Y'}}" readonly="readonly"></td>
+                                    <td><input id="fixation" name="fixation" type="text" class="form-control"  value="{{ data.fixation}}" readonly="readonly"  ></td>
+                                    <!--zpp-->
+                                    <td><input id="date_reordo" name="date_reordo" type="text" class="form-control"  value="{{ data.date_reordo | date:'d/m/Y'}}" readonly="readonly"  ></td>
+                                    <td><input id="message" name="message" type="text" class="form-control"  value="{{ data.message}}" readonly="readonly"  ></td>
+                                    <!--coois-->
+                                    <td><input id="order_stat" name="order_stat" type="text" class="form-control"  value="{{ data.order_stat }}" readonly="readonly"  ></td>
+                                    <td><input id="customer_order" name="customer_order" type="text" class="form-control"  value="{{ data.customer_order}}" readonly="readonly"  ></td>
+                                    <td><input id="date_end_real" name="date_end_real" type="text" class="form-control"  value="{{data.date_end_real | date:'d/m/Y'}}" readonly="readonly"  ></td>
+                                    <!--material-->
+                                    <td><input id="AllocatedTime" name="AllocatedTime" type="text" class="form-control"  value="{{ data.AllocatedTime}}" readonly="readonly"  ></td>
+                                    <td><input id="Leadtime" name="Leadtime" type="text" class="form-control"  value="{{data.Leadtime}}" readonly="readonly"  ></td>
+                                    <td><input id="workstation" name="workstation" type="text" class="form-control"  value="{{data.workstation}}" readonly="readonly"  ></td>
+                                    <td><input id="Allocated_Time_On_Workstation" name="Allocated_Time_On_Workstation" type="text" class="form-control"  value="{{ data.Allocated_Time_On_Workstation}}" readonly="readonly"  ></td>
+                                    <td><input id="Smooth_Family" name="Smooth_Family" type="text" class="form-control"  value="{{ data.Smooth_Family}}" readonly="readonly" ></td>
+                                    <td><input style="border: 0px ;" id="Ranking" name="Ranking" type="number" class="form-control" ></td>
+                                    <td><input style="border: 0px ;" id="Freeze end date" name="Freeze end date" type="date" class="form-control"  ></td>
+                                    <td><input style="border: 0px ;" id="Remain to do" name="Remain to do" type="text" class="form-control"  ></td>
+                                    
+                                    </tr>
+                                    {%empty%}
+                                    <tr><td> Data Empty</td></tr>
+                                    {% endfor %}
+                            </tbody>      
+                         </table>   
+                      </div>
+                    </div>
+                </div>  
+                <input type="submit" class="btn btn:hover btn-color" value="Save" style="float: right;">
+                <!-- <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" style="float: right;"> -->
+            
+             </form>  
+        </div>
+    </div>
+
+</div>
+</div>
+
+
+<script>
+    var placeholder = document.getElementById('dataTable');
+var myDataGrid = new Handsontable(placeholder, {
+    records: records,
+    
+});
+
+
+    var placeholder = document.getElementById('dataTable');
+
+var myDataGrid =new Handsontable(placeholder, {
+    columns: [
+      {readOnly:false},
+      {},
+      {}
+    ],
+    cells:function(row, col, prop) {
+      var cellProperties = {};
+      if (row === 0 && col === 0) {
+        cellProperties.readOnly =true;
+      }
+      return cellProperties;
+    }
+});
+
+</script>
+{% endblock %}
