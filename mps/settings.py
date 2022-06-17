@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-vrel63z*58-r#5kleh*ni(4=cmteeox=kxffldb0#^n4v2j(p-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -82,9 +82,9 @@ WSGI_APPLICATION = 'mps.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'MPS',
+        'NAME': 'mps_db',
         'USER': 'postgres',
-        'PASSWORD': 'AdminMPS',
+        'PASSWORD': '054Ibiza',
         'HOST': 'localhost',
         'PORT': '5432',
     }
