@@ -89,13 +89,14 @@
   <!-- /.navbar -->
 
   <!-- Main Sidebar Container -->
-  <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background-image: linear-gradient(to top, #09203f 0%, #537895 100%); ">
+  <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(198, 65%, 34%, 1) 0%, hsla(178, 44%, 32%, 1) 100%);">
+    {% comment %} <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%);"> {% endcomment %}
+    
     <!-- Brand Logo -->
     <a href="" class="brand-link"  style="text-decoration: none; ">
-      <img src="{% static 'img/m.png' %}" alt="mps" class="brand-image img-circle elevation-3"
-           style="opacity: .8">
+      <img src="{% static 'img/logo_m.svg' %}" alt="mps"  style="margin-left: 14px;:opacity: .8">
       <!-- <span class="brand-text" >MPS</span> -->
-      <i class="badge bg-purple" style="font-weight:100">Master Product Schedule</i>
+      <i class="badge " style="font-weight:100"><b>Master Product Schedule</b></i>
     </a>
 
     <!-- Sidebar -->
@@ -150,6 +151,12 @@
                   <p>Shopfloor</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="{% url 'result' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Smoothing</p>
+                </a>
+              </li>
             
               <li class="nav-item">
                 <a href="" class="nav-link">
@@ -173,7 +180,7 @@
       <div class="container-fluid" style="background-color: white;height: 55px;">
       <div class="row mb-2">
       <div class="col-sm-6">
-      <h1 class="m-0"><a href="{% url 'home' %}"class="nav-link">MPS </a></h1>
+      <h1 class="m-0"><a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important">MPS </a></h1>
       </div><!-- /.col -->
       <div class="col-sm-6">
       <ol class="breadcrumb float-sm-right" style="margin-top: 10px;">
