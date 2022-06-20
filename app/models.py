@@ -226,6 +226,8 @@ class Shopfloor(BaseModel,SoftDeleteModel):
     Ranking=models.DateField()
     Freeze_end_date=models.DateTimeField(null=True)
     Remain_to_do=models.FloatField(null=True)
+    smoothing_end_date=models.DateTimeField(null=True)
+
     # renames the instances of the Shopfloor
     # with their order
     # def __str__(self):

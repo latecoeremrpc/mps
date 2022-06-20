@@ -1,7 +1,7 @@
 from django.shortcuts import render ,redirect ,get_object_or_404
 from app.models import Division,Material,HolidaysCalendar,Product,WorkData,CalendarConfigurationTreatement,CalendarConfigurationCpordo,Coois,Zpp,Shopfloor
 from app.forms import DivisionForm,MaterialForm,ProductForm,CalendarConfigurationCpordoForm,CalendarConfigurationTreatementForm 
-from datetime import  datetime, timedelta
+from datetime import  date, datetime, timedelta
 from io import StringIO
 import psycopg2, pandas as pd
 import numpy as np
@@ -1013,55 +1013,107 @@ def shopfloor(request):
     
     records=df_coois
     #**************************************
-    file=r'C:\Users\LENOVO\Documents\Mps_Files\df_shopfloor.xlsx'
-    df_data=pd.read_excel(file)
-    df_data=df_data.sort_values('Ranking')
-    
-    df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
-    #df_data['Freeze_end_date_prev']=df_data['Freeze_end_date'].ffill()
-    df_data['key']=df_data['designation'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
-    df_data['Freeze_end_date']=pd.to_datetime(df_data['Freeze_end_date'])
-    #Merge
-    df_data['cycle']=df_data['key'].map(df_product_work_data_dict_cycle)
-    #insert in df_date freezed_start_date
-    df_data.insert(0,'freezed_start_date',None)
-    # df_data['freezed_start_date']=np.where((df_data['freezed']=='Freezed'),df_data['Freeze_end_date'],df_data['freezed_start_date'])
-    df_data['freezed_start_date']=pd.to_datetime(df_data['freezed_start_date'])
-    # df_data['freezed_start_date']=df_data['Freeze_end_date']
-    df_data.insert(0,'key_start_day','')
-    print('+++++++++++++++++++')
-    print(df_data)
-    
-    
-    for i in range(1, 15):
-        print('*****************')
-        print(i)
-        print(df_data.loc[i, 'Freeze_end_date'])
-    #     df_data.loc[i, 'freezed_start_date'] =np.where((df_data.loc[i,'freezed']=='not_freezed'),(pd.to_datetime(str(df_data.loc[i-1, 'Freeze_end_date'])) + timedelta(hours=int(df_data.loc[i-1, 'cycle']))),df_data.loc[i, 'freezed_start_date'])
-    #     df_data.loc[i, 'key_start_day']=str(df_data.loc[i,'designation'])+str(df_data.loc[i,'freezed_start_date']).split(' ')[0]
+    # file=r'\\prfoufiler01\donnees$\Public\df_shopfloor.csv'
+    # df_data=pd.read_csv(file)
+    # df_data=df_data.sort_values('Ranking')
+    # df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
 
-    #     for key,value in df_product_work_data_dict_cycle.items():
-    #         if df_data.loc[i,'key_start_day'] == key:
-    #             df_data.loc[i,'cycle']=value
-    #             if int(df_data.loc[i-1, 'cycle']) == int(df_data.loc[i, 'cycle']):
-    #                 df_data.loc[i, 'freezed_start_date'] =np.where((df_data.loc[i,'freezed']=='not_freezed'),(pd.to_datetime(str(df_data.loc[i-1, 'Freeze_end_date']))),df_data.loc[i, 'freezed_start_date'])
-    #             else:
-    #                 df_data.loc[i, 'freezed_start_date'] =np.where((df_data.loc[i,'freezed']=='not_freezed'),(pd.to_datetime(str(df_data.loc[i-1, 'Freeze_end_date'])) + timedelta(hours=int(df_data.loc[i, 'cycle']))),df_data.loc[i, 'freezed_start_date'])
+    # df_data['key']=df_data['designation'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
+    # df_data['Freeze_end_date']=pd.to_datetime(df_data['Freeze_end_date'])
+    
+    # product_work_data=Product.undeleted_objects.values('planning','workdata__date','workdata__cycle_time')
+
+    # df_product_work_data=pd.DataFrame(list(product_work_data))
+    # df_product_work_data=df_product_work_data.rename(columns={'workdata__date':'workdate','workdata__cycle_time':'cycle_time'})
+    # df_product_work_data['key']= df_product_work_data['planning'].astype(str)+df_product_work_data['workdate'].astype(str)
+
+    # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
+    # df_product_work_data_dict_cycle=dict(zip(df_product_work_data.key, df_product_work_data.cycle_time))
+    # df_data['cycle']=df_data['key'].map(df_product_work_data_dict_cycle)
+    # df_data.insert(0,'freezed_start_date',None)
+    # # df_data['freezed_start_date']=np.where((df_data['freezed']=='Freezed'),df_data['Freeze_end_date'],df_data['freezed_start_date'])
+    # df_data['freezed_start_date']=pd.to_datetime(df_data['freezed_start_date'])
+    # # df_data['freezed_start_date']=df_data['Freeze_end_date']
+    # df_data.insert(0,'key_start_day','')
 
 
-    # df_data.loc[i, 'Freeze_end_date']=np.where((df_data.loc[i,'freezed']=='not_freezed'),(df_data.loc[i, 'freezed_start_date'] + timedelta(hours=int(df_data.loc[i, 'cycle']))),df_data.loc[i, 'Freeze_end_date'])
-    # # df_data.loc[i, 'Freeze_end_date']=np.datetime64(df_data.loc[i, 'Freeze_end_date'])
-    # print(str(df_data.loc[i,'freezed_start_date']).split(' ')[0])
-    
+    # for i in range(0, len(df_data)-1):
+    # # for i in range(0, 1):
+    #     # cycle_i=0
+    #     # cycle_i_1=0
+    #     # first_date=df_data.loc[i,'Freeze_end_date']
+    #     # df_data.loc[i, 'key']=str(df_data.loc[i,'designation'])+str(first_date).split(' ')[0]
+    #     # for key,value in df_product_work_data_dict_cycle.items():
+    #     #     if df_data.loc[i,'key'] == key:
+    #     #         cycle_i=value
+    #     # second_date=pd.to_datetime(str(first_date)) + timedelta(hours=int(cycle_i))
+    #     # df_data.loc[i+1, 'key']=str(df_data.loc[i+1,'designation'])+str(second_date).split(' ')[0]
+    #     # for key,value in df_product_work_data_dict_cycle.items():
+    #     #     if df_data.loc[i+1,'key'] == key:
+    #     #         cycle_i_1=value
+    #     # if (df_data.loc[i+1,'freezed']=='not_freezed'):
+    #     #     if cycle_i_1 == cycle_i:
+    #     #         df_data.loc[i+1,'Freeze_end_date']=pd.to_datetime(str(first_date)) + timedelta(hours=int(cycle_i))
+    #     #     else:
+    #     #         if cycle_i_1 == 0:
+    #     #             df_data.loc[i+1,'Freeze_end_date']=date(1990,1,1)
+    #     #         else:
+    #     #             while cycle_i_1 != cycle_i:
+
+    #     #                 #Search for next Date
+    #     #                 second_date=pd.to_datetime(str(first_date)) + timedelta(hours=int(cycle_i_1))
+    #     #                 df_data.loc[i+1, 'key']=str(df_data.loc[i+1,'designation'])+str(second_date).split(' ')[0]
+    #     #                 for key,value in df_product_work_data_dict_cycle.items():
+    #     #                     if df_data.loc[i+1,'key'] == key:
+    #     #                         cycle_i_1=value
+
+    #     #                 first_date=pd.to_datetime(str(first_date)) + timedelta(hours=int(cycle_i_1))
+    #     #                 df_data.loc[i+1, 'key']=str(df_data.loc[i+1,'designation'])+str(first_date).split(' ')[0]
+    #     #                 for key,value in df_product_work_data_dict_cycle.items():
+    #     #                     if df_data.loc[i+1,'key'] == key:
+    #     #                         cycle_i=value
+
+    #     #                 if cycle_i_1 == cycle_i:
+    #     #                     df_data.loc[i+1,'Freeze_end_date']=first_date
+    #     #                     break
+    #     #                 else:
+    #     #                     first_date=second_date
+
+
+    #     if (df_data.loc[i+1,'freezed']=='not_freezed'):
+    #         df_data.loc[i, 'key']=str(df_data.loc[i,'designation'])+str(df_data.loc[i,'Freeze_end_date']).split(' ')[0]
+    #         for key,value in df_product_work_data_dict_cycle.items():
+    #             if df_data.loc[i,'key'] == key:
+    #                 cycle_i=value
+    #         df_data.loc[i+1,'Freeze_end_date'] = smooth_date_calcul(df_data.loc[i,'Freeze_end_date'],df_product_work_data_dict_cycle.items(),df_data.loc[i,'designation'])            
+    #         print(df_data.loc[i+1,'Freeze_end_date'])
+
+    # print(df_data['Freeze_end_date'])
    
     
     #************************************************************
     
     return render(request,'app/Shopfloor/Shopfloor.html',{'records': records} )    
+def smooth_date_calcul(current_date,table,designation,prev_cycle=None,prev_date=None):
+    #Get cycle for current day
+    key_date=str(designation)+str(current_date).split(' ')[0]
+    if prev_date==None:
+        prev_date=current_date
+    # Check and get cycle
+    try:
+        for key,value in table:
+            if key_date == key:
+                cycle=value
+        print(cycle)
+    except: return date(1900,1,1)
+    if cycle==prev_cycle:
+        return current_date
+    else: 
+        new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
+        print('new date',new_date)
+        return   calcul(new_date,table,designation,cycle,current_date)
+   
 
-def data_table(request):
-    return render(request,'app/Shopfloor/datatable.html')    
-     
 
 #create shopfloor
 def create_shopfloor(request):
@@ -1091,13 +1143,13 @@ def create_shopfloor(request):
         Ranking = request.POST.getlist('Ranking')
         Freeze_end_date = request.POST.getlist('Freeze end date')
         Remain_to_do = request.POST.getlist('Remain to do')
-        print('*************',len(Freeze_end_date[0]))
+        # print('*************',len(Freeze_end_date[0]))
         # if  len(Freeze_end_date[0]) > 0:
-        data=Shopfloor.objects.all().delete()
+        # data=Shopfloor.objects.all().delete()
         
         if  Freeze_end_date[0]!= '':     
             
-              #save all informations from table 
+            #save all informations from table 
             for i in range(len(id)):
                 if date_start_plan[i] != '':
                     #convert date_start_plan to datetime 
@@ -1120,7 +1172,10 @@ def create_shopfloor(request):
                     Freeze_end_date [i]= datetime.strptime(Freeze_end_date[i],'%Y-%m-%d')
                 else:
                     Freeze_end_date [i]=None
-                    
+                if Ranking[i] != '':
+                    Ranking [i]= datetime.strptime(Ranking[i],'%Y-%m-%d')
+                else:
+                    Ranking [i]=date(2022,6,20)    
                 if Remain_to_do[i]=='':
                     Remain_to_do [i]=None
                 
@@ -1141,18 +1196,62 @@ def create_shopfloor(request):
                 #             messages.success(request,"data saved successfully!") 
                 # except Exception:
                 #     messages.error(request,"fill in the first box of Freeze end date please!")               
+            # df_data=pd.DataFrame(list(data))
                 data.save()
-            data=Shopfloor.objects.all().values()
-            df_data=pd.DataFrame(list(data))
-            #df_data.to_csv('df_shopfloor.csv')
+
+
+
+
             messages.success(request,"Data saved successfully!") 
         else:
-             messages.error(request,"Fill in the first box of Freeze end date please!")  
+            messages.error(request,"Fill in the first box of Freeze end date please!")  
         
-                   
+
                 
-    return redirect("../")       
+    return redirect(result)       
         
-        
+def result(request):
+    #Get Work date data
+    product_work_data=Product.undeleted_objects.values('planning','workdata__date','workdata__cycle_time')
+    df_product_work_data=pd.DataFrame(list(product_work_data))
+    df_product_work_data=df_product_work_data.rename(columns={'workdata__date':'workdate','workdata__cycle_time':'cycle_time'})
+    df_product_work_data['key']= df_product_work_data['planning'].astype(str)+df_product_work_data['workdate'].astype(str)
+    # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
+    df_product_work_data_dict_cycle=dict(zip(df_product_work_data.key, df_product_work_data.cycle_time))
+    
+    #Get Shopfloor from DB
+    data=Shopfloor.objects.all().values()
+    df_data=pd.DataFrame(list(data))
+    print(df_data)
+    df_data=df_data.sort_values('Ranking') #To add designation as sort
+    #Add col freezed to know how row is freezed
+    df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
+
+    df_data['key']=df_data['designation'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
+    # df_data['Freeze_end_date']=pd.to_datetime(df_data['Freeze_end_date'])
+    
+
+    # df_data['cycle']=df_data['key'].map(df_product_work_data_dict_cycle)
+    # df_data.insert(0,'freezed_start_date',None)
+    # df_data['freezed_start_date']=np.where((df_data['freezed']=='Freezed'),df_data['Freeze_end_date'],df_data['freezed_start_date'])
+    # df_data['freezed_start_date']=pd.to_datetime(df_data['freezed_start_date'])
+    # df_data['freezed_start_date']=df_data['Freeze_end_date']
+    df_data[['Freeze_end_date']] = df_data[['Freeze_end_date']].astype(object).where(df_data[['Freeze_end_date']].notnull(), None)
+    df_data['smoothing_end_date']=df_data['Freeze_end_date']
+    df_data.insert(0,'key_start_day','')
+    for i in range(0, len(df_data)-1):
+        if (df_data.loc[i+1,'freezed']=='not_freezed'):
+            # df_data.loc[i, 'key']=str(df_data.loc[i,'designation'])+str(df_data.loc[i,'smoothing_end_date']).split(' ')[0]
+            # for key,value in df_product_work_data_dict_cycle.items():
+            #     if df_data.loc[i,'key'] == key:
+            #         cycle_i=value
+            df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_product_work_data_dict_cycle.items(),df_data.loc[i,'designation'])            
+    print(df_data.loc[i+1,'smoothing_end_date'])
+    print(df_data)
+    return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
+
+#Test for web excel jquery
+def data_table(request):
+    return render(request,'app/Shopfloor/datatable.html') 
         
     

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+
+{% block content %} 
+
+<div class="content">
+    <div class="container-fluid">
+        <!--message alert -->
+        {% if messages %}
+            {% for message in messages %}
+                {%include 'app/alerts/alert.html'%}
+            {% endfor %}
+        {% endif %}
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary card-outline">
+                      <div class="card-header">
+                        <h5 class="m-0">Planning</h5>
+                      </div>
+                      <div class="card-body table-responsive p-0 " style="height: 400px;">
+                      <div class="card-body">
+                         <table id="dataTable" class="table table-bordered table-head-fixed text-nowrap">
+                            <thead >
+                                <tr>
+                                    <th>id</th>
+                                    <th>Plant</th>
+                                    <th>Profit Centre</th>
+                                    <th>Order</th>
+                                    <th>Material Number</th>         
+                                    <th>Material description</th>
+                                    <th>Order Type </th>
+                                    <th>Order quantity</th>
+                                    <th>Begin Date</th>
+                                    <th>End Date</th>
+                                    <th>Freeze </th>
+                                    <th>Reschedule date</th>
+                                    <th>Exception message</th>
+                                    <th>System Status</th>
+                                    <th>Sales Order</th>
+                                    <th>Actual finish date</th>
+                                    <th>Allocated time</th>
+                                    <th>Leadtime</th>
+                                    <th>Workstation</th>
+                                    <th>Allocated time on workstation</th>
+                                    <th>Smooth Family</th>
+                                    <th>Ranking</th>
+                                    <th>Freeze end date</th>
+                                    {% comment %} <th>Remain to do</th> {% endcomment %}
+                                    <th>Smoothing end date</th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+            
+            
+                                
+                                {% for index,data in records.iterrows %}
+                                <tr>
+                                    <!--coois-->
+                                    <!-- <td>{{data.id}}</td> -->
+                                    <td>{{data.id}} </td> 
+                                    <td>{{ data.division }}</td> 
+                                    <td>{{ data.profit_centre}}  </td>
+                                    <td>{{data.order}}  </td>   
+                                    <td>{{data.material}}  </td>
+                                    <td>{{ data.designation}} </td>
+                                    <td>{{ data.order_type}}  </td>
+                                    <td>{{ data.order_quantity}}</td>
+                                    <td>{{ data.date_start_plan | date:'d/m/Y'}} </td>
+                                    <td>{{ data.date_end_plan | date:'d/m/Y'}} </td>
+                                    <td>{{ data.fixation}}   </td>
+                                    <!--zpp-->
+                                    <td>{{ data.date_reordo | date:'d/m/Y'}}</td>
+                                    <td>{{ data.message}}   </td>
+                                    <!--coois-->
+                                    <td>{{ data.order_stat }}   </td>
+                                    <td>{{ data.customer_order}}   </td>
+                                    <td>{{data.date_end_real | date:'d/m/Y'}}</td>
+                                    <!--material-->
+                                    <td>{{ data.AllocatedTime}}   </td>
+                                    <td>{{data.Leadtime}}   </td>
+                                    <td>{{data.workstation}}   </td>
+                                    <td>{{ data.Allocated_Time_On_Workstation}}</td>
+                                    <td>{{ data.Smooth_Family}}  </td>
+                                    <td>{{ data.Ranking | date:'d/m/Y'}}  </td>
+                                    <td>{{data.Freeze_end_date | date:'d/m/Y'}}</td>
+                                    <td>{{data.smoothing_end_date | date:'d/m/Y'}}</td>
+                                    </tr>
+                                    {%empty%}
+                                    <tr><td> Data Empty</td></tr>
+                                    {% endfor %}
+                            </tbody>      
+                         </table>   
+                      </div>
+                    </div>
+                </div>  
+                <input type="submit" class="btn btn:hover btn-color" value="Save" style="float: right;">
+                <!-- <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" style="float: right;"> -->
+            
+             </form>  
+        </div>
+    </div>
+
+</div>
+</div>
+
+
+<script>
+    var placeholder = document.getElementById('dataTable');
+var myDataGrid = new Handsontable(placeholder, {
+    records: records,
+    
+});
+
+
+    var placeholder = document.getElementById('dataTable');
+
+var myDataGrid =new Handsontable(placeholder, {
+    columns: [
+      {readOnly:false},
+      {},
+      {}
+    ],
+    cells:function(row, col, prop) {
+      var cellProperties = {};
+      if (row === 0 && col === 0) {
+        cellProperties.readOnly =true;
+      }
+      return cellProperties;
+    }
+});
+
+</script>
+{% endblock %}

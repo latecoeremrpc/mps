@@ -51,6 +51,7 @@
                                     <th>Ranking</th>
                                     <th>Freeze end date</th>
                                     <th>Remain to do</th>
+                                    <th>Smoothing end date</th>
                                     
                                 </tr>
                             </thead>
@@ -87,10 +88,10 @@
                                     <td><input id="workstation" name="workstation" type="text" class="form-control"  value="{{data.workstation}}" readonly="readonly"  ></td>
                                     <td><input id="Allocated_Time_On_Workstation" name="Allocated_Time_On_Workstation" type="text" class="form-control"  value="{{ data.Allocated_Time_On_Workstation}}" readonly="readonly"  ></td>
                                     <td><input id="Smooth_Family" name="Smooth_Family" type="text" class="form-control"  value="{{ data.Smooth_Family}}" readonly="readonly" ></td>
-                                    <td><input style="border: 0px ;" id="Ranking" name="Ranking" type="number" class="form-control" ></td>
+                                    <td><input style="border: 0px ;" id="Ranking" name="Ranking" type="date" class="form-control" ></td>
                                     <td><input style="border: 0px ;" id="Freeze end date" name="Freeze end date" type="date" class="form-control"  ></td>
                                     <td><input style="border: 0px ;" id="Remain to do" name="Remain to do" type="text" class="form-control"  ></td>
-                                    
+                                    <td>{{data.smoothing_end_date}}</td>
                                     </tr>
                                     {%empty%}
                                     <tr><td> Data Empty</td></tr>
