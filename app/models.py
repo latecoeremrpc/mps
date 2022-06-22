@@ -75,7 +75,7 @@ class Product(BaseModel,SoftDeleteModel):
     has_treatement = models.BooleanField(null= False, default=False) 
     product = models.CharField(max_length=200)
     planning= models.CharField(max_length=200)
-    division = models.ForeignKey(Division, on_delete=models.CASCADE)
+    division= models.ForeignKey(Division, on_delete=models.CASCADE)
 
 # renames the instances of the Product
     # with their program

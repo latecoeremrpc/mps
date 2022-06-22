@@ -92,7 +92,7 @@
         {% csrf_token %}
           
           <div class="modal-body">
-            <p class="col-sm-4 control-label">Holiday</p>
+            <p class="col-sm-4 control-label  calendar-text" >Holiday</p>
               <input type="hidden" name="event-index">
               <form class="form-horizontal">
                 <div class="form-group row">
@@ -125,7 +125,7 @@
   
           <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-color" id="save-event" name ='save-event'>Save</button>
+              <button type="submit" class="btn btn-primary" id="save-event" name ='save-event'>Save</button>
           </div>
        </form>
 
@@ -135,7 +135,7 @@
         {% csrf_token %}
          
          <div class="modal-body">
-           <p class="col-sm-4 control-label">Work Hours</p>
+           <p class="col-sm-4 control-label calendar-text">Work Day</p>
              <input type="hidden" name="event-index">
              <form class="form-horizontal">
                 <div class="form-group row">
@@ -220,7 +220,7 @@
  
          <div class="modal-footer">
              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-             <button type="submit" class="btn btn-color" id="save" name ='save'>Save</button>
+             <button type="submit" class="btn btn-primary" id="save" name ='save'>Save</button>
          </div>
       </form>
 

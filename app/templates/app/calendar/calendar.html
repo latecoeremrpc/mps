@@ -36,7 +36,7 @@
                             <form method="POST"  action="{% url 'copycalendar' division product %}">
                                 <!-- Security token by Django -->
                                 {% csrf_token %}
-                                <select class="btn btn-primary dropdown-toggle dropdown-toggle-split" name="product_copied" size="1" style="width: 100px">
+                                <select class="btn-outline-primary dropdown-toggle dropdown-toggle-split" name="product_copied" size="1" style="width: 100px">
                                 {% for p in products_data %}
                                  <option value="{{p.id}}">{{p.division.name}} {{p.product}}  </option>
                                  {% endfor %}
@@ -108,7 +108,7 @@
          {% csrf_token %}
           
           <div class="modal-body">
-            <p class="col-sm-4 control-label">Holiday</p>
+            <p class="col-sm-4 control-label calendar-text ">Holiday</p>
               <input type="hidden" name="event-index">
               <form class="form-horizontal">
               <div class="form-group row">
@@ -135,7 +135,7 @@
   
           <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-color" id="save-event" name ='save-event'>Save</button>
+              <button type="submit" class="btn btn-primary" id="save-event" name ='save-event'>Save</button>
           </div>
        </form>
        <!--work hours form -->
@@ -144,7 +144,7 @@
         {% csrf_token %}
          
          <div class="modal-body">
-           <p class="col-sm-4 control-label">Work Hours</p>
+           <p class="col-sm-4 control-label calendar-text">Work Day</p>
              <input type="hidden" name="event-index">
              <form class="form-horizontal">
             <div class="form-group row">
@@ -224,7 +224,7 @@
  
          <div class="modal-footer">
              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-             <button type="submit" class="btn btn-color" id="save-work" name ='save-work'>Save</button>
+             <button type="submit" class="btn btn-primary" id="save-work" name ='save-work'>Save</button>
          </div>
       </form>
       </div>  

@@ -784,7 +784,7 @@ def upload_files(request):
 
 #save coois   
 def save_coois(request):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
     try:
         #Delete coois data 
         coois_data = Coois.undeleted_objects.all().filter(created_by='Marwa')
@@ -801,7 +801,7 @@ def save_coois(request):
         
 #save zpp   
 def save_zpp(request):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
     #Delete zpp data 
     zpp_data = Zpp.undeleted_objects.all().filter(created_by='Marwa')
     zpp_data.delete()
@@ -1008,7 +1008,7 @@ def shopfloor(request):
     #convert df_product_work_data to dict
     df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
     df_product_work_data_dict_cycle=dict(zip(df_product_work_data.key, df_product_work_data.cycle_time))
-    
+   
     
     
     records=df_coois
@@ -1093,7 +1093,9 @@ def shopfloor(request):
     
     #************************************************************
     
-    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records} )    
+    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records} ) 
+
+   
 def smooth_date_calcul(current_date,table,designation,prev_cycle=None,prev_date=None):
     #Get cycle for current day
     key_date=str(designation)+str(current_date).split(' ')[0]
@@ -1111,7 +1113,7 @@ def smooth_date_calcul(current_date,table,designation,prev_cycle=None,prev_date=
     else: 
         new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
         print('new date',new_date)
-        return   calcul(new_date,table,designation,cycle,current_date)
+        return   smooth_date_calcul(new_date,table,designation,cycle,current_date)
    
 
 
