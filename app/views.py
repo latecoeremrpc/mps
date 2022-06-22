@@ -6,6 +6,7 @@ from io import StringIO
 import psycopg2, pandas as pd
 import numpy as np
 from django.contrib import messages
+from app.decorators import allowed_users
 
 
 # Create your views here.
@@ -1211,7 +1212,8 @@ def create_shopfloor(request):
 
                 
     return redirect(result)       
-        
+   
+@allowed_users(allowed_roles=["Planificateur"])        
 def result(request):
     #Get Work date data
     product_work_data=Product.undeleted_objects.values('planning','workdata__date','workdata__cycle_time')
