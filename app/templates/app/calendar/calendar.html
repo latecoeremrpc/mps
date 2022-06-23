@@ -28,22 +28,40 @@
                       </div>
                     </div>
                       <div class="card-body">
-                        <a class="btn btn-outline-primary" href="{% url 'duplicatecalendar' division product %}" style="margin-bottom: 10px;">Duplicate This Calendar <i class="fa-solid fa-calendar"></i> </a>
-                        <a class="btn btn-outline-primary" href="{% url 'customcalendar' division product %}"style="margin-bottom: 10px;"> Custom Calendar <i class="fa-solid fa-calendar"></i></a><br>
-                        <p>Copy calendar from another product:</p>
-
-                        <div>
-                            <form method="POST"  action="{% url 'copycalendar' division product %}">
-                                <!-- Security token by Django -->
-                                {% csrf_token %}
-                                <select class="btn-outline-primary dropdown-toggle dropdown-toggle-split" name="product_copied" size="1" style="width: 100px">
-                                {% for p in products_data %}
-                                 <option value="{{p.id}}">{{p.division.name}} {{p.product}}  </option>
-                                 {% endfor %}
-                                </select> 
-                                <input class="btn btn-outline-primary" type="submit" value="valid"/>
-                           </form>                      
+                        <div class="row">
+                            <div class="col-6">
+                                <form method="POST"  action="{% url 'copycalendar' division product %}">
+                                    <!-- Security token by Django -->
+                                    {% csrf_token %}
+                                    <b>From: </b> 
+                                    <div class="input-group input-group-sm" style="width:300px">
+                                        <select name="product_copied" size="1" style="height: 40px;"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                            {% for p in products_data %}
+                                            <option value="{{p.id}}">{{p.division.name}} | {{p.product}}  </option>
+                                            {% endfor %}
+                                            </select>
+                                        <span class="input-group-append">
+                                        <button type="submit" class="btn btn-outline-primary">Copy!</button>
+                                        </span>
+                                    </div>
+                                </form>  
+                            </div>
+                            <div class="col-6">
+                                        <b>Edit: </b> 
+                                        <div>
+                                            <a class="btn btn-outline-primary" href="{% url 'duplicatecalendar' division product %}" style="margin-bottom: 10px;">Duplicate This Calendar <i class="fa-regular fa-copy"></i> </a>
+                                            <b>Or: </b><a href="{% url 'customcalendar' division product %}" style="margin-bottom: 10px; text-decoration: none !important;" > View your custom Calendar</a>
+                                        </div>
+                                    
+                            </div>
                         </div>
+                             <!-- <select class="btn-outline-primary dropdown-toggle dropdown-toggle-split" name="product_copied" size="1" >
+                            {% for p in products_data %}
+                             <option value="{{p.id}}">{{p.division.name}} | {{p.product}}  </option>
+                             {% endfor %}
+                            </select> 
+                            <input class="btn btn-outline-primary" type="submit" value="valid"/>  -->
+                        <hr>
                         <!--Display Calendar-->
                         <div class="calendar"></div>
                       </div>
