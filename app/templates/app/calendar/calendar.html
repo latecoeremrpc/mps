@@ -50,7 +50,7 @@
                                         <b>Edit: </b> 
                                         <div>
                                             <a class="btn btn-outline-primary" href="{% url 'duplicatecalendar' division product %}" style="margin-bottom: 10px;">Duplicate This Calendar <i class="fa-regular fa-copy"></i> </a>
-                                            <b>Or: </b><a href="{% url 'customcalendar' division product %}" style="margin-bottom: 10px; text-decoration: none !important;" > View your custom Calendar</a>
+                                            <b>Or: </b><a href="{% url 'customcalendar' division product %}" style="margin-bottom: 10px; text-decoration: none !important;" >  View your custom Calendar </a>
                                         </div>
                                     
                             </div>
@@ -126,7 +126,8 @@
          {% csrf_token %}
           
           <div class="modal-body">
-            <p class="col-sm-4 control-label calendar-text ">Holiday</p>
+            <center><h6 class="col-sm-4 control-label calendar-text " style="color:var(--bs-red);">Holiday</h6></center>
+            <hr>
               <input type="hidden" name="event-index">
               <form class="form-horizontal">
               <div class="form-group row">
@@ -162,7 +163,8 @@
         {% csrf_token %}
          
          <div class="modal-body">
-           <p class="col-sm-4 control-label calendar-text">Work Day</p>
+           <center><h6 class="col-sm-4 control-label calendar-text" style="color:var(--info);">Work Day</h6></center>
+           <hr>
              <input type="hidden" name="event-index">
              <form class="form-horizontal">
             <div class="form-group row">
