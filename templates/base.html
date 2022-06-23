@@ -97,6 +97,7 @@
     <!-- Brand Logo -->
     <a href="" class="brand-link"  style="text-decoration: none; ">
       <img src="{% static 'img/Lettre_M_.png' %}" alt="mps"  style="margin-left: 14px;:opacity: .8;width:37px">
+      
       <!-- <span class="brand-text" >MPS</span> -->
       <i class="badge " style="font-weight:100"><b>Master Product Schedule</b></i>
     </a>
@@ -141,11 +142,17 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-               <a href="{% url 'division' %}" class="nav-link">
-                 <i class="nav-icon fas fa-th"></i>
-                 <p>Divisions</p>
+               <a href="http://127.0.0.1:8000/admin" class="nav-link">
+                <i class="fa-solid fa-user-gear nav-icon"></i>
+                 <p>Administration</p>
                 </a>
               </li>  
+              <li class="nav-item">
+                <a href="{% url 'division' %}" class="nav-link">
+                  <i class="nav-icon fas fa-th"></i>
+                  <p>Divisions</p>
+                 </a>
+               </li>  
               <li class="nav-item">
                 <a href="{% url 'uploadfiles' %}" class="nav-link">
                   <i class="far fa-solid fa-file nav-icon"></i>
@@ -184,7 +191,10 @@
       <div class="container-fluid" style="background-color: white;height: 55px;">
       <div class="row mb-2">
       <div class="col-sm-6">
-      <h1 class="m-0"><a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important">MPS </a></h1>
+      <!-- <h1 class="m-0"><a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important">MPS </a></h1> -->
+      <a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important"><img src="{% static 'img/mps_logo.png' %}" style="width: 75px;
+        margin-top: 5px;
+        margin-left: -13px"> </a>
       </div><!-- /.col -->
       <div class="col-sm-6">
       <ol class="breadcrumb float-sm-right" style="margin-top: 10px;">
