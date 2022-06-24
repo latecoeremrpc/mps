@@ -957,7 +957,7 @@ def shopfloor(request):
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
     material_data=Material.objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
     product_work_data=Product.objects.values('planning','workdata__date','workdata__cycle_time')
-    print(product_work_data)
+    
 
     #Convert to DataFrame
     df_zpp=pd.DataFrame(list(zpp_data))
@@ -1146,13 +1146,20 @@ def create_shopfloor(request):
         Ranking = request.POST.getlist('Ranking')
         Freeze_end_date = request.POST.getlist('Freeze end date')
         Remain_to_do = request.POST.getlist('Remain to do')
+<<<<<<< HEAD
 
         #Delete shopfloor history
         shopfloor_history=Shopfloor.objects.all().delete()
+=======
+        # print('*************',len(Freeze_end_date[0]))
+        # if  len(Freeze_end_date[0]) > 0:
+        # data=Shopfloor.objects.all().delete()
+        print(len( date_start_plan))
+>>>>>>> 8fbf8c1 (shopfloor)
         if  Freeze_end_date[0]!= '':     
             
             #save all informations from table 
-            for i in range(len(id)):
+            for i in list(range(len(id))):   
                 if date_start_plan[i] != '':
                     #convert date_start_plan to datetime 
                     date_start_plan [i]= datetime.strptime( date_start_plan[i],'%d/%m/%Y')
@@ -1181,8 +1188,7 @@ def create_shopfloor(request):
                 if Remain_to_do[i]=='':
                     Remain_to_do [i]=None
                 
-            
-
+      
         
                 data =Shopfloor(division=division[i],profit_centre=profit_centre[i],order=order[i],material=material[i],
                                 designation=designation[i],order_type=order_type[i],order_quantity=order_quantity[i],
@@ -1214,7 +1220,7 @@ def create_shopfloor(request):
                 
     return redirect(result)       
    
-@allowed_users(allowed_roles=["Planificateur"])        
+# @allowed_users(allowed_roles=["Planificateur"])        
 def result(request):
     #Get Work date data
     product_work_data=Product.undeleted_objects.values('planning','workdata__date','workdata__cycle_time')
@@ -1256,6 +1262,9 @@ def result(request):
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
 
+
+
+#calcul KPIs
 def planning(request):
     #Get data
     data=Shopfloor.objects.all()

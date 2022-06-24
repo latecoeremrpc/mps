@@ -5,7 +5,7 @@ def allowed_users(allowed_roles=[]):
     def decorator(view_func):
         
         def wrapper_func (request, *args, **kwargs):
-            username="l0005082"
+            username="Marwa"
             user=User.objects.filter(username=username).first()
             if not user :
                 return HttpResponse("user not exist")
