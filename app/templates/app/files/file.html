@@ -30,10 +30,10 @@
         {% csrf_token %}
         <!-- Upload file input-->
         <div class="input-group mb-3 px-2 py-2 rounded-pill bg-white shadow-sm">
-          <input id="upload" name="coois" type="file" onchange="readURL(this);" class="form-control border-0" required>
-          <label id="upload-label" for="upload" class="font-weight-light text-muted">Choose a COOIS file</label>
+          <input id="uploadcoois" name="coois" type="file"  class="form-control border-0" required>
+          <label id="upload-label-coois" for="uploadcoois" class="font-weight-light text-muted">Choose a COOIS file</label>
           <div class="input-group-append">
-              <label for="upload" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a COOIS file</small></label>
+              <label for="uploadcoois" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a COOIS file</small></label>
           </div>
         </div>
         <!-- <label for="file">Select a file:</label>
@@ -64,10 +64,10 @@
                       {% csrf_token %}
                       <!-- Upload file input-->
                       <div class="input-group mb-3 px-2 py-2 rounded-pill bg-white shadow-sm">
-                        <input id="upload" name="zpp" type="file" onchange="readURL(this);" class="form-control border-0" required>
-                        <label id="upload-label" for="upload" class="font-weight-light text-muted">Choose a ZPP file</label>
+                        <input id="uploadzpp" name="zpp" type="file"  class="form-control border-0" required>
+                        <label id="upload-label-zpp" for="uploadzpp" class="font-weight-light text-muted">Choose a ZPP file</label>
                         <div class="input-group-append">
-                            <label for="upload" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a ZPP file</small></label>
+                            <label for="uploadzpp" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a ZPP file</small></label>
                         </div>
                       </div>
                       <!-- <label for="file">Select a file:</label>
@@ -85,36 +85,61 @@
 </div>
 
 <script>
-$(function () {
-    $('#upload').on('change', function () {
-        readURL(input);
-    });
-});
+// $(function () {
+//     $('#uploadcoois').on('change', function () {
+//         readURL(input);
+//     });
+// });
 /*  ==========================================
     SHOW UPLOADED FILE NAME
 * ========================================== */
-var input = document.getElementById( 'upload' );
-var infoArea = document.getElementById( 'upload-label' );
-
+var input = document.getElementById('uploadcoois')
+var infoArea = document.getElementById( 'upload-label-coois' );
 input.addEventListener( 'change', showFileName );
 function showFileName( event ) {
   var input = event.srcElement;
   var fileName = input.files[0].name;
   infoArea.textContent = 'File name: ' + fileName;
-
 }
-
 </script>
 
+<script>
+  var inputzpp = document.getElementById('uploadzpp')
+  // $(function () {
+  //     $('#uploadzpp').on('change', function () {
+  //         readURL(inputzpp);
+  //     });
+  // });
+  /*  ==========================================
+      SHOW UPLOADED FILE NAME
+  * ========================================== */
+  var infoAreazpp = document.getElementById( 'upload-label-zpp' );
+  inputzpp.addEventListener( 'change', showFileName );
+  function showFileName( event ) {
+    var inputzpp = event.srcElement;
+    var fileName = inputzpp.files[0].name;
+    infoAreazpp.textContent = 'File name: ' + fileName;
+  }
+  </script>
+
 <style>
-#upload {
+#uploadcoois {
     opacity: 0;
 }
-#upload-label {
+#uploadzpp {
+  opacity: 0;
+}
+#upload-label-coois {
     position: absolute;
     top: 50%;
     left: 1rem;
     transform: translateY(-50%);
+}
+#upload-label-zpp {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
 }
 </style>
 {% endblock %}

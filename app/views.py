@@ -785,7 +785,7 @@ def upload_files(request):
 
 #save coois   
 def save_coois(request):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
     try:
         #Delete coois data 
         coois_data = Coois.undeleted_objects.all().filter(created_by='Marwa')
@@ -802,7 +802,7 @@ def save_coois(request):
         
 #save zpp   
 def save_zpp(request):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
     #Delete zpp data 
     zpp_data = Zpp.undeleted_objects.all().filter(created_by='Marwa')
     zpp_data.delete()
@@ -1146,10 +1146,9 @@ def create_shopfloor(request):
         Ranking = request.POST.getlist('Ranking')
         Freeze_end_date = request.POST.getlist('Freeze end date')
         Remain_to_do = request.POST.getlist('Remain to do')
-        # print('*************',len(Freeze_end_date[0]))
-        # if  len(Freeze_end_date[0]) > 0:
-        # data=Shopfloor.objects.all().delete()
-        
+
+        #Delete shopfloor history
+        shopfloor_history=Shopfloor.objects.all().delete()
         if  Freeze_end_date[0]!= '':     
             
             #save all informations from table 
@@ -1190,7 +1189,9 @@ def create_shopfloor(request):
                                 date_start_plan= date_start_plan[i],date_end_plan = date_end_plan[i],
                                 fixation=fixation[i],date_reordo=date_reordo [i] ,message=message[i],order_stat=order_stat[i],
                                 customer_order=customer_order[i],date_end_real= date_end_real[i],AllocatedTime=AllocatedTime[i],
-                                Leadtime=Leadtime[i],workstation=workstation[i],Allocated_Time_On_Workstation=Allocated_Time_On_Workstation[i],
+                                Leadtime=Leadtime[i],
+                                workstation=workstation[i],
+                                Allocated_Time_On_Workstation=Allocated_Time_On_Workstation[i],
                                 Smooth_Family=Smooth_Family[i],Ranking=Ranking[i],Freeze_end_date=Freeze_end_date[i],Remain_to_do=Remain_to_do[i])
                 
                 # try:
@@ -1250,8 +1251,8 @@ def result(request):
             #     if df_data.loc[i,'key'] == key:
             #         cycle_i=value
             df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_product_work_data_dict_cycle.items(),df_data.loc[i,'designation'])            
-    print(df_data.loc[i+1,'smoothing_end_date'])
-    print(df_data)
+    # print(df_data.loc[i+1,'smoothing_end_date'])
+    df_data=df_data.sort_values('id')
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
 
