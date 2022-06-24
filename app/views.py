@@ -1254,6 +1254,22 @@ def result(request):
     print(df_data)
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
+
+def planning(request):
+    #Get data
+    data=Shopfloor.objects.all()
+    #Convert to DF
+    df_data=pd.DataFrame(data.values())
+    #Get week from date_end_plan if date_reordo is null or Get week from date_reordo
+    df_data['week_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
+    df_data['year_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.year),(pd.to_datetime(df_data['date_reordo']).dt.year)).astype(int)
+    df_data['year_week_programm_demand']=df_data['year_programm_demand'].astype(str)+'_'+df_data['week_programm_demand'].astype(str)
+    
+    df_data=df_data.sort_values('year_week_programm_demand')
+    week_count=df_data.groupby('year_week_programm_demand')['id'].count().reset_index()
+
+    
+    return render(request,'app/planning.html',{'records':df_data,'week_count':week_count})
 #Test for web excel jquery
 def data_table(request):
     return render(request,'app/Shopfloor/datatable.html') 

@@ -1,0 +1,67 @@
+<div class="card card-primary card-outline">
+    <div class="card-header">
+      <h5 class="m-0">Program demand count per week</h5>
+    </div>
+    <div class="card-body">
+          
+<div style="height: 400px" >
+    <canvas id="week_count" ></canvas>
+    <script>
+        var xValues = [{% for index, data in week_count.iterrows %}  '{{data.year_week_programm_demand}}', {% endfor %}];
+        var data = [{% for index, data in week_count.iterrows %} {{data.id}}, {% endfor %}];
+        
+        const week_count=new Chart("week_count", {
+            // plugins: [ChartDataLabels],
+            type: "line",
+            data: {
+                    labels: xValues,
+                    datasets: [
+                        {
+                        label: 'QTE Program demand',
+                        backgroundColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b','#065a60','#006466','#38b000'],
+                        borderColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b',,'#065a60',"#006466",'#38b000'],
+                        borderWidth: 1,
+                        data: data
+                        }
+                    ]
+                    },
+            options: {
+                plugins: {
+                        datalabels: {
+                            // anchor: 'end',
+                            clamp: true,
+                            color: 'black',
+                            
+                        },
+                        legend: {
+                        display: true,
+                        position:'top',
+                        align:'middle',
+                        labels: {
+                        usePointStyle: true,
+                        boxWidth: 6,
+                        },
+                        },
+
+                        title: {
+                            display: false,
+                            text: "this is title"
+                        },
+                        
+                    },
+                    scales: {
+                            y: {
+                                min: 0
+                            }
+                        },
+                    responsive: true,
+                    maintainAspectRatio:false, 
+            }
+        });
+    </script>
+</div>
+    </div>
+    <div class="card-footer clearfix">
+  </div>
+</div> 
+

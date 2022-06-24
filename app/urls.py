@@ -75,6 +75,7 @@ urlpatterns = [
     path('shopfloor/',views.shopfloor,name='shopfloor'),
     path('shopfloor/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
     path('shopfloor/result/',views.result,name='result'), 
+    path('shopfloor/planning/',views.planning,name='planning'), 
     path('shopfloor/datatable/',views.data_table,name='datatable'), 
      
     

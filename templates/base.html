@@ -22,13 +22,8 @@
   <link rel="stylesheet" href= " {% static 'adminlte/fontawesome-free/css/all.min.css' %} ">
   <!-- style -->
   <link rel="stylesheet" href= " {% static 'css/style.css' %} ">
- 
-
-  
-
   <!------------------ scripts------------------>
   <!-- jquery -->
-  
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>> -->
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
   <script src="https://unpkg.com/popper.js@1.14.7/dist/umd/popper.min.js"></script>
@@ -39,7 +34,6 @@
   <!-- <script src="{% static 'jexcel.js' %}"></script>
   <link rel="stylesheet" href="{% static 'jexcel.css' %}" /> -->
   <!-- <script src="/path/to/jsuites.js"></script> -->
-
   <!-- Alert Toastr -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css" rel="stylesheet">
@@ -58,6 +52,16 @@
   <script src="{% static 'app/calendar/js/calendar.js' %}"></script>
   <!-- htmx -->
   <script src="https://unpkg.com/htmx.org@1.7.0" integrity="sha384-EzBXYPt0/T6gxNp0nuPtLkmRpmDBbjg6WmCUZRLXBBwYYmwAUxzlSGej0ARHX0Bo" crossorigin="anonymous" defer></script>
+  
+  <!-- Charjs must--> <!-- be in head -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <!-- Registration data label  -->
+  <script>
+    Chart.register(ChartDataLabels);
+  </script>
+
+
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -127,7 +131,7 @@
                 </a>
               </li>   
               <li class="nav-item">
-                <a href="" class="nav-link">
+                <a href="{% url 'planning' %}" class="nav-link">
                   <i class="fa-solid fa-chart-line  nav-icon"></i>
                   <p>Planning</p>
                 </a>
