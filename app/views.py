@@ -1265,11 +1265,15 @@ def planning(request):
     df_data['year_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.year),(pd.to_datetime(df_data['date_reordo']).dt.year)).astype(int)
     df_data['year_week_programm_demand']=df_data['year_programm_demand'].astype(str)+'_'+df_data['week_programm_demand'].astype(str)
     
-    df_data=df_data.sort_values('year_week_programm_demand')
+    #Program demand count per week
     week_count=df_data.groupby('year_week_programm_demand')['id'].count().reset_index()
-
     
-    return render(request,'app/planning.html',{'records':df_data,'week_count':week_count})
+    #Demonstrated_capacity count per week
+    df_status=df_data[df_data['order_stat'].str.contains('TCLO|LIVR')]
+    df_status['year_week_end_date']=(pd.to_datetime(df_data['date_end_plan']).dt.year).astype(str)+'_'+(pd.to_datetime(df_data['date_end_plan']).dt.week).astype(str)
+    week_demonstrated_capacity_count=df_status.groupby('year_week_end_date')['id'].count().reset_index()
+    
+    return render(request,'app/planning.html',{'records':df_data,'week_count':week_count,'week_demonstrated_capacity_count':week_demonstrated_capacity_count})
 #Test for web excel jquery
 def data_table(request):
     return render(request,'app/Shopfloor/datatable.html') 
