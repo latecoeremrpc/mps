@@ -9,7 +9,6 @@
         <div style='margin-bottom:10px'>
             <a href="{%url 'calendar' division  product  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
             </div>
-{{division}}
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary card-outline">
@@ -92,7 +91,8 @@
         {% csrf_token %}
           
           <div class="modal-body">
-            <p class="col-sm-4 control-label  calendar-text" >Holiday</p>
+            <center><h6 class="col-sm-4 control-label calendar-text " style="color:var(--bs-red);">Holiday</h6></center>
+            <hr>
               <input type="hidden" name="event-index">
               <form class="form-horizontal">
                 <div class="form-group row">
@@ -135,7 +135,8 @@
         {% csrf_token %}
          
          <div class="modal-body">
-           <p class="col-sm-4 control-label calendar-text">Work Day</p>
+            <center><h6 class="col-sm-4 control-label calendar-text" style="color:var(--info);">Work Day</h6></center>
+            <hr>
              <input type="hidden" name="event-index">
              <form class="form-horizontal">
                 <div class="form-group row">

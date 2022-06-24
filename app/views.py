@@ -949,7 +949,7 @@ def import_zpp(file,conn):
     conn.commit()
 
 #**********************Shopfloor****************************
-
+@allowed_users(allowed_roles=["Planificateur"])
 def shopfloor(request):
     
     #Get Data from DB

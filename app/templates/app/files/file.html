@@ -30,10 +30,10 @@
         {% csrf_token %}
         <!-- Upload file input-->
         <div class="input-group mb-3 px-2 py-2 rounded-pill bg-white shadow-sm">
-          <input  name="coois" id="upload" type="file" onchange="readURL(this);" class="form-control border-0" required>
-          <label id="upload-label" for="upload" class="font-weight-light text-muted">Choose a ZPP file</label>
+          <input id="upload" name="coois" type="file" onchange="readURL(this);" class="form-control border-0" required>
+          <label id="upload-label" for="upload" class="font-weight-light text-muted">Choose a COOIS file</label>
           <div class="input-group-append">
-              <label for="upload" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a ZPP file</small></label>
+              <label for="upload" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a COOIS file</small></label>
           </div>
         </div>
         <!-- <label for="file">Select a file:</label>
@@ -64,7 +64,7 @@
                       {% csrf_token %}
                       <!-- Upload file input-->
                       <div class="input-group mb-3 px-2 py-2 rounded-pill bg-white shadow-sm">
-                        <input  name="zpp" id="upload" type="file" onchange="readURL(this);" class="form-control border-0" required>
+                        <input id="upload" name="zpp" type="file" onchange="readURL(this);" class="form-control border-0" required>
                         <label id="upload-label" for="upload" class="font-weight-light text-muted">Choose a ZPP file</label>
                         <div class="input-group-append">
                             <label for="upload" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a ZPP file</small></label>
@@ -95,13 +95,17 @@ $(function () {
 * ========================================== */
 var input = document.getElementById( 'upload' );
 var infoArea = document.getElementById( 'upload-label' );
+
 input.addEventListener( 'change', showFileName );
 function showFileName( event ) {
   var input = event.srcElement;
   var fileName = input.files[0].name;
   infoArea.textContent = 'File name: ' + fileName;
+
 }
+
 </script>
+
 <style>
 #upload {
     opacity: 0;
