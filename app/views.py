@@ -375,7 +375,6 @@ def create_product(request,division):
     return redirect(f'../{division}/product/')
    
 
-
 #update object(Product) by id
 def update_product(request):
     id = id = request.POST.get('id')
@@ -391,7 +390,6 @@ def update_product(request):
             messages.error(request," try again!")        
     return redirect(f'./{str(obj.division_id)}/product/')
     
-
 
 # delete object(Product) by id
 def delete_product(request, id):
@@ -412,7 +410,6 @@ def restore_product(request, id):
     # restore object
     obj.restore()
     return redirect(f'../{str(obj.division_id)}/product/')
-
 
 
 # find all product for division 
@@ -947,15 +944,16 @@ def import_zpp(file,conn):
         )
     conn.commit()
 
-#**********************Shopfloor****************************
+#**********************Shopfloor*****************************************
+
 # @allowed_users(allowed_roles=["Planificateur"])
 def shopfloor(request):
+    
     #Get Data from DB
     zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
     material_data=Material.objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
     product_work_data=Product.objects.values('planning','workdata__date','workdata__cycle_time')
-    
 
     #Convert to DataFrame
     df_zpp=pd.DataFrame(list(zpp_data))
@@ -1010,24 +1008,34 @@ def shopfloor(request):
     return render(request,'app/Shopfloor/Shopfloor.html',{'records': records} ) 
 
 
+#******************************smooth end date*****************************************************
+
+#calcul smooth end date(Recursive Function)
 def smooth_date_calcul(current_date,table,designation,prev_cycle=None,prev_date=None):
     #Get cycle for current day
     key_date=str(designation)+str(current_date).split(' ')[0]
-    if prev_date==None:
+    #initial case treatment (when prev_date =  current_date)
+    if prev_date is None:
         prev_date=current_date
     # Check and get cycle
     try:
+        # key : contains the concatenation between designation and date of the table 
+        # value : c'est la valeur de cycle time de work data 
         for key,value in table:
             if key_date == key:
                 cycle=value
         print(cycle)
-    except: return date(1900,1,1)
+    #when cycle not found  in table return date(1900,1,1)    
+    except Exception:
+        return date(1900,1,1)
+    #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
-    else: 
-        new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
-        print('new date',new_date)
-        return   smooth_date_calcul(new_date,table,designation,cycle,current_date)
+    new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
+    print('new date',new_date)
+    return   smooth_date_calcul(new_date,table,designation,cycle,current_date)
+
+#******************************create_shopfloor*****************************************************
 
 
 #create shopfloor
@@ -1100,6 +1108,9 @@ def create_shopfloor(request):
         save_shopfloor(df)
         messages.success(request,"Data saved successfully!") 
         return redirect(result)
+    
+    
+#******************************save_shopfloor*****************************************************    
 
 def save_shopfloor(df):
     conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
@@ -1165,6 +1176,10 @@ def save_shopfloor(df):
             sep=";",
         )
     conn.commit()
+    
+#******************************result *****************************************************    
+    
+        
 # @allowed_users(allowed_roles=["Planificateur"])        
 def result(request):
     #Get Work date data
@@ -1199,8 +1214,7 @@ def result(request):
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
 
-
-
+#******************************Planning*****************************************************    
 #calcul KPIs
 def planning(request):
     #Get data

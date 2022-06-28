@@ -23,31 +23,44 @@
                          <table id="dataTable" class="table table-bordered table-head-fixed text-nowrap">
                             <thead >
                                 <tr>
+                                    <th colspan="2"></th>
+                                    <th colspan="13" style="text-align: center; color:#b288ff;">COOIS</th>
+                                    <th colspan="2" style="text-align: center; color:#3dcae1;">ZPP</th>
+                                    <th colspan="5" style="text-align: center; color:#e83e8c;">Material</th>
+                                    <th colspan="3" style="text-align: center; color:#007bff;">User Input</th>
+                                    <th colspan="1" style="text-align: center; color:#20c997;">Smoothing</th>
+                                </tr>
+                                <tr>
                                     <th>id</th>
-                                    <th>Plant</th>
-                                    <th>Profit Centre</th>
-                                    <th>Order</th>
-                                    <th>Material Number</th>         
-                                    <th>Material description</th>
-                                    <th>Order Type </th>
-                                    <th>Order quantity</th>
-                                    <th>Begin Date</th>
-                                    <th>End Date</th>
-                                    <th>Freeze </th>
-                                    <th>Reschedule date</th>
-                                    <th>Exception message</th>
-                                    <th>System Status</th>
-                                    <th>Sales Order</th>
-                                    <th>Actual finish date</th>
-                                    <th>Allocated time</th>
-                                    <th>Leadtime</th>
-                                    <th>Workstation</th>
-                                    <th>Allocated time on workstation</th>
-                                    <th>Smooth Family</th>
-                                    <th>Ranking</th>
-                                    <th>Freeze end date</th>
-                                    {% comment %} <th>Remain to do</th> {% endcomment %}
-                                    <th>Smoothing end date</th>
+                                    <th>Closed?</th>
+                                    <th style='background: #b288ff;color: white;'>Division</th>
+                                    <th style='background: #b288ff;color: white;'>Profit Centre</th>
+                                    <th style='background: #b288ff;color: white;'>Order</th>
+                                    <th style='background: #b288ff;color: white;'>Material</th>         
+                                    <th style='background: #b288ff;color: white;'>Planning</th>
+                                    <th style='background: #b288ff;color: white;'>Order Type </th>
+                                    <th style='background: #b288ff;color: white;'>Order quantity</th>
+                                    <th style='background: #b288ff;color: white;'>Start Date</th>
+                                    <th style='background: #b288ff;color: white;'>End Date</th>
+                                    <th style='background: #b288ff;color: white;'>Freeze </th>
+                                    <th style='background: #b288ff;color: white;'>System Status</th>
+                                    <th style='background: #b288ff;color: white;'>Sales Order</th>
+                                    <th style='background: #b288ff;color: white;'>Date end reel</th>
+
+                                    <th style='background: #3dcae1;color: white;'>Reschedule date</th>
+                                    <th style='background: #3dcae1;color: white;'>Exception message</th>
+                                    
+                                    <th style='background: #e83e8c;color: white;'>Allocated time</th>
+                                    <th style='background: #e83e8c;color: white;'>Leadtime</th>
+                                    <th style='background: #e83e8c;color: white;'>Workstation</th>
+                                    <th style='background: #e83e8c;color: white;'>Allocated time on workstation</th>
+                                    <th style='background: #e83e8c;color: white;'>Smooth Family</th>
+
+                                    <th style='background: #007bff;color: white;'>Ranking</th>
+                                    <th style='background: #007bff;color: white;'>Freeze end date</th>
+                                    <th style='background: #007bff;color: white;'>Remain to do</th> 
+
+                                    <th style='background: #20c997;;color: white;'>Smoothing end date</th>
                                     
                                 </tr>
                             </thead>
@@ -60,6 +73,7 @@
                                     <!--coois-->
                                     <!-- <td>{{data.id}}</td> -->
                                     <td>{{data.id}} </td> 
+                                    <td>{{data.closed}}</td>
                                     <td>{{ data.division }}</td> 
                                     <td>{{ data.profit_centre}}  </td>
                                     <td>{{data.order}}  </td>   
@@ -70,21 +84,24 @@
                                     <td>{{ data.date_start_plan | date:'d/m/Y'}} </td>
                                     <td>{{ data.date_end_plan | date:'d/m/Y'}} </td>
                                     <td>{{ data.fixation}}   </td>
-                                    <!--zpp-->
-                                    <td>{{ data.date_reordo | date:'d/m/Y'}}</td>
-                                    <td>{{ data.message}}   </td>
-                                    <!--coois-->
                                     <td>{{ data.order_stat }}   </td>
                                     <td>{{ data.customer_order}}   </td>
                                     <td>{{data.date_end_real | date:'d/m/Y'}}</td>
+                                    <!--zpp-->
+                                    <td>{{ data.date_reordo | date:'d/m/Y'}}</td>
+                                    <td>{{ data.message}}</td>
+
                                     <!--material-->
                                     <td>{{ data.AllocatedTime}}   </td>
                                     <td>{{data.Leadtime}}   </td>
                                     <td>{{data.workstation}}   </td>
                                     <td>{{ data.Allocated_Time_On_Workstation}}</td>
-                                    <td>{{ data.Smooth_Family}}  </td>
+                                    <td>{{ data.Smooth_Family}} </td>
+                                    <!--User Input-->
                                     <td>{{ data.Ranking | date:'d/m/Y'}}  </td>
                                     <td>{{data.Freeze_end_date | date:'d/m/Y'}}</td>
+                                    <td>{{ data.Remain_to_do}} </td>
+                                    <!--Smoothing-->
                                     <td>{{data.smoothing_end_date | date:'d/m/Y'}}</td>
                                     </tr>
                                     {%empty%}
