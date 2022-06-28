@@ -18,39 +18,47 @@
                       <div class="card-header">
                         <h5 class="m-0">Planning</h5>
                       </div>
-                      <div class="card-body table-responsive p-0 " style="height: 400px;">
+                      <div class="card-body table-responsive p-0 " style="height: 600px;">
                       <div class="card-body">
                         <form method="POST" action="{%url 'createshopfloor' %}">
                             <!-- Security token -->
                             {% csrf_token %}
                         					
-                         <table id="dataTable" class="table table-bordered table-head-fixed text-nowrap">
+                         <table id="dataTable" class="table table-bordered table-head-fixed text-nowrap table-hover">
                             <thead >
                                 <tr>
+                                    <th colspan="2"></th>
+                                    <th colspan="13" style="text-align: center; color:#b288ff;">COOIS</th>
+                                    <th colspan="2" style="text-align: center; color:#3dcae1;">ZPP</th>
+                                    <th colspan="5" style="text-align: center; color:#e83e8c;">Material</th>
+                                    <th colspan="3" style="text-align: center; color:#007bff;">User Input</th>
+                                </tr>
+                                <tr>
                                     <th>id</th>
-                                    <th>Plant</th>
-                                    <th>Profit Centre</th>
-                                    <th>Order</th>
-                                    <th>Material Number</th>         
-                                    <th>Material description</th>
-                                    <th>Order Type </th>
-                                    <th>Order quantity</th>
-                                    <th>Begin Date</th>
-                                    <th>End Date</th>
-                                    <th>Freeze </th>
-                                    <th>Reschedule date</th>
-                                    <th>Exception message</th>
-                                    <th>System Status</th>
-                                    <th>Sales Order</th>
-                                    <th>Actual finish date</th>
-                                    <th>Allocated time</th>
-                                    <th>Leadtime</th>
-                                    <th>Workstation</th>
-                                    <th>Allocated time on workstation</th>
-                                    <th>Smooth Family</th>
-                                    <th>Ranking</th>
-                                    <th>Freeze end date</th>
-                                    <th>Remain to do</th>
+                                    <th>Closed?</th>
+                                    <th style='background: #b288ff;color: white;'>Division</th>
+                                    <th style='background: #b288ff;color: white;'>Profit Centre</th>
+                                    <th style='background: #b288ff;color: white;'>Order</th>
+                                    <th style='background: #b288ff;color: white;'>Material</th>         
+                                    <th style='background: #b288ff;color: white;'>Planning</th>
+                                    <th style='background: #b288ff;color: white;'>Order Type </th>
+                                    <th style='background: #b288ff;color: white;'>Order quantity</th>
+                                    <th style='background: #b288ff;color: white;'>Start Date</th>
+                                    <th style='background: #b288ff;color: white;'>End Date</th>
+                                    <th style='background: #b288ff;color: white;'>Freeze </th>
+                                    <th style='background: #b288ff;color: white;'>System Status</th>
+                                    <th style='background: #b288ff;color: white;'>Sales Order</th>
+                                    <th style='background: #b288ff;color: white;' >Date end reel</th>
+                                    <th style='background: #3dcae1;color: white;'>Reschedule date</th>
+                                    <th style='background: #3dcae1;color: white;'>Exception message</th>
+                                    <th style='background: #e83e8c;color: white;'>Allocated time</th>
+                                    <th style='background: #e83e8c;color: white;'>Leadtime</th>
+                                    <th style='background: #e83e8c;color: white;'>Workstation</th>
+                                    <th style='background: #e83e8c;color: white;'>Allocated time on workstation</th>
+                                    <th style='background: #e83e8c;color: white;'>Smooth Family</th>
+                                    <th style='background: #007bff;color: white;'>Ranking</th>
+                                    <th style='background: #007bff;color: white;'>Freeze end date</th>
+                                    <th style='background: #007bff;color: white;'>Remain to do</th>
                                     <!-- <th>Smoothing end date</th> -->
                                     
                                 </tr>
@@ -65,6 +73,7 @@
                                     <!--coois-->
                                     <!-- <td>{{data.id}}</td> -->
                                     <td><input id="index" name="index" type="text" class="form-control custom-input"  value="{{data.id}}" readonly="readonly"> </td> 
+                                    <td><input id="closed" name="closed" type="text" class="form-control custom-input"  value="{{data.closed}}" readonly="readonly"> </td> 
                                     <td><input id="division" name="division" type="text" class="form-control custom-input"  value="{{ data.division }}" readonly="readonly"></td> 
                                     <td><input id="profit_centre" name="profit_centre" type="text" class="form-control custom-input"  value="{{ data.profit_centre}}"readonly="readonly"  ></td>
                                     <td><input id="order" name="order" type="text" class="form-control custom-input"  value="{{data.order}}" readonly="readonly" ></td>   
@@ -75,24 +84,25 @@
                                     <td><input id="date_start_plan" name="date_start_plan" type="text" class="form-control custom-input"  value="{{ data.date_start_plan | date:'d/m/Y'}}" readonly="readonly"></td>
                                     <td><input id="date_end_plan" name="date_end_plan" type="text" class="form-control custom-input"  value="{{ data.date_end_plan | date:'d/m/Y'}}" readonly="readonly"></td>
                                     <td><input id="fixation" name="fixation" type="text" class="form-control custom-input"  value="{{ data.fixation}}" readonly="readonly"  ></td>
-                                    <!--zpp-->
-                                    <td><input id="date_reordo" name="date_reordo" type="text" class="form-control custom-input"  value="{{ data.date_reordo | date:'d/m/Y'}}" readonly="readonly"  ></td>
-                                    <td><input id="message" name="message" type="text" class="form-control custom-input"  value="{{ data.message}}" readonly="readonly"  ></td>
-                                    <!--coois-->
                                     <td><input id="order_stat" name="order_stat" type="text" class="form-control custom-input"  value="{{ data.order_stat }}" readonly="readonly"  ></td>
                                     <td><input id="customer_order" name="customer_order" type="text" class="form-control custom-input"  value="{{ data.customer_order}}" readonly="readonly"  ></td>
                                     <td><input id="date_end_real" name="date_end_real" type="text" class="form-control custom-input"  value="{{data.date_end_real | date:'d/m/Y'}}" readonly="readonly"  ></td>
+                                    <!--zpp-->
+                                    <td><input id="date_reordo" name="date_reordo" type="text" class="form-control custom-input"  value="{{ data.date_reordo | date:'d/m/Y'}}" readonly="readonly"  ></td>
+                                    <td><input id="message" name="message" type="text" class="form-control custom-input"  value="{{ data.message}}" readonly="readonly"  ></td>
                                     <!--material-->
                                     <td><input id="AllocatedTime" name="AllocatedTime" type="text" class="form-control custom-input"  value="{{ data.AllocatedTime}}" readonly="readonly"  ></td>
                                     <td><input id="Leadtime" name="Leadtime" type="text" class="form-control custom-input"  value="{{data.Leadtime}}" readonly="readonly"  ></td>
                                     <td><input id="workstation" name="workstation" type="text" class="form-control custom-input"  value="{{data.workstation}}" readonly="readonly"  ></td>
                                     <td><input id="Allocated_Time_On_Workstation" name="Allocated_Time_On_Workstation" type="text" class="form-control custom-input"  value="{{ data.Allocated_Time_On_Workstation}}" readonly="readonly"  ></td>
                                     <td><input id="Smooth_Family" name="Smooth_Family" type="text" class="form-control custom-input"  value="{{ data.Smooth_Family}}" readonly="readonly" ></td>
-                                    <td><input style="border: 0px ;" id="Ranking" name="Ranking" type="date" class="form-control custom-input" ></td>
-                                    <td><input style="border: 0px ;" id="Freeze end date" name="Freeze end date" type="date" class="form-control" custom-input></td>
-                                    <td><input style="border: 0px ;" id="Remain to do" name="Remain to do" type="text" class="form-control" custom-input ></td>
+                                    <td><input  id="Ranking" name="Ranking" type="date" class="form-control" value="{{ data.Ranking| date:'Y-m-d'}}"></td>
+                                    <td><input  id="Freeze end date" name="Freeze end date" type="date" class="form-control" custom-input></td>
+                                    <td><input  id="Remain to do" name="Remain to do" type="text" class="form-control" custom-input ></td>
                                     <!-- <td>{{data.smoothing_end_date}}</td> -->
                                     </tr>
+                
+
                                     {%empty%}
                                     <tr><td> Data Empty</td></tr>
                                     {% endfor %}

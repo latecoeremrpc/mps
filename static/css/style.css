@@ -1,8 +1,8 @@
  
   .custom-input{
-
     width: 150px !important;
-  
+    background: transparent !important;
+    border: none !important;
   }
 
   .custom-save-shopfloor{

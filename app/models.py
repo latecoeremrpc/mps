@@ -34,7 +34,7 @@ class SoftDeleteManager(models.Manager):
 #SoftDeleteModel
 class SoftDeleteModel(models.Model):
     is_deleted = models.BooleanField(null= False, default=False)
-    deleted_by= models.CharField(max_length= 30, default='Marwa')
+    deleted_by= models.CharField(max_length= 30,null=True)
     deleted_at = models.DateTimeField(auto_now_add=True,null=True) 
     restored_at = models.DateTimeField(auto_now=True, null=True)
     restored_by = models.CharField(max_length= 30,default='Marwa',null=True)
@@ -227,6 +227,7 @@ class Shopfloor(BaseModel,SoftDeleteModel):
     Freeze_end_date=models.DateTimeField(null=True)
     Remain_to_do=models.FloatField(null=True)
     smoothing_end_date=models.DateTimeField(null=True)
+    closed=models.BooleanField(null=True)
 
     # renames the instances of the Shopfloor
     # with their order
