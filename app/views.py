@@ -786,7 +786,7 @@ def upload_files(request):
 
 #save coois   
 def save_coois(request):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
     try:
         #Delete coois data 
         coois_data = Coois.undeleted_objects.all().filter(created_by='Marwa')
@@ -803,7 +803,7 @@ def save_coois(request):
         
 #save zpp   
 def save_zpp(request):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
     #Delete zpp data 
     zpp_data = Zpp.undeleted_objects.all().filter(created_by='Marwa')
     zpp_data.delete()
@@ -948,7 +948,7 @@ def import_zpp(file,conn):
     conn.commit()
 
 #**********************Shopfloor****************************
-@allowed_users(allowed_roles=["Planificateur"])
+# @allowed_users(allowed_roles=["Planificateur"])
 def shopfloor(request):
     #Get Data from DB
     zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo')
