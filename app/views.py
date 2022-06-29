@@ -950,17 +950,21 @@ def import_zpp(file,conn):
 def shopfloor(request):
     
     #Get Data from DB
+    # to use in shopfloor
     zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
     material_data=Material.objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
+    # to use in smoothing calcul
     product_work_data=Product.objects.values('planning','workdata__date','workdata__cycle_time')
 
     #Convert to DataFrame
     df_zpp=pd.DataFrame(list(zpp_data))
     df_coois=pd.DataFrame(list(coois_data))
     df_material=pd.DataFrame(list(material_data))
+    # rename df_material column 
     df_material=df_material.rename(columns={'product__program':'program','product__division__name':'division'})
     df_product_work_data=pd.DataFrame(list(product_work_data))
+    # rename  df_product_work_data column
     df_product_work_data=df_product_work_data.rename(columns={'workdata__date':'workdate','workdata__cycle_time':'cycle_time'})
     
     
@@ -1001,10 +1005,14 @@ def shopfloor(request):
     df_coois['workstation']=df_coois['key2'].map(df_material_dict_workstation)
     df_coois['Allocated_Time_On_Workstation']=df_coois['key2'].map(df_material_dict_Allocated_Time_On_Workstation)
     df_coois['Smooth_Family']=df_coois['key2'].map(df_material_dict_Smooth_Family)
-    
+     
+    # add conditions :
+    # 1: for Ranking 
     df_coois['Ranking']=np.where((df_coois['date_reordo'].isna()),(pd.to_datetime(df_coois['date_end_plan'])),(pd.to_datetime(df_coois['date_reordo'])))
+    # 2: for closed  :
     df_coois['closed']=np.where(df_coois['order_stat'].str.contains('TCLO|LIVR'),True,False)
-    records=df_coois.sort_values(['Smooth_Family','Ranking'])    
+    records=df_coois.sort_values(['Smooth_Family','Ranking']) 
+    
     return render(request,'app/Shopfloor/Shopfloor.html',{'records': records} ) 
 
 
@@ -1113,7 +1121,7 @@ def create_shopfloor(request):
 #******************************save_shopfloor*****************************************************    
 
 def save_shopfloor(df):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
     #insert base informations into file
     df.insert(0,'created_at',datetime.now())
     df.insert(1,'updated_at',datetime.now())
