@@ -61,6 +61,11 @@
     Chart.register(ChartDataLabels);
   </script>
 
+  <!-- DataGrid jspreadsheet -->
+  <script src="https://bossanova.uk/jspreadsheet/v4/jexcel.js"></script>
+  <script src="https://jsuites.net/v4/jsuites.js"></script>
+  <link rel="stylesheet" href="https://bossanova.uk/jspreadsheet/v4/jexcel.css" type="text/css" />
+  <link rel="stylesheet" href="https://jsuites.net/v4/jsuites.css" type="text/css" />
 
 </head>
 
@@ -196,7 +201,8 @@
       <div class="row mb-2">
       <div class="col-sm-6">
       <!-- <h1 class="m-0"><a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important">MPS </a></h1> -->
-      <a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important"><img src="{% static 'img/mps_logo.png' %}" style="width: 75px;
+      <a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important;width: 75px;">
+      <img src="{% static 'img/mps_logo.png' %}" style="width: 75px;
         margin-top: 5px;
         margin-left: -13px"> </a>
       </div><!-- /.col -->

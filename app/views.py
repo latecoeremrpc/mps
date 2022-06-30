@@ -1104,6 +1104,7 @@ def create_shopfloor(request):
             'closed':closed, 
             }
         df=pd.DataFrame(data)
+        Shopfloor.objects.all().delete()
 
         # #Check if at least the first end date is present for each Smooth Family
         df_for_check = df[~df['closed'].str.contains('Closed')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
@@ -1111,7 +1112,6 @@ def create_shopfloor(request):
             if (df_for_check.loc[i,'Freeze_end_date']==''):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
                 return redirect("shopfloor")
-        Shopfloor.objects.all().delete()
         #Save data
         save_shopfloor(df)
         messages.success(request,"Data saved successfully!") 

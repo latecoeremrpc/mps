@@ -24,7 +24,7 @@
                             <!-- Security token -->
                             {% csrf_token %}
                         					
-                         <table id="dataTable" class="table table-bordered table-head-fixed text-nowrap table-hover">
+                         <table id="spreadsheet" class="table table-bordered table-head-fixed text-nowrap table-hover">
                             <thead >
                                 <tr>
                                     <th colspan="2"></th>
@@ -117,31 +117,8 @@
 </div>
 </div>
 
+<!-- <script>
+    jspreadsheet(document.getElementById('spreadsheet')); 
+</script> -->
 
-<script>
-    var placeholder = document.getElementById('dataTable');
-var myDataGrid = new Handsontable(placeholder, {
-    records: records,
-    
-});
-
-
-    var placeholder = document.getElementById('dataTable');
-
-var myDataGrid =new Handsontable(placeholder, {
-    columns: [
-      {readOnly:false},
-      {},
-      {}
-    ],
-    cells:function(row, col, prop) {
-      var cellProperties = {};
-      if (row === 0 && col === 0) {
-        cellProperties.readOnly =true;
-      }
-      return cellProperties;
-    }
-});
-
-</script>
 {% endblock %}
