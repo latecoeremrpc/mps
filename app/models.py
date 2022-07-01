@@ -185,7 +185,7 @@ class Coois(BaseModel,SoftDeleteModel):
     def __str__(self):
         return  str(self.designation)
 
-
+#Zpp Model
 class Zpp(BaseModel,SoftDeleteModel):
     material= models.CharField(max_length=50,null=True)
     plan_date= models.DateField(null=True)
@@ -203,6 +203,7 @@ class Zpp(BaseModel,SoftDeleteModel):
     def __str__(self):
         return  str(self.element)      
 
+#Shoploor Model
 class Shopfloor(BaseModel,SoftDeleteModel):
     division=models.IntegerField(null=True)
     profit_centre=models.CharField(max_length=50,null=True)
@@ -235,7 +236,14 @@ class Shopfloor(BaseModel,SoftDeleteModel):
     # def __str__(self):
     #     return  str(self.order)   
 
-
+#Cycle Model
+class Cycle(BaseModel,SoftDeleteModel):
+    division= models.ForeignKey(Division, on_delete=models.CASCADE)
+    profit_center= models.CharField(max_length=200)
+    date= models.DateField()
+    smooth_family= models.CharField(max_length=100)
+    
+    
 
     
     
