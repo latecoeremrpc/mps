@@ -31,7 +31,9 @@ class ProductForm(forms.ModelForm):
             "program",
             "product",
             "planning",
+            "Profit_center",
             "has_treatement",
+            
         ]  
 
 

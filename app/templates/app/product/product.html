@@ -44,6 +44,7 @@
                 <th>Has Treatment</th>
                 <th>Product</th>         
                 <th>Planning</th>
+                <th>Profit center</th>
                 <th>Material</th>
                 <th>Calendar</th>
                 <th>Calendar Config Treatment</th>
@@ -64,6 +65,7 @@
                 <td>{{ d.has_treatement}}</td>   
                 <td>{{ d.product}}</td>
                 <td>{{ d.planning}}</td>
+                <td>{{d.Profit_center}}</td>
                 <td><a href="{% url 'material' d.division d.id  %}" style="text-decoration: none;">Material</a></td>
                 <td><a href="{% url 'calendar' d.division d.id %}" style="text-decoration: none; ">Calendar</a></td>
                 {%if d.has_treatement %}
@@ -83,7 +85,7 @@
                     {% if d.is_deleted%}
                     <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
                     {%else%}
-                <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-traitement="{{d.has_treatement}}" data-product="{{d.product}}" data-program="{{d.program}}" data-planning="{{d.planning}}"  ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-traitement="{{d.has_treatement}}" data-product="{{d.product}}" data-profitcenter="{{d.Profit_center}}" data-program="{{d.program}}" data-planning="{{d.planning}}"  ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
                 <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
                 {%endif%}
                 </td>
@@ -138,10 +140,7 @@
         <div class="modal-body">    
                  <!-- form with crispy -->
                  {{ form|crispy}}
-                 <input type="hidden" id="id" name="id" value="">
-                 <input type="checkbox" id="test" name="test">
-                 <input type="checkbox" id="has_has_has" name="test">
-                 
+                 <input type="hidden" id="id" name="id" value="">        
         </div>
             <div class="modal-footer">
                 <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
@@ -217,10 +216,14 @@
     var program = $(event.relatedTarget).data('program');
     var planning = $(event.relatedTarget).data('planning');
     var traitement = $(event.relatedTarget).data('traitement');
+    var profitcenter = $(event.relatedTarget).data('profitcenter');
+
     $(this).find(".modal-body #id").val(id);
     $(this).find(".modal-body #id_product").val(product);
     $(this).find(".modal-body #id_program").val(program);
     $(this).find(".modal-body #id_planning").val(planning); 
+    $(this).find(".modal-body #id_Profit_center").val(profitcenter); 
+
     // $(this).find(".modal-body #id_has_treatement").checked=true; 
     // document.getElementById("has_has_has").checked=true;
 

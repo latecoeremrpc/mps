@@ -1246,3 +1246,5 @@ def planning(request):
 #Test for web excel jquery
 def data_table(request):
     return render(request,'app/Shopfloor/datatable.html') 
+
+#***********************************************************************************    
