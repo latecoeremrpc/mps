@@ -66,11 +66,11 @@
                 <td>{{ d.product}}</td>
                 <td>{{ d.planning}}</td>
                 <td>{{d.Profit_center}}</td>
-                <td><a href="{% url 'material' d.division d.id  %}" style="text-decoration: none;">Material</a></td>
-                <td><a href="{% url 'calendar' d.division d.id %}" style="text-decoration: none; ">Calendar</a></td>
+                <td><a href="{% url 'material' division d.id  %}" style="text-decoration: none;">Material</a></td>
+                <td><a href="{% url 'calendar' division d.id %}" style="text-decoration: none; ">Calendar</a></td>
                 {%if d.has_treatement %}
-                    <td><a href="{% url 'configTrait' d.division d.id %}"style="text-decoration: none; ">Calendar Config Treatment</a></td>
-                    <td><a href="{% url 'configCpordo' d.division d.id %}"style="text-decoration: none; ">Calendar Config CpOrdo</a></td>
+                    <td><a href="{% url 'configTrait' division d.id %}"style="text-decoration: none; ">Calendar Config Treatment</a></td>
+                    <td><a href="{% url 'configCpordo' division d.id %}"style="text-decoration: none; ">Calendar Config CpOrdo</a></td>
 
                 {%else%}
                     <td>N/A</td>

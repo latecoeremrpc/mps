@@ -1,3 +1,4 @@
+from itertools import groupby
 from django.http import HttpResponse
 from django.shortcuts import render ,redirect ,get_object_or_404
 from app.models import Division,Material,HolidaysCalendar,Product,WorkData,CalendarConfigurationTreatement,CalendarConfigurationCpordo,Coois,Zpp,Shopfloor
@@ -8,6 +9,7 @@ import psycopg2, pandas as pd
 import numpy as np
 from django.contrib import messages
 from app.decorators import allowed_users
+from django.db.models import Count
 
 
 # Create your views here.
@@ -20,8 +22,8 @@ def create_division(request):
     form = DivisionForm(request.POST)
     if request.method == "POST" :
         if form.is_valid():
-            messages.success(request,"Division created successfully!")
             form.save()
+            messages.success(request,"Division created successfully!")
         else:
             messages.error(request,"Division exit or Form not valid! try again")
     return redirect(read_division)
@@ -46,8 +48,8 @@ def update_division(request):
     form = DivisionForm(request.POST or None, instance = obj)
     if request.method == "POST":
         if form.is_valid():
-            messages.success(request,"Division updated successfully!")
             form.save()
+            messages.success(request,"Division updated successfully!")
         else:
             messages.error(request,"try again!")
                 
@@ -58,10 +60,10 @@ def update_division(request):
 def delete_division(request, id):
     # fetch the object related to passed id
     obj = get_object_or_404(Division, id = id)
-    #alert message
-    messages.success(request,"Division deleted successfully!")
     # delete object
     obj.soft_delete()
+    #alert message
+    messages.success(request,"Division deleted successfully!")
     return redirect("../")
     
 
@@ -69,10 +71,10 @@ def delete_division(request, id):
 def restore_division(request, id):
     # fetch the object related to passed id
     obj = get_object_or_404(Division, id = id)
-    #alert message
-    messages.success(request,"Division restored successfully!")
     # restore object
     obj.restore() 
+    #alert message
+    messages.success(request,"Division restored successfully!")
     return redirect("../")
     
 
@@ -85,8 +87,8 @@ def create_material(request,division,product):
         if form.is_valid():
             instance=form.save(commit=False)
             instance.product_id=product
-            messages.success(request," Material created successfully!")
             instance.save()
+            messages.success(request," Material created successfully!")
         else:
             messages.error(request,"Form not valid! try again")          
     return redirect(f'../{product}/material/')
@@ -109,8 +111,8 @@ def update_material(request,division):
     form = MaterialForm(request.POST or None, instance = obj)
     if request.method == "POST":
         if form.is_valid():
-            messages.success(request,"Material updated successfully!")
             form.save()
+            messages.success(request,"Material updated successfully!")
         else:
             messages.error(request,"try again!")    
     return redirect(f'./{str(obj.product_id)}/material/')
@@ -120,10 +122,10 @@ def update_material(request,division):
 def delete_material(request, division ,id):
     # fetch the object related to passed id
     obj = get_object_or_404(Material, id = id)
-    #alert message
-    messages.success(request,"Material deleted successfully!")
     # delete object
     obj.soft_delete()
+    #alert message
+    messages.success(request,"Material deleted successfully!")
     return redirect(f'../{str(obj.product_id)}/material/')
    
 
@@ -131,10 +133,10 @@ def delete_material(request, division ,id):
 def restore_material(request, division ,id):
     # fetch the object related to passed id
     obj = get_object_or_404(Material, id = id)
-    #alert message
-    messages.success(request,"Material restored successfully!")
     # restore object
     obj.restore()
+    #alert message
+    messages.success(request,"Material restored successfully!")
     return redirect(f'../{str(obj.product_id)}/material/')    
 
 
@@ -149,13 +151,15 @@ def material(request ,division, product):
 
 #********************Create Holidays calendar****************************
 def calendar(request,division,product):
+    material_data=(Material.undeleted_objects.values('Smooth_Family').annotate(dcount=Count('Smooth_Family')).order_by('Smooth_Family'))
     # get all work data objects to display in Calendar(for copy calendar)
     products_data= Product.undeleted_objects.all()
     # get all work data objects to display in Calendar
     work = WorkData.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
     # get all holiday objects to display in Calendar
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product, owner = 'officiel' ) 
-    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'products_data':products_data})
+    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'products_data':products_data,'material_data': material_data})
+
 
 
 # create calendar for product 
@@ -368,8 +372,8 @@ def create_product(request,division):
         if form.is_valid():
          instance=form.save(commit=False)
          instance.division_id=division
-         messages.success(request," Product created successfully!")
          instance.save()
+         messages.success(request," Product created successfully!")
         else:
             messages.error(request,"Form not valid! try again") 
     return redirect(f'../{division}/product/')
@@ -384,8 +388,8 @@ def update_product(request):
     form = ProductForm(request.POST or None, instance = obj)
     if request.method == "POST":
         if form.is_valid():
-            messages.success(request," Product updated successfully!")  
             form.save()
+            messages.success(request," Product updated successfully!")  
         else:
             messages.error(request," try again!")        
     return redirect(f'./{str(obj.division_id)}/product/')
@@ -395,9 +399,9 @@ def update_product(request):
 def delete_product(request, id):
     # fetch the object related to passed id
     obj = get_object_or_404(Product, id = id)
-    messages.success(request," Product deleted successfully!")  
     # delete object
     obj.soft_delete()
+    messages.success(request," Product deleted successfully!")  
     return redirect(f'../{str(obj.division_id)}/product/')
     
 
@@ -406,9 +410,9 @@ def delete_product(request, id):
 def restore_product(request, id):
     # fetch the object related to passed id
     obj = get_object_or_404(Product, id = id)
-    messages.success(request," Product restored successfully!")  
     # restore object
     obj.restore()
+    messages.success(request," Product restored successfully!")  
     return redirect(f'../{str(obj.division_id)}/product/')
 
 
@@ -422,6 +426,7 @@ def product(request ,division):
 #********************work Data****************************
 #create work data for calendar
 def work_data(request,division,product):
+    #groupBy Smooth_Family
     work = WorkData.undeleted_objects.all().filter(product_id = product) 
     # get list of days from dataBase to compare if exist 
     days = list(work.values_list('date',flat=True))
@@ -629,8 +634,8 @@ def create_conf_trait(request,division,product):
      if form.is_valid():
         instance=form.save(commit=False)
         instance.product_id = product
-        messages.success(request,"CalendarConfigurationTraitement created successfully!")
         instance.save()
+        messages.success(request,"CalendarConfigurationTraitement created successfully!")
      else:
          messages.error(request,"Form not valid! try again")
     return redirect(f'../{product}/configTrait')
@@ -647,8 +652,8 @@ def update_conf_trait(request,division):
     form = CalendarConfigurationTreatementForm(request.POST or None, instance = obj)
     if request.method == "POST":
         if form.is_valid():
-            messages.success(request,"CalendarConfigurationTraitement updated successfully!")   
             form.save()
+            messages.success(request,"CalendarConfigurationTraitement updated successfully!")   
         else:
           messages.error(request,"try again !")           
     return redirect(f'./{str(obj.product_id)}/configTrait')
@@ -658,9 +663,9 @@ def update_conf_trait(request,division):
 def delete_conf_trait(request, division ,id):
     # fetch the object related to passed id
     obj = get_object_or_404(CalendarConfigurationTreatement, id = id)
-    messages.success(request,"CalendarConfigurationTraitement deleted successfully!")   
     # delete object
     obj.soft_delete()
+    messages.success(request,"CalendarConfigurationTraitement deleted successfully!")   
     return redirect(f'../{str(obj.product_id)}/configTrait')
     
 
@@ -669,9 +674,9 @@ def delete_conf_trait(request, division ,id):
 def restore_conf_trait(request, division ,id):
     # fetch the object related to passed id
     obj = get_object_or_404(CalendarConfigurationTreatement, id = id)
-    messages.success(request,"CalendarConfigurationTraitement restored successfully!")   
     # restore object
     obj.restore()
+    messages.success(request,"CalendarConfigurationTraitement restored successfully!")   
     return redirect(f'../{str(obj.product_id)}/configTrait')
     
 
@@ -693,8 +698,8 @@ def create_conf_cpordo(request,division,product):
         if form.is_valid():
             instance=form.save(commit=False)
             instance.product_id = product
-            messages.success(request,"CalendarConfigurationCpordo created successfully!")
             instance.save()
+            messages.success(request,"CalendarConfigurationCpordo created successfully!")
         else:
             messages.error(request,"Form not valid! try again")     
     return redirect(f'../{product}/configCpordo')
@@ -710,8 +715,8 @@ def update_conf_cpordo(request, division):
     form = CalendarConfigurationCpordoForm(request.POST or None, instance = obj)
     if request.method == "POST":
         if form.is_valid():
-            messages.success(request,"CalendarConfigurationCpordo updated successfully!")
             form.save()
+            messages.success(request,"CalendarConfigurationCpordo updated successfully!")
         else:
             messages.error(request,"try again!")    
     return redirect(f'./{str(obj.product_id)}/configCpordo')
@@ -721,9 +726,9 @@ def update_conf_cpordo(request, division):
 def delete_conf_cpordo(request,division ,id):
     # fetch the object related to passed id
     obj = get_object_or_404(CalendarConfigurationCpordo, id = id)
-    messages.success(request,"CalendarConfigurationCpordo deleted successfully!")
     # delete object
     obj.soft_delete()
+    messages.success(request,"CalendarConfigurationCpordo deleted successfully!")
     return redirect(f'../{str(obj.product_id)}/configCpordo')
 
 
@@ -731,9 +736,9 @@ def delete_conf_cpordo(request,division ,id):
 def restore_conf_cpordo(request,division ,id):
     # fetch the object related to passed id
     obj = get_object_or_404(CalendarConfigurationCpordo, id = id)
-    messages.success(request,"CalendarConfigurationCpordo restored successfully!")
     # restore object
     obj.restore()
+    messages.success(request,"CalendarConfigurationCpordo restored successfully!")
     return redirect(f'../{str(obj.product_id)}/configCpordo')
     
 
@@ -754,10 +759,10 @@ def home_page(request):
 #*******************copy calendar************************************
 def copy_calendar(request,division,product):
     #Delete holidays
-    holidays_data = HolidaysCalendar.undeleted_objects.all().filter(product_id = product)
+    holidays_data = HolidaysCalendar.objects.all().filter(product_id = product)
     holidays_data.delete()
     #Delete work
-    work_data = WorkData.undeleted_objects.all().filter(product_id = product)
+    work_data = WorkData.objects.all().filter(product_id = product)
     work_data.delete() 
     #get product copied id 
     product_copied= request.POST.get('product_copied')

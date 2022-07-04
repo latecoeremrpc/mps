@@ -238,11 +238,11 @@ class Shopfloor(BaseModel,SoftDeleteModel):
 
 #Cycle Model
 class Cycle(BaseModel,SoftDeleteModel):
-    division= models.ForeignKey(Division, on_delete=models.CASCADE)
+    division= models.IntegerField()
     profit_center= models.CharField(max_length=200)
-    date= models.DateField()
+    work_day= models.DateField()
     smooth_family= models.CharField(max_length=100)
-    
+    cycle_time=models.FloatField()
     
 
     
