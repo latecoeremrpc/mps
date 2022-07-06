@@ -151,7 +151,7 @@ def material(request ,division, product):
 
 #********************Create Holidays calendar****************************
 def calendar(request,division,product):
-    material_data=(Material.undeleted_objects.values('Smooth_Family').annotate(dcount=Count('Smooth_Family')).order_by('Smooth_Family'))
+    material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # get all work data objects to display in Calendar(for copy calendar)
     products_data= Product.undeleted_objects.all()
     # get all work data objects to display in Calendar
