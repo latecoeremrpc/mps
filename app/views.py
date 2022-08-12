@@ -432,7 +432,7 @@ def work_data(request,division,product):
 
     if request.method=='POST' and 'save-work' in request.POST:
         # get inputs from form
-        #    workdata inforlations
+        #    workdata informations
         id = request.POST.get('event-index')
         startTime = request.POST.get('start-time')
         endTime = request.POST.get('end-time')
@@ -444,7 +444,7 @@ def work_data(request,division,product):
         startDate = request.POST.get('event-start-date')
         endDate = request.POST.get('event-end-date')
         #cycle informations
-        profit_center= Product.objects.all().filter(id = product).values('Profit_center')
+        profit_center= Product.objects.all().filter(id = product).values('Profit_center').first()
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle-time')
         # time = request.POST.getlist('cycle-type')
@@ -452,6 +452,7 @@ def work_data(request,division,product):
         #     cycle_time = 24 * float(cycle_time)
         #     print(cycle_time)
         print(profit_center)
+        print(type(profit_center))
         print(division)
         print(smooth_family)
         print(cycle_time)
@@ -494,14 +495,28 @@ def work_data(request,division,product):
                         cycle_data.save()
                     return redirect("../calendar")
                 else:
-                    #save new date in exist date
-                    exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate= startDate) 
-                    exist_off_days.delete()
+                    # exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate= startDate) 
+                    # exist_off_days.delete()
+                    #Save into Workdata table
                     data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
                     data.save()
-                    for i,j in range(len(smooth_family), len(cycle_time)):
-                        cycle_data=Cycle(work_day=startDate[i,j],division=division[i,j],profit_center=profit_center[i,j],smooth_family=smooth_family[i,j],cycle_time=cycle_time[i,j])
+                    
+                    #Save into Cycle table
+                    #******************************************
+                    # for i,j in zip(l,t):
+                    #     print(i,j)
+                    #     cycle(division = division, cycle = i , smooth =j )                
+                    # print('ok')
+                    #*****************************************
+                    # for i in range(len(list(map(int,smooth_family)))):
+                    #     print(smooth_family[i])
+                    # for j in range(len(list(map(int,cycle_time)))):
+                    #     print(cycle_time[j])
+                    for i,j in zip(smooth_family,cycle_time):
+                        print(i,j)
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center,smooth_family=i,cycle_time=j)
                         cycle_data.save()
+                        
                     return redirect("../calendar")
             # add list of days in database       
             else: 
