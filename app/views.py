@@ -429,7 +429,7 @@ def work_data(request,division,product):
     days = list(work.values_list('date',flat=True))
     # get list of product_id from database to compare if exist
     products =list(WorkData.objects.values_list('product_id',flat=True))
-
+    # test if method post and button save-work
     if request.method=='POST' and 'save-work' in request.POST:
         # get inputs from form
         #    workdata informations
@@ -453,6 +453,7 @@ def work_data(request,division,product):
         #     print(cycle_time)
         print(profit_center)
         print(type(profit_center))
+        print ('****', profit_center.get('Profit_center'))
         print(division)
         print(smooth_family)
         print(cycle_time)
@@ -484,39 +485,35 @@ def work_data(request,division,product):
             if startDate == endDate:
                 startDate= datetime.strptime(startDate,'%m/%d/%Y')
                 endDate= datetime.strptime(endDate,'%m/%d/%Y')
-                # check if day and product_id exists in DB don't save else save
+                # check if day and product_id exists in DB delete and save new data
                 if (startDate.strftime('%Y-%m-%d') in [day.strftime('%Y-%m-%d') for day in days] ) and (int(product) in products):
-                    exist_day =WorkData.undeleted_objects.all().filter(date = startDate) 
+                   # delete exist data and save new data 
+                   # delete work data with date and product_id 
+                    exist_day =WorkData.undeleted_objects.all().filter(date = startDate,product_id = product) 
                     exist_day.delete()
-                    data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
-                    data.save()
-                    for i,j in range(len(smooth_family), len(cycle_time)):
-                        cycle_data=Cycle(work_day=startDate[i,j],division=division[i,j],profit_center=profit_center[i,j],smooth_family=smooth_family[i,j],cycle_time=cycle_time[i,j] )
-                        cycle_data.save()
-                    return redirect("../calendar")
-                else:
-                    # exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate= startDate) 
-                    # exist_off_days.delete()
+                    # delete cycle with date and profit center
+                    exist_cycle=Cycle.undeleted_objects.all().filter(work_day = startDate,profit_center = profit_center.get('Profit_center'))
+                    exist_cycle.delete()
                     #Save into Workdata table
                     data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
                     data.save()
-                    
                     #Save into Cycle table
-                    #******************************************
-                    # for i,j in zip(l,t):
-                    #     print(i,j)
-                    #     cycle(division = division, cycle = i , smooth =j )                
-                    # print('ok')
-                    #*****************************************
-                    # for i in range(len(list(map(int,smooth_family)))):
-                    #     print(smooth_family[i])
-                    # for j in range(len(list(map(int,cycle_time)))):
-                    #     print(cycle_time[j])
                     for i,j in zip(smooth_family,cycle_time):
-                        print(i,j)
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center,smooth_family=i,cycle_time=j)
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
                         cycle_data.save()
-                        
+                    
+                    return redirect("../calendar")
+                else:
+                    ##replace holidays with work data
+                    exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate= startDate,product_id = product) 
+                    exist_off_days.delete()
+                    #Save into Workdata table
+                    data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
+                    data.save()
+                    #Save into Cycle table
+                    for i,j in zip(smooth_family,cycle_time):
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                        cycle_data.save()    
                     return redirect("../calendar")
             # add list of days in database       
             else: 
@@ -526,21 +523,34 @@ def work_data(request,division,product):
                 day=""
                 for i in range(delta.days+1):
                     day= startDate + timedelta(days=i)
-                    # check if day and product_id exists in DB don't save else save
+                    # check if day and product_id exists delete old object and save new workday and cycle object
                     if (day.strftime('%Y-%m-%d') in [day.strftime('%Y-%m-%d') for day in days]) and (int(product) in products):
-                        exist_days = WorkData.undeleted_objects.all().filter(date = day) 
+                        # delete exist workdata and save new workdata
+                        exist_days = WorkData.undeleted_objects.all().filter(date = day,product_id = product ) 
                         exist_days.delete()
+                        # delete exist cycle and save new cycle object
+                        exist_cycle=Cycle.undeleted_objects.all().filter(work_day = day,profit_center = profit_center.get('Profit_center'))
+                        exist_cycle.delete()
+                        # Save into workdata table
                         data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
-                        data.save()     
+                        data.save() 
+                        #Save into Cycle table
+                        for i,j in zip(smooth_family,cycle_time):
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                            cycle_data.save()    
                     else :
                         #replace holidays with work data
                         #get holidays 
-                        exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate = day) 
+                        exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate = day, product_id = product ) 
                         #delete exist_off_days
                         exist_off_days.delete()
-                        #save work data
+                        #save into workdata data
                         data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
                         data.save()
+                        #Save into Cycle table
+                        for i,j in zip(smooth_family,cycle_time):
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                            cycle_data.save()  
                 return redirect("../calendar")       
         
     return render(request,"app/calendar/calendar.html",{'product':product,'division':division, 'work':work})
