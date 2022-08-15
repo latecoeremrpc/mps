@@ -274,11 +274,13 @@ def duplicate_calendar(request,division,product):
 
 
 def custom_calendar(request,division,product):
+    #get smooth family 
+    material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # get all holiday objects to display in Calendar
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product ,owner = 'marwa') 
     # get all work data objects to display in Calendar    
     work = WorkData.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
-    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work})
+    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'material_data': material_data})
     
 
 #custom calendar
@@ -403,7 +405,6 @@ def delete_product(request, id):
     return redirect(f'../{str(obj.division_id)}/product/')
     
 
-
 # restore object(Product) by id
 def restore_product(request, id):
     # fetch the object related to passed id
@@ -457,8 +458,6 @@ def work_data(request,division,product):
         print(division)
         print(smooth_family)
         print(cycle_time)
-        
-
         # If id exist Update Object if not create new one
         if id:
             #get object work data
@@ -568,6 +567,7 @@ def custom_work(request,division,product):
     products =list(WorkData.objects.values_list('product_id',flat=True))       
     if request.method=='POST' and 'save' in request.POST:
         # get inputs values
+        # workdata informations
         id = request.POST.get('event-index')
         owner = request.POST.get('owner')
         startTime = request.POST.get('start-time')
@@ -581,13 +581,23 @@ def custom_work(request,division,product):
         time = request.POST.get('cycle')
         startDate = request.POST.get('event-start-date')
         endDate = request.POST.get('event-end-date')
-        print('*************')
-        print(time)
-        print(cycle_time)
-        if time == 'Days':
-            cycle_time = 24 * float(cycle_time)
-            print(cycle_time)
+        #cycle informations
+        profit_center= Product.objects.all().filter(id = product).values('Profit_center').first()
+        smooth_family= request.POST.getlist('smooth_family')
+        cycle_time = request.POST.getlist('cycle-time')
+        # print('*************')
+        # print(time)
+        # print(cycle_time)
+        # if time == 'Days':
+        #     cycle_time = 24 * float(cycle_time)
+        #     print(cycle_time)
         # If id exist Update Object if not create new one
+        print(profit_center)
+        print(type(profit_center))
+        print ('****', profit_center.get('Profit_center'))
+        print(division)
+        print(smooth_family)
+        print(cycle_time)
         if id:
             #get object work data
             #first : to get object not queryset 
@@ -617,44 +627,65 @@ def custom_work(request,division,product):
                 endDate= datetime.strptime(endDate,'%m/%d/%Y')
                     # check if day and product_id exists in DB don't save else save
                 if (startDate.strftime('%Y-%m-%d') in [day.strftime('%Y-%m-%d') for day in days] ) and (int(product) in products):
-                    exist_day =WorkData.undeleted_objects.all().filter(date = startDate, owner = 'marwa') 
+                    # delete workdata with date and product_id and owner
+                    exist_day =WorkData.undeleted_objects.all().filter(date = startDate, product_id = product, owner = 'marwa') 
                     exist_day.delete()
-                    data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,cycle_time=cycle_time,product_id =product,owner = owner)
+                    # delete cycle with date and profit center
+                    exist_cycle=Cycle.undeleted_objects.all().filter(work_day = startDate,profit_center = profit_center.get('Profit_center'))
+                    exist_cycle.delete()
+                    # Save into workdata table
+                    data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product,owner = owner)
                     data.save()
+                    #Save into Cycle table
+                    for i,j in zip(smooth_family,cycle_time):
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                        cycle_data.save()
+                    
                     return redirect("../customcalendar")
                 else:
                     #replace holiday with workdata
-                    exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate= startDate, owner = 'marwa') 
+                    exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate= startDate,product_id = product, owner = 'marwa') 
                     #delete holidays
                     exist_off_days.delete()
                     #save data work object
-                    data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,cycle_time=cycle_time,product_id =product,owner = owner)
+                    data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product,owner = owner)
                     data.save()
+                    #Save into Cycle table
+                    for i,j in zip(smooth_family,cycle_time):
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                        cycle_data.save() 
                     return redirect("../customcalendar")
             # add list of days in database       
             else: 
                 startDate=datetime.strptime(startDate,'%m/%d/%Y')
                 endDate=datetime.strptime(endDate,'%m/%d/%Y')
-                print(startDate)
-                print(endDate)
                 delta= endDate-startDate
                 day=""
                 for i in range(delta.days+1):
                     day= startDate + timedelta(days=i)
-                    # check if day and product_id exists in DB don't save else save
+                    # check if day and product_id exists in DB delete old objects of workdata and cycle and save new objects
                     if (day.strftime('%Y-%m-%d') in [day.strftime('%Y-%m-%d') for day in days]) and (int(product) in products):
-                        exist_days = WorkData.undeleted_objects.all().filter(date = day, owner = 'marwa') 
+                        # delete workdata object
+                        exist_days = WorkData.undeleted_objects.all().filter(date = day,product_id = product, owner = 'marwa') 
                         exist_days.delete()
-                        data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,cycle_time=cycle_time,product_id =product,owner = owner)
+                        # delete cycle with date and profit center
+                        exist_cycle=Cycle.undeleted_objects.all().filter(work_day = day,profit_center = profit_center.get('Profit_center'))
+                        exist_cycle.delete()
+                        # save into workdata table
+                        data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product,owner = owner)
                         data.save()
+                        # save into cycle object 
+                        for i,j in zip(smooth_family,cycle_time):
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                            cycle_data.save() 
                     else :
                         #replace holidays with work data
                         #get holidays 
-                        exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate = day, owner = 'marwa') 
+                        exist_off_days = HolidaysCalendar.undeleted_objects.all().filter(holidaysDate = day,product_id = product,owner = 'marwa') 
                         #delete exist_off_days
                         exist_off_days.delete()
                         #save work data
-                        data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,cycle_time=cycle_time,product_id =product,owner = owner)
+                        data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product,owner = owner)
                         data.save()
                 return redirect("../customcalendar")
     return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division, 'work':work}) 
