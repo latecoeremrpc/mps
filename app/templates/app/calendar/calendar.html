@@ -90,8 +90,9 @@
               </button>
           </div>
           <div class="modal-body">
-              <input type="hidden" name="date_id" class="form-control">
-              <input type="hidden" name="date_type" class="form-control">
+              <input type="text" name="date_id" class="form-control">
+              <input type="text" name="date_type" class="form-control">
+              <input type="text" name="cycle-id" class="form-control">
             <p>Are you sure you want to delete these Records?</p>
           </div>
   
@@ -220,7 +221,7 @@
                  <thead >
                     <tr>
                         <th><label for="smooth_family" class="col-sm-4 control-label">Smooth Family</label></th>
-                        <th><label for="cycle-time" class="col-sm-4 control-label">Cycle time</label></th>
+                        <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
                         <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
 
                     </tr>
@@ -228,10 +229,11 @@
                     <tbody>
                     {% for d in material_data %}
                     <tr>
-                     <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{d.Smooth_Family}}" readonly="readonly"> </td> 
+                        
+                        <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{d.Smooth_Family}}" readonly="readonly"> </td> 
                     <td class="form-row">
                         <div class="inline-radio-input col-sm-8" > 
-                        <input style="width: 100px;" id="cycle-time" name="cycle-time" type="number" class="form-control" required="">
+                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" class="form-control" required="">
                     </td>
                     <td>
                         <input style="margin:10px ;" type="radio" id="hour" name="cycle-type-{{d.Smooth_Family}}" value="Hours">
@@ -273,7 +275,6 @@
 
 
 
-  
 <script>
    let calendar = null;
 
@@ -289,8 +290,9 @@
         $('#event-modal input[name="Efficienty-ratio"]').val(event ? event.efficienty_ratio : '');
         $('#event-modal input[name="start-time"]').val(event ? event.StartTime : '');
         $('#event-modal input[name="end-time"]').val(event ? event.EndTime : '');
-        // $('#event-modal input[name="cycle-time"]').val(event ? event.cycle_time : '');
-        // $('#event-modal input[name="cycle"]').val(event ? event.cycle : '');
+        // $('#event-modal input[name="cycle_time"]').val(event ? event.Cycle_time : '');
+        // $('#event-modal input[name="cycle-id"]').val(event ? event.cycle_id : '');
+        // // $('#event-modal input[name="cycle"]').val(event ? event.cycle : '');
         $('#event-modal').modal();
     }
     
@@ -298,6 +300,7 @@
 
         $('#delete-modal input[name="date_id"]').val(event ? event.id : '');
         $('#delete-modal input[name="date_type"]').val(event ? event.name : '');
+        // $('#delete-modal input[name="cycle-id"]').val(event ? event.cycle_id : '');
 
         $('#delete-modal').modal();
     }
@@ -315,7 +318,8 @@
             absenteeism_ratio: $('#event-modal input[name="Absenteeism-ratio"]').val(),
             unproductiveness_ratio: $('#event-modal input[name="Unproductiveness-ratio"]').val(),
             efficienty_ratio: $('#event-modal input[name="Efficienty-ratio"]').val(),
-            // cycle_time: $('#event-modal input[name="cycle-time"]').val(),
+            // Cycle_time: $('#event-modal input[name="cycle_time"]').val(),
+            // cycle_id: $('#event-modal input[name="cycle-id"]').val(),
             // cycle: $('#event-modal input[name="cycle"]').val(),
 
 
@@ -339,7 +343,8 @@
                     dataSource[i].absenteeism_ratio = event.absenteeism_ratio;
                     dataSource[i].unproductiveness_ratio = event.unproductiveness_ratio;
                     dataSource[i].efficienty_ratio = event.efficienty_ratio;
-                    // dataSource[i].cycle_time = event.cycle_time;
+                    // dataSource[i].Cycle_time = event.Cycle_time;
+                    // dataSource[i].cycle_id = event.cycle_id;
 
 
                 }
@@ -440,20 +445,30 @@
                     efficienty_ratio:{{day.Efficienty_ratio}},
                     EndTime:"{{day.endTime|time:"H:i:s"}}",
                     StartTime:"{{day.startTime|time:"H:i:s"}}",
-                    // cycle_time:{{day.cycle_time}},
-                    color:'#0d6efd',
-                    
-                    
+                    color:'#0d6efd',     
                 },
                 {%endfor%}
                 
+                // {%for day in cycle_data %}
+                // {
+                //     // id: {{day.id}},
+                //     cycle_id: {{day.id}},
+                //     name: "Work Day",
+                //     Cycle_time: {{day.cycle_time}},
+                //     console.log(Cycle_time)  
+                //     color:'#0d6efd',     
+                // },
+                // {%endfor%}
+                
             ]
+           
         });
         
         $('#save-event').click(function() {
             saveEvent();
         });
     });
+
     
 </script>
 

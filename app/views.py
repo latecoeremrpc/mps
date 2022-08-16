@@ -149,7 +149,7 @@ def material(request ,division, product):
     return render(request, "app/material/material.html", {'data':data,'division':division,'product':product,'form':form})
 
 
-#********************Create Holidays calendar****************************
+#********************Create calendar****************************
 def calendar(request,division,product):
     #get smooth family 
     material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
@@ -201,8 +201,12 @@ def create_calendar(request,division,product):
                     data = HolidaysCalendar(name=name,holidaysDate=startDate,product_id =product)
                     data.save()
                 else:
+                    # delete workdata
                     exist_on_days = WorkData.undeleted_objects.all().filter(date = startDate,product_id =product) 
                     exist_on_days.delete()
+                    # delete cycle with date and profit center
+                    # exist_cycle=Cycle.undeleted_objects.all().filter(work_day = startDate,profit_center = profit_center.get('Profit_center'))
+                    # exist_cycle.delete()
                     data = HolidaysCalendar(name=name,holidaysDate=startDate,product_id =product)
                     data.save()
             # add list of days in database       
@@ -223,6 +227,8 @@ def create_calendar(request,division,product):
                     else :
                         exist_on_days = WorkData.undeleted_objects.all().filter(date = day,product_id =product) 
                         exist_on_days.delete()
+                        # delete cycle 
+
                         data = HolidaysCalendar(name=name,holidaysDate=day,product_id =product)
                         data.save()
     return redirect("../calendar")
@@ -447,19 +453,15 @@ def work_data(request,division,product):
         #cycle informations
         profit_center= Product.objects.all().filter(id = product).values('Profit_center').first()
         smooth_family= request.POST.getlist('smooth_family')
-        cycle_time = request.POST.getlist('cycle-time')
-        # time = request.POST.getlist('cycle-type')
-        # if time == 'Days':
-        #     cycle_time = 24 * float(cycle_time)
-        #     print(cycle_time)
-        print(profit_center)
-        print(type(profit_center))
-        print ('****', profit_center.get('Profit_center'))
-        print(division)
-        print(smooth_family)
-        print(cycle_time)
+        cycle_time = request.POST.getlist('cycle_time')
+        time = request.POST.getlist('cycle-type')
+        if time == 'Days':
+            cycle_time = 24 * float(cycle_time)
+            print(cycle_time)
+            
         # If id exist Update Object if not create new one
         if id:
+            print("+"*50,id)
             #get object work data
             #first : to get object not queryset 
             work_day=WorkData.objects.all().filter(id=id).first()  #intilisation object
@@ -473,10 +475,12 @@ def work_data(request,division,product):
                 work_day.Absenteeism_ratio=AbsenteeismRatio
                 work_day.Unproductiveness_ratio=UnproductivenessRatio
                 work_day.Efficienty_ratio=EfficientyRatio
-                work_day.cycle_time=cycle_time
                 work_day.startTime=startTime
                 work_day.endTime=endTime
                 work_day.save()
+                #update cycle
+                # cycle.cycle_time=cycle_time
+                # cycle.save()
                 return redirect("../calendar")
         # create new object         
         else :
@@ -498,7 +502,7 @@ def work_data(request,division,product):
                     data.save()
                     #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=id)
                         cycle_data.save()
                     
                     return redirect("../calendar")
@@ -511,7 +515,7 @@ def work_data(request,division,product):
                     data.save()
                     #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=id)
                         cycle_data.save()    
                     return redirect("../calendar")
             # add list of days in database       
@@ -535,7 +539,7 @@ def work_data(request,division,product):
                         data.save() 
                         #Save into Cycle table
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=id)
                             cycle_data.save()    
                     else :
                         #replace holidays with work data
@@ -548,7 +552,7 @@ def work_data(request,division,product):
                         data.save()
                         #Save into Cycle table
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata=id)
                             cycle_data.save()  
                 return redirect("../calendar")       
         
@@ -584,7 +588,7 @@ def custom_work(request,division,product):
         #cycle informations
         profit_center= Product.objects.all().filter(id = product).values('Profit_center').first()
         smooth_family= request.POST.getlist('smooth_family')
-        cycle_time = request.POST.getlist('cycle-time')
+        cycle_time = request.POST.getlist('cycle_time')
         # print('*************')
         # print(time)
         # print(cycle_time)
@@ -592,12 +596,12 @@ def custom_work(request,division,product):
         #     cycle_time = 24 * float(cycle_time)
         #     print(cycle_time)
         # If id exist Update Object if not create new one
-        print(profit_center)
-        print(type(profit_center))
-        print ('****', profit_center.get('Profit_center'))
-        print(division)
-        print(smooth_family)
-        print(cycle_time)
+        # print(profit_center)
+        # print(type(profit_center))
+        # print ('****', profit_center.get('Profit_center'))
+        # print(division)
+        # print(smooth_family)
+        # print(cycle_time)
         if id:
             #get object work data
             #first : to get object not queryset 
