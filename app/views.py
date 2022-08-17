@@ -499,10 +499,9 @@ def work_data(request,division,product):
                     exist_cycle.delete()
                     #Save into Workdata table
                     data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
-                    data.save()
                     #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=id)
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id)
                         cycle_data.save()
                     
                     return redirect("../calendar")
@@ -513,9 +512,8 @@ def work_data(request,division,product):
                     #Save into Workdata table
                     data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
                     data.save()
-                    #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=id)
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id)
                         cycle_data.save()    
                     return redirect("../calendar")
             # add list of days in database       
@@ -536,10 +534,12 @@ def work_data(request,division,product):
                         exist_cycle.delete()
                         # Save into workdata table
                         data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
-                        data.save() 
+                        data.save()
+                        print("----",data)
+                        print("-------",data.id)
                         #Save into Cycle table
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=id)
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id)
                             cycle_data.save()    
                     else :
                         #replace holidays with work data
@@ -550,9 +550,11 @@ def work_data(request,division,product):
                         #save into workdata data
                         data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
                         data.save()
+                        print("----",data)
+                        print("-------",data.id)
                         #Save into Cycle table
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata=id)
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id)
                             cycle_data.save()  
                 return redirect("../calendar")       
         
@@ -642,7 +644,7 @@ def custom_work(request,division,product):
                     data.save()
                     #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id)
                         cycle_data.save()
                     
                     return redirect("../customcalendar")
@@ -656,7 +658,7 @@ def custom_work(request,division,product):
                     data.save()
                     #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id)
                         cycle_data.save() 
                     return redirect("../customcalendar")
             # add list of days in database       
@@ -680,7 +682,7 @@ def custom_work(request,division,product):
                         data.save()
                         # save into cycle object 
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j)
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id)
                             cycle_data.save() 
                     else :
                         #replace holidays with work data
@@ -691,6 +693,10 @@ def custom_work(request,division,product):
                         #save work data
                         data = WorkData(date=day,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product,owner = owner)
                         data.save()
+                        # save into cycle object 
+                        for i,j in zip(smooth_family,cycle_time):
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id)
+                            cycle_data.save() 
                 return redirect("../customcalendar")
     return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division, 'work':work}) 
 
