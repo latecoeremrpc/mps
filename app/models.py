@@ -244,6 +244,8 @@ class Cycle(BaseModel,SoftDeleteModel):
     smooth_family= models.CharField(max_length=100)
     cycle_time=models.FloatField()
     workdata=models.ForeignKey(WorkData,on_delete=models.CASCADE,null=True)
+    owner = models.CharField(default='officiel',max_length=30)
+
     
 
     
