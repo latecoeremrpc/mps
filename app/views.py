@@ -156,15 +156,16 @@ def calendar(request,division,product):
     # get all work data objects to display in Calendar(for copy calendar)
     products_data= Product.undeleted_objects.all()
     # get all work data objects to display in Calendar
-    work = WorkData.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
-    # get all holiday objects to display in Calendar
-    holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
-    # get cycle from workdata
-    workdata=WorkData.objects.values('cycle__cycle_time','cycle__id','id','startTime','endTime','date','FTEhourByDay','ExtraHour','Absenteeism_ratio','Unproductiveness_ratio','Efficienty_ratio').filter(product_id = product, owner = 'officiel')
-    print("*********************")
+    workdata = WorkData.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
+    print("***************")
     print(workdata)
     print(workdata.count()) 
-    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'products_data':products_data,'material_data': material_data})
+    # get all holiday objects to display in Calendar
+    holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
+    # get cycle ifo and workdata infos to display in Calendar
+    #workdata=WorkData.objects.values('cycle__cycle_time','cycle__id','id','startTime','endTime','date','FTEhourByDay','ExtraHour','Absenteeism_ratio','Unproductiveness_ratio','Efficienty_ratio').filter(product_id = product, owner = 'officiel')
+     
+    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'material_data': material_data})
 
 
 
@@ -245,9 +246,18 @@ def delete_day(request,division,product):
     if request.method =="POST"  and 'delete' in request.POST:
         # get id value from form
         id = request.POST.get('date_id')
+        #get cycle id from form
+        id_cycle = request.POST.get('cycle_id')
+        print("*************,ids=")
+        print(id)
+        print(id_cycle)
+        #get data type
+        obj_cycle = get_object_or_404(Cycle, id = id_cycle)
+        # delete object
+        obj_cycle.soft_delete()
         date_type = request.POST.get('date_type')
         model = WorkData if date_type=='Work Day' else HolidaysCalendar
-        obj = get_object_or_404(model, id = id)
+        obj = get_object_or_404(model, id = id )
         # delete object
         obj.soft_delete()
         # redirect to calendar 

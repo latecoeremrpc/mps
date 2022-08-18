@@ -4,7 +4,14 @@
 
 {% block content %}
 
-
+{{workdata}}
+{% for day in workdata %}
+<br>
+id_workdata:
+    {{day.id}}
+        {% for cycle in day.cycle_set.all %}{{cycle.cycle_time}} {% endfor %}
+<br>
+{% endfor %}
 
 <div class="content">
     <div class="container-fluid">
@@ -92,7 +99,7 @@
           <div class="modal-body">
               <input type="text" name="date_id" class="form-control">
               <input type="text" name="date_type" class="form-control">
-              <input type="text" name="cycle-id" class="form-control">
+              <input type="text" name="cycle_id" class="form-control">
             <p>Are you sure you want to delete these Records?</p>
           </div>
   
@@ -231,7 +238,7 @@
                     <tr>
                         <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{d.Smooth_Family}}" readonly="readonly"> </td> 
                     <td class="form-row">
-                        <div class="inline-radio-input col-sm-8" > 
+                        <div class="inline-radio-input col-sm-8" >
                         <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" class="form-control" required="">
                     </td>
                     <td>
@@ -289,9 +296,9 @@
         $('#event-modal input[name="Efficienty-ratio"]').val(event ? event.efficienty_ratio : '');
         $('#event-modal input[name="start-time"]').val(event ? event.StartTime : '');
         $('#event-modal input[name="end-time"]').val(event ? event.EndTime : '');
-        // $('#event-modal input[name="cycle_time"]').val(event ? event.Cycle_time : '');
-        // $('#event-modal input[name="cycle-id"]').val(event ? event.cycle_id : '');
-        // // $('#event-modal input[name="cycle"]').val(event ? event.cycle : '');
+        $('#event-modal input[name="cycle_time"]').val(event ? event.Cycle_Time : '');
+        $('#event-modal input[name="date_id"]').val(event ? event.cycle_id : '');
+        $('#event-modal input[name="cycle_id"]').val(event ? event.cycle_id : '');
         $('#event-modal').modal();
     }
     
@@ -299,7 +306,7 @@
 
         $('#delete-modal input[name="date_id"]').val(event ? event.id : '');
         $('#delete-modal input[name="date_type"]').val(event ? event.name : '');
-        // $('#delete-modal input[name="cycle-id"]').val(event ? event.cycle_id : '');
+        $('#delete-modal input[name="cycle_id"]').val(event ? event.cycle_id : '');
 
         $('#delete-modal').modal();
     }
@@ -317,8 +324,8 @@
             absenteeism_ratio: $('#event-modal input[name="Absenteeism-ratio"]').val(),
             unproductiveness_ratio: $('#event-modal input[name="Unproductiveness-ratio"]').val(),
             efficienty_ratio: $('#event-modal input[name="Efficienty-ratio"]').val(),
-            // Cycle_time: $('#event-modal input[name="cycle_time"]').val(),
-            // cycle_id: $('#event-modal input[name="cycle-id"]').val(),
+            Cycle_Time: $('#event-modal input[name="cycle_time"]').val(),
+            cycle_id: $('#event-modal input[name="cycle_id"]').val(),
             // cycle: $('#event-modal input[name="cycle"]').val(),
 
 
@@ -342,8 +349,8 @@
                     dataSource[i].absenteeism_ratio = event.absenteeism_ratio;
                     dataSource[i].unproductiveness_ratio = event.unproductiveness_ratio;
                     dataSource[i].efficienty_ratio = event.efficienty_ratio;
-                    // dataSource[i].Cycle_time = event.Cycle_time;
-                    // dataSource[i].cycle_id = event.cycle_id;
+                    dataSource[i].Cycle_Time = event.Cycle_Time;
+                    dataSource[i].cycle_id = event.cycle_id;
 
 
                 }
@@ -431,7 +438,7 @@
                 },
                 {%endfor%}
 
-                {%for day in work %}
+                {%for day in workdata %}
                 {
                     id: {{day.id}} ,
                     name: "Work Day",
@@ -444,6 +451,10 @@
                     efficienty_ratio:{{day.Efficienty_ratio}},
                     EndTime:"{{day.endTime|time:"H:i:s"}}",
                     StartTime:"{{day.startTime|time:"H:i:s"}}",
+                    Cycle_Time:'[{% for cycle in day.cycle_set.all %}{{cycle.cycle_time}}, {% endfor %}]',
+                    
+
+                    /cycle_id: {{day.cycle__id}},
                     color:'#0d6efd',     
                 },
                 {%endfor%}
