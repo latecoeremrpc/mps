@@ -151,21 +151,21 @@ def material(request ,division, product):
 
 #********************Create calendar****************************
 def calendar(request,division,product):
-    #get smooth family 
-    material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
+    #get smooth family from product
+    smooth_family =Product.undeleted_objects.filter(id = product).values('material__Smooth_Family').distinct().order_by('material__Smooth_Family')
+    cycle=Cycle.undeleted_objects.all()
+    # print(cycle_time)
+    #material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # get all work data objects to display in Calendar(for copy calendar)
     products_data= Product.undeleted_objects.all()
     # get all work data objects to display in Calendar
     workdata = WorkData.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
-    print("***************")
-    print(workdata)
-    print(workdata.count()) 
     # get all holiday objects to display in Calendar
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
     # get cycle ifo and workdata infos to display in Calendar
     #workdata=WorkData.objects.values('cycle__cycle_time','cycle__id','id','startTime','endTime','date','FTEhourByDay','ExtraHour','Absenteeism_ratio','Unproductiveness_ratio','Efficienty_ratio').filter(product_id = product, owner = 'officiel')
      
-    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'material_data': material_data})
+    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'smooth_family': smooth_family,'cycle': cycle})
 
 
 
@@ -469,10 +469,19 @@ def work_data(request,division,product):
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
         time = request.POST.getlist('cycle-type-{{d.Smooth_Family}}')
+        
         # print("*************",time)
         # if time == 'Days':
         #     cycle_time = 24 * float(cycle_time)
         #     print(cycle_time)
+
+
+        # print("*"*100)
+        # print(smooth_family)
+        # print(cycle_time)
+        # print("*"*100)
+
+
             
         # If id exist Update Object if not create new one
         if id:
@@ -572,7 +581,7 @@ def work_data(request,division,product):
                             cycle_data.save()  
                 return redirect("../calendar")       
         
-    return render(request,"app/calendar/calendar.html",{'product':product,'division':division, 'work':work})
+    return render(request,"app/calendar/calendar.html",{'product':product,'division':division, 'work':work, 'cycle_time':cycle_time})
       
 
 #********************custom work data****************************
@@ -1135,8 +1144,6 @@ def smooth_date_calcul(current_date,table,designation,prev_cycle=None,prev_date=
     return   smooth_date_calcul(new_date,table,designation,cycle,current_date)
 
 #******************************create_shopfloor*****************************************************
-
-
 #create shopfloor
 def create_shopfloor(request):
     if request.method=='POST':
@@ -1276,8 +1283,7 @@ def save_shopfloor(df):
         )
     conn.commit()
     
-#******************************result *****************************************************    
-    
+#******************************result ***********************************************************       
         
 # @allowed_users(allowed_roles=["Planificateur"])        
 def result(request):

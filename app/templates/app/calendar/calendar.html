@@ -4,14 +4,14 @@
 
 {% block content %}
 
-{{workdata}}
+<!-- {{workdata}}
 {% for day in workdata %}
 <br>
 id_workdata:
     {{day.id}}
         {% for cycle in day.cycle_set.all %}{{cycle.cycle_time}} {% endfor %}
 <br>
-{% endfor %}
+{% endfor %} -->
 
 <div class="content">
     <div class="container-fluid">
@@ -234,9 +234,13 @@ id_workdata:
                     </tr>
                  </thead> 
                     <tbody>
-                    {% for d in material_data %}
+                        <div id="inutContainer"></div>
+                        
+                       
+                        
+                    <!-- {% for d in smooth_family %}
                     <tr>
-                        <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{d.Smooth_Family}}" readonly="readonly"> </td> 
+                        <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{d.material__Smooth_Family}}" readonly="readonly"> </td> 
                     <td class="form-row">
                         <div class="inline-radio-input col-sm-8" >
                         <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" class="form-control" required="">
@@ -249,7 +253,9 @@ id_workdata:
                         </div> 
                     </td>
                     </tr>
-                    {%endfor%}
+                    {%endfor%} -->
+
+                    
                 </tbody> 
                 </table>   
             </div> 
@@ -300,6 +306,53 @@ id_workdata:
         $('#event-modal input[name="date_id"]').val(event ? event.cycle_id : '');
         $('#event-modal input[name="cycle_id"]').val(event ? event.cycle_id : '');
         $('#event-modal').modal();
+        
+        var inputContainer = document.getElementById("inutContainer");
+        // var list = {{smooth_family | safe}}
+        // console.log("************",list);
+        // for (let i = 0; i < 4; i++) {
+        //     let newForm = document.createElement("input");
+        //     newForm.setAttribute("type", "text");
+        //     newForm.setAttribute("type", "text");
+        //     inputContainer.appendChild(newForm);
+        //     inputContainer.appendChild(document.createElement("br"));
+            
+        // }; 
+        
+        // var list = {{smooth_family | safe}}
+        // console.log("************",list);
+            
+            // {%for i in smooth_family%}
+            // smooth_input = document.createElement("input");
+            // smooth_input.setAttribute("type", "text");
+            // smooth_input.setAttribute("name", "smooth_family");
+            // smooth_input.setAttribute("value", "{{i.material__Smooth_Family}}"), 
+            // inputContainer.appendChild(smooth_input);
+            // smooth_input ++;
+            // cycle_input = document.createElement("input");
+            // cycle_input.setAttribute("type", "number");
+            // cycle_input.setAttribute("name", "cycle_time");
+            // inputContainer.appendChild(cycle_input);
+            // cycle_input ++;
+            // inputContainer.appendChild(document.createElement("br"));
+            // {%endfor%}
+            
+            console.log(event.id)
+        
+            {%for i in cycle%}
+            {% if i.workdata_id == 129 %}
+            cycle_input = document.createElement("input");
+            cycle_input.setAttribute("type", "number");
+            cycle_input.setAttribute("name", "cycle_time");
+            cycle_input.setAttribute("value", "{{i.cycle_time}}"), 
+            inputContainer.appendChild(cycle_input);
+            cycle_input ++;
+            inputContainer.appendChild(document.createElement("br"));
+            {% endif %}
+            {%endfor%}
+            
+        
+        
     }
     
     function deleteEvent(event) {
@@ -326,14 +379,12 @@ id_workdata:
             efficienty_ratio: $('#event-modal input[name="Efficienty-ratio"]').val(),
             Cycle_Time: $('#event-modal input[name="cycle_time"]').val(),
             cycle_id: $('#event-modal input[name="cycle_id"]').val(),
-            // cycle: $('#event-modal input[name="cycle"]').val(),
-
-
-
-            
+            // cycle: $('#event-modal input[name="cycle"]').val(),  
 
         }
+
         
+
         var dataSource = calendar.getDataSource();
     
         if (event.id) {
@@ -351,7 +402,6 @@ id_workdata:
                     dataSource[i].efficienty_ratio = event.efficienty_ratio;
                     dataSource[i].Cycle_Time = event.Cycle_Time;
                     dataSource[i].cycle_id = event.cycle_id;
-
 
                 }
             }
@@ -452,9 +502,8 @@ id_workdata:
                     EndTime:"{{day.endTime|time:"H:i:s"}}",
                     StartTime:"{{day.startTime|time:"H:i:s"}}",
                     Cycle_Time:'[{% for cycle in day.cycle_set.all %}{{cycle.cycle_time}}, {% endfor %}]',
-                    
 
-                    /cycle_id: {{day.cycle__id}},
+                    // cycle_id: {{day.cycle__id}},
                     color:'#0d6efd',     
                 },
                 {%endfor%}
