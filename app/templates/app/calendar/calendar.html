@@ -234,7 +234,7 @@ id_workdata:
                     </tr>
                  </thead> 
                     <tbody>
-                        <div id="inutContainer"></div>
+                        <div id="inputContainer"></div>
                         
                        
                         
@@ -303,55 +303,58 @@ id_workdata:
         $('#event-modal input[name="start-time"]').val(event ? event.StartTime : '');
         $('#event-modal input[name="end-time"]').val(event ? event.EndTime : '');
         $('#event-modal input[name="cycle_time"]').val(event ? event.Cycle_Time : '');
-        $('#event-modal input[name="date_id"]').val(event ? event.cycle_id : '');
+        // $('#event-modal input[name="date_id"]').val(event ? event.cycle_id : '');
         $('#event-modal input[name="cycle_id"]').val(event ? event.cycle_id : '');
         $('#event-modal').modal();
         
-        var inputContainer = document.getElementById("inutContainer");
-        // var list = {{smooth_family | safe}}
-        // console.log("************",list);
-        // for (let i = 0; i < 4; i++) {
-        //     let newForm = document.createElement("input");
-        //     newForm.setAttribute("type", "text");
-        //     newForm.setAttribute("type", "text");
-        //     inputContainer.appendChild(newForm);
-        //     inputContainer.appendChild(document.createElement("br"));
-            
-        // }; 
-        
-        // var list = {{smooth_family | safe}}
-        // console.log("************",list);
-            
-            // {%for i in smooth_family%}
-            // smooth_input = document.createElement("input");
-            // smooth_input.setAttribute("type", "text");
-            // smooth_input.setAttribute("name", "smooth_family");
-            // smooth_input.setAttribute("value", "{{i.material__Smooth_Family}}"), 
-            // inputContainer.appendChild(smooth_input);
-            // smooth_input ++;
-            // cycle_input = document.createElement("input");
-            // cycle_input.setAttribute("type", "number");
-            // cycle_input.setAttribute("name", "cycle_time");
-            // inputContainer.appendChild(cycle_input);
-            // cycle_input ++;
-            // inputContainer.appendChild(document.createElement("br"));
-            // {%endfor%}
-            
-            console.log(event.id)
-        
-            {%for i in cycle%}
-            {% if i.workdata_id == 129 %}
-            cycle_input = document.createElement("input");
-            cycle_input.setAttribute("type", "number");
-            cycle_input.setAttribute("name", "cycle_time");
-            cycle_input.setAttribute("value", "{{i.cycle_time}}"), 
-            inputContainer.appendChild(cycle_input);
-            cycle_input ++;
-            inputContainer.appendChild(document.createElement("br"));
-            {% endif %}
-            {%endfor%}
-            
-        
+        var inputContainer = document.getElementById("inputContainer");
+        inputContainer.innerHTML='';
+
+        // **************************************
+            if (event.id == null){
+                {%for i in smooth_family%}
+                    smooth_input = document.createElement("input");
+                    smooth_input.setAttribute("type", "text");
+                    smooth_input.setAttribute("name", "smooth_family");
+                    smooth_input.setAttribute("value", "{{i.material__Smooth_Family}}"), 
+                    inputContainer.appendChild(smooth_input);
+                    cycle_input = document.createElement("input");
+                    cycle_input.setAttribute("type", "number");
+                    cycle_input.setAttribute("name", "cycle_time");
+                    inputContainer.appendChild(cycle_input);
+                    
+
+
+                    inputContainer.appendChild(document.createElement("br"));
+                {%endfor%}
+            }else
+            {
+             {%for i in cycle%}
+                var id = {{i.workdata_id }};
+                console.log(id);
+                if (event.id == id) {
+                        smooth_input = document.createElement("input");
+                        smooth_input.setAttribute("type", "text");
+                        smooth_input.setAttribute("name", "smooth_family");
+                        smooth_input.setAttribute("value", "{{i.smooth_family}}"), 
+                        inputContainer.appendChild(smooth_input);
+                        cycle_input = document.createElement("input");
+                        cycle_input.setAttribute("type", "number");
+                        cycle_input.setAttribute("name", "cycle_time");
+                        cycle_input.setAttribute("value", "{{i.cycle_time}}"), 
+                        inputContainer.appendChild(cycle_input);
+                        cycle_i = document.createElement("input");
+                        cycle_i.setAttribute("type", "hidden");
+                        cycle_i.setAttribute("name", "cycle_id");
+                        cycle_i.setAttribute("value", "{{i.id}}"), 
+                        inputContainer.appendChild(cycle_i);
+                    inputContainer.appendChild(document.createElement("br"));    
+                } 
+               {%endfor%}
+
+            }
+    
+            // ***************************     
         
     }
     
@@ -502,8 +505,7 @@ id_workdata:
                     EndTime:"{{day.endTime|time:"H:i:s"}}",
                     StartTime:"{{day.startTime|time:"H:i:s"}}",
                     Cycle_Time:'[{% for cycle in day.cycle_set.all %}{{cycle.cycle_time}}, {% endfor %}]',
-
-                    // cycle_id: {{day.cycle__id}},
+                    cycle_id :'{% for cycle in day.cycle_set.all %}{{cycle.id}}, {% endfor %}',
                     color:'#0d6efd',     
                 },
                 {%endfor%}

@@ -154,7 +154,7 @@ def calendar(request,division,product):
     #get smooth family from product
     smooth_family =Product.undeleted_objects.filter(id = product).values('material__Smooth_Family').distinct().order_by('material__Smooth_Family')
     cycle=Cycle.undeleted_objects.all()
-    # print(cycle_time)
+    print(cycle)
     #material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # get all work data objects to display in Calendar(for copy calendar)
     products_data= Product.undeleted_objects.all()
@@ -469,6 +469,16 @@ def work_data(request,division,product):
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
         time = request.POST.getlist('cycle-type-{{d.Smooth_Family}}')
+        cycle_id = request.POST.getlist('cycle_id')
+        # transfor of string of id
+
+        print(cycle_id)
+        print(cycle_time)
+        # transformed_string=cycle_id.replace(",","")
+        # # print(transformed_string)
+        # id_cycle =transformed_string.split()
+        # # print(id_cycle)
+
         
         # print("*************",time)
         # if time == 'Days':
@@ -480,18 +490,25 @@ def work_data(request,division,product):
         # print(smooth_family)
         # print(cycle_time)
         # print("*"*100)
-
-
-            
+     
         # If id exist Update Object if not create new one
-        if id:
+        if id and cycle_id:
+
             #get object work data
             #first : to get object not queryset 
             work_day=WorkData.objects.all().filter(id=id).first()  #intilisation object
+            for i in cycle_id:
+                # print('*************')
+                # print(i)
+                cycle_info=Cycle.objects.all().filter(id=i).first()  #intilisation object
+                # print('/////////////',cycle_info)
+            # print('**********',work_day)
+            # print('++++++++',id)
             if startDate == endDate:
                 startDate= datetime.strptime(startDate,'%m/%d/%Y')
                 endDate= datetime.strptime(endDate,'%m/%d/%Y')
                 #update attributes values with new values
+                #update cycle
                 work_day.FTEhourByDay=fte
                 work_day.date= startDate
                 work_day.ExtraHour=extraHours
@@ -501,9 +518,11 @@ def work_data(request,division,product):
                 work_day.startTime=startTime
                 work_day.endTime=endTime
                 work_day.save()
-                #update cycle
-                # cycle.cycle_time=cycle_time
-                # cycle.save()
+                for i in cycle_time:
+                    # print(i)
+                    cycle_info.cycle_time=i
+                    cycle_info.save()
+                
                 return redirect("../calendar")
         # create new object         
         else :
