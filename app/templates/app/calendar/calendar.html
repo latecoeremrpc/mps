@@ -43,6 +43,7 @@ id_workdata:
                                     <b>From: </b> 
                                     <div class="input-group input-group-sm" style="width:300px">
                                         <select name="product_copied" size="1" style="height: 40px;"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                            <!--list of product-->
                                             {% for p in products_data %}
                                             <option value="{{p.id}}">{{p.division.name}} | {{p.product}}  </option>
                                             {% endfor %}
@@ -335,7 +336,7 @@ id_workdata:
                     hour_input = document.createElement("input");
                     hour_input.setAttribute("type", "radio");
                     hour_input.setAttribute("id", "hour");
-                    hour_input.setAttribute("name", "cycle-type-{{d.Smooth_Family}}");
+                    hour_input.setAttribute("name", "cycle-type-{{i.material__Smooth_Family}}");
                     hour_input.setAttribute("value", "Hours");
                     inputContainer.appendChild(hour_input);
                     // create label for day 
@@ -346,7 +347,7 @@ id_workdata:
                     day_input = document.createElement("input");
                     day_input.setAttribute("type", "radio");
                     day_input.setAttribute("id", "day");
-                    day_input.setAttribute("name", "cycle-type-{{d.Smooth_Family}}");
+                    day_input.setAttribute("name", "cycle-type-{{i.material__Smooth_Family}}");
                     day_input.setAttribute("value", "Days");
                     inputContainer.appendChild(day_input);
                     inputContainer.appendChild(document.createElement("br"));
@@ -363,6 +364,7 @@ id_workdata:
                         smooth_input.setAttribute("type", "text");
                         smooth_input.setAttribute("name", "smooth_family");
                         smooth_input.setAttribute("value", "{{i.smooth_family}}"),
+
                         // add a node to the end of the list 
                         inputContainer.appendChild(smooth_input);
                         // create cycle_time input

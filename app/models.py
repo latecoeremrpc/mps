@@ -245,6 +245,8 @@ class Cycle(BaseModel,SoftDeleteModel):
     cycle_time=models.FloatField()
     workdata=models.ForeignKey(WorkData,on_delete=models.CASCADE,null=True)
     owner = models.CharField(default='officiel',max_length=30)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
+
 
     
 
