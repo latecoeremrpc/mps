@@ -56,6 +56,9 @@
             <input type="hidden" name="date_id" class="form-control">
             <!--input for name-->
             <input type="hidden" name="date_type" class="form-control">
+            <!--create input for cycle_id-->
+            <div id="deleteCycle"></div>
+
             <p>Are you sure you want to delete these Records?</p>
           </div>
   
@@ -203,7 +206,8 @@
                         </tr>
                      </thead> 
                         <tbody>
-                        {% for d in material_data %}
+                        <div id="inputContainer"></div>
+                        <!-- {% for d in material_data %}
                         <tr>
                          <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{d.Smooth_Family}}" readonly="readonly"> </td> 
                         <td class="form-row">
@@ -218,7 +222,7 @@
                             </div> 
                         </td>
                     </tr>
-                    {%endfor%}
+                    {%endfor%} -->
                 </tbody> 
                 </table>     
             </div> 
@@ -269,14 +273,137 @@ function editEvent(event) {
     $('#event-modal input[name="end-time"]').val(event ? event.EndTime : '');
     $('#event-modal input[name="owner"]').val(event ? event.Owner : '');
     $('#event-modal').modal();
+     
+    // create body elements
+        // get div by id
+        var inputContainer = document.getElementById("inputContainer");
+        //delete the content of the div attribute
+        inputContainer.innerHTML='';
+        // to save
+            if (event.id == null){
+                {%for i in smooth_family%}
+                    // create smoothi_family input
+                    smooth_input = document.createElement("input");
+                    smooth_input.setAttribute("type", "text");
+                    smooth_input.setAttribute("name", "smooth_family");
+                    smooth_input.setAttribute("value", "{{i.material__Smooth_Family}}"),
+                    // add a node to the end of the list 
+                    inputContainer.appendChild(smooth_input);
+                    // create cycle_time input
+                    cycle_input = document.createElement("input");
+                    cycle_input.setAttribute("type", "number");
+                    cycle_input.setAttribute("name", "cycle_time");
+                    inputContainer.appendChild(cycle_input);
+                    inputContainer.appendChild(document.createElement("br"));
+                    // create label for hour 
+                    hour_label = document.createElement("label");
+                    hour_label.innerHTML = "Hours";
+                    inputContainer.appendChild(hour_label);
+                    // create radio for hour
+                    hour_input = document.createElement("input");
+                    hour_input.setAttribute("type", "radio");
+                    hour_input.setAttribute("id", "hour");
+                    hour_input.setAttribute("name", "cycle-type-{{d.Smooth_Family}}");
+                    hour_input.setAttribute("value", "Hours");
+                    inputContainer.appendChild(hour_input);
+                    // create label for day 
+                    day_label = document.createElement("label");
+                    day_label.innerHTML = "Days";
+                    inputContainer.appendChild(day_label);
+                    // create radio for day
+                    day_input = document.createElement("input");
+                    day_input.setAttribute("type", "radio");
+                    day_input.setAttribute("id", "day");
+                    day_input.setAttribute("name", "cycle-type-{{d.Smooth_Family}}");
+                    day_input.setAttribute("value", "Days");
+                    inputContainer.appendChild(day_input);
+                    inputContainer.appendChild(document.createElement("br"));
+                {%endfor%}
+            }else
+            {
+            //  to update  
+             {%for i in cycle%}
+                var id = {{i.workdata_id }};
+                console.log(id);
+                if (event.id == id) {
+                        // create smooh_family input 
+                        smooth_input = document.createElement("input");
+                        smooth_input.setAttribute("type", "text");
+                        smooth_input.setAttribute("name", "smooth_family");
+                        smooth_input.setAttribute("value", "{{i.smooth_family}}"),
+                        // add a node to the end of the list 
+                        inputContainer.appendChild(smooth_input);
+                        // create cycle_time input
+                        cycle_input = document.createElement("input");
+                        cycle_input.setAttribute("type", "number");
+                        cycle_input.setAttribute("name", "cycle_time");
+                        cycle_input.setAttribute("value", "{{i.cycle_time}}"), 
+                        inputContainer.appendChild(cycle_input);
+                        // create cycle_id input
+                        cycle_i = document.createElement("input");
+                        cycle_i.setAttribute("type", "hidden");
+                        cycle_i.setAttribute("name", "cycle_id");
+                        cycle_i.setAttribute("value", "{{i.id}}"), 
+                        inputContainer.appendChild(cycle_i);
+                        inputContainer.appendChild(document.createElement("br"));
+                        // create label for hour 
+                        hour_label = document.createElement("label");
+                        hour_label.innerHTML = "Hours";
+                        inputContainer.appendChild(hour_label);
+                        // create radio for hour
+                        hour_input = document.createElement("input");
+                        hour_input.setAttribute("type", "radio");
+                        hour_input.setAttribute("id", "hour");
+                        hour_input.setAttribute("name", "cycle-type-{{d.Smooth_Family}}");
+                        hour_input.setAttribute("value", "Hours");
+                        inputContainer.appendChild(hour_input);
+                        // create label for day 
+                        day_label = document.createElement("label");
+                        day_label.innerHTML = "Days";
+                        inputContainer.appendChild(day_label);
+                        // create radio for day
+                        day_input = document.createElement("input");
+                        day_input.setAttribute("type", "radio");
+                        day_input.setAttribute("id", "day");
+                        day_input.setAttribute("name", "cycle-type-{{d.Smooth_Family}}");
+                        day_input.setAttribute("value", "Days");
+                        inputContainer.appendChild(day_input);
+                        inputContainer.appendChild(document.createElement("br"));    
+                } 
+               {%endfor%}
+
+            } 
+
+
+
+
 }
 
 function deleteEvent(event) {
 
     $('#delete-modal input[name="date_id"]').val(event ? event.id : '');
     $('#delete-modal input[name="date_type"]').val(event ? event.name : '');
-
     $('#delete-modal').modal();
+
+    var inputContainer = document.getElementById("deleteCycle");
+        //delete the content of the div attribute
+        inputContainer.innerHTML='';
+        {%for i in cycle%}
+            var id = {{i.workdata_id }};
+            if (event.id == id) {
+                // create cycle_id input
+                cycle_i = document.createElement("input");
+                cycle_i.setAttribute("type", "text");
+                cycle_i.setAttribute("name", "cycle_id");
+                cycle_i.setAttribute("value", "{{i.id}}"), 
+                deleteCycle.appendChild(cycle_i);
+                deleteCycle.appendChild(document.createElement("br"));
+            }
+            
+
+        {%endfor%}
+
+
 }
 
 function saveEvent() {

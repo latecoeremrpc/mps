@@ -246,6 +246,7 @@ def delete_day(request,division,product):
     if request.method =="POST"  and 'delete' in request.POST:
         # get id value from form
         id = request.POST.get('date_id')
+        # get name from form 
         date_type = request.POST.get('date_type')
         #get cycle id from form
         cycle_id = request.POST.getlist('cycle_id')
@@ -295,13 +296,15 @@ def duplicate_calendar(request,division,product):
 
 
 def custom_calendar(request,division,product):
-    #get smooth family 
-    material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
+    #get smooth family
+    smooth_family =Product.undeleted_objects.filter(id = product).values('material__Smooth_Family').distinct().order_by('material__Smooth_Family')
+    cycle=Cycle.undeleted_objects.all() 
+    # material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # get all holiday objects to display in Calendar
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product ,owner = 'marwa') 
     # get all work data objects to display in Calendar    
     work = WorkData.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
-    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'material_data': material_data})
+    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'smooth_family': smooth_family,'cycle':cycle})
     
 
 #custom calendar
@@ -377,9 +380,13 @@ def delete_day_custom(request,division,product):  # sourcery skip: avoid-builtin
         # get id value from form
         id = request.POST.get('date_id')
         date_type = request.POST.get('date_type')
-        cycle_id = request.POST.get('cycle_id')
-        print(cycle_id)
-        print(id)
+        #get cycle id from form
+        cycle_id = request.POST.getlist('cycle_id')
+        #get data type
+        for i in cycle_id:
+            obj_cycle = get_object_or_404(Cycle, id = i)
+            # delete object
+            obj_cycle.soft_delete()
         model = WorkData if date_type=='Work Day' else HolidaysCalendar
         obj = get_object_or_404(model, id = id)
         # delete object
@@ -620,12 +627,7 @@ def custom_work(request,division,product):
         profit_center= Product.objects.all().filter(id = product).values('Profit_center').first()
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
-        print('*************')
-        print(profit_center)
-        print(smooth_family)
-        print( cycle_time)
-        # print('*************')
-
+        cycle_id = request.POST.getlist('cycle_id')
         # print(time)
         # print(cycle_time)
         # if time == 'Days':
@@ -649,9 +651,16 @@ def custom_work(request,division,product):
                 work_day.cycle_time=cycle_time
                 work_day.startTime=startTime
                 work_day.endTime=endTime
-                
-                #To complete all filed
                 work_day.save()
+                # update cycle
+                # convert two list in dict
+                cycle_dict = dict(zip(cycle_id, cycle_time))
+                for key,value in cycle_dict.items(): 
+                    # get cycle object with key
+                    cycle_info= Cycle.objects.all().filter(id=key).first()  #intilisation object
+                    # update cycle_time
+                    cycle_info.cycle_time=value
+                    cycle_info.save()
                 return redirect("../customcalendar")
         # create new object         
         else : 
