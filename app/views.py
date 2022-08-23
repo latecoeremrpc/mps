@@ -246,18 +246,19 @@ def delete_day(request,division,product):
     if request.method =="POST"  and 'delete' in request.POST:
         # get id value from form
         id = request.POST.get('date_id')
+        date_type = request.POST.get('date_type')
         #get cycle id from form
-        id_cycle = request.POST.get('cycle_id')
+        cycle_id = request.POST.getlist('cycle_id')
         print("*************,ids=")
         print(id)
-        print(id_cycle)
+        print(cycle_id)
         #get data type
-        obj_cycle = get_object_or_404(Cycle, id = id_cycle)
-        # delete object
-        obj_cycle.soft_delete()
-        date_type = request.POST.get('date_type')
+        for i in cycle_id:
+            obj_cycle = get_object_or_404(Cycle, id = i)
+            # delete object
+            obj_cycle.soft_delete()
         model = WorkData if date_type=='Work Day' else HolidaysCalendar
-        obj = get_object_or_404(model, id = id )
+        obj = get_object_or_404(model, id = id)
         # delete object
         obj.soft_delete()
         # redirect to calendar 
@@ -376,6 +377,9 @@ def delete_day_custom(request,division,product):  # sourcery skip: avoid-builtin
         # get id value from form
         id = request.POST.get('date_id')
         date_type = request.POST.get('date_type')
+        cycle_id = request.POST.get('cycle_id')
+        print(cycle_id)
+        print(id)
         model = WorkData if date_type=='Work Day' else HolidaysCalendar
         obj = get_object_or_404(model, id = id)
         # delete object
@@ -470,40 +474,19 @@ def work_data(request,division,product):
         cycle_time = request.POST.getlist('cycle_time')
         time = request.POST.getlist('cycle-type-{{d.Smooth_Family}}')
         cycle_id = request.POST.getlist('cycle_id')
-        # transfor of string of id
-
         print(cycle_id)
         print(cycle_time)
-        # transformed_string=cycle_id.replace(",","")
-        # # print(transformed_string)
-        # id_cycle =transformed_string.split()
-        # # print(id_cycle)
 
-        
         # print("*************",time)
         # if time == 'Days':
         #     cycle_time = 24 * float(cycle_time)
         #     print(cycle_time)
-
-
-        # print("*"*100)
-        # print(smooth_family)
-        # print(cycle_time)
-        # print("*"*100)
-     
         # If id exist Update Object if not create new one
-        if id and cycle_id:
 
-            #get object work data
+        if id and cycle_id:
+            # get object workdata
             #first : to get object not queryset 
             work_day=WorkData.objects.all().filter(id=id).first()  #intilisation object
-            for i in cycle_id:
-                # print('*************')
-                # print(i)
-                cycle_info=Cycle.objects.all().filter(id=i).first()  #intilisation object
-                # print('/////////////',cycle_info)
-            # print('**********',work_day)
-            # print('++++++++',id)
             if startDate == endDate:
                 startDate= datetime.strptime(startDate,'%m/%d/%Y')
                 endDate= datetime.strptime(endDate,'%m/%d/%Y')
@@ -518,10 +501,16 @@ def work_data(request,division,product):
                 work_day.startTime=startTime
                 work_day.endTime=endTime
                 work_day.save()
-                for i in cycle_time:
-                    # print(i)
-                    cycle_info.cycle_time=i
+                # update cycle
+                # convert two list in dict
+                cycle_dict = dict(zip(cycle_id, cycle_time))
+                for key,value in cycle_dict.items(): 
+                    # get cycle object with key
+                    cycle_info= Cycle.objects.all().filter(id=key).first()  #intilisation object
+                    # update cycle_time
+                    cycle_info.cycle_time=value
                     cycle_info.save()
+                
                 
                 return redirect("../calendar")
         # create new object         
