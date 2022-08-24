@@ -236,7 +236,7 @@ id_workdata:
                     </tr>
                  </thead> 
                     <tbody>
-                        <div id="inputContainer"></div>
+                        <tr id="inputContainer"></tr>
                            
                     <!-- {% for d in smooth_family %}
                     <tr>
@@ -323,6 +323,7 @@ id_workdata:
                     // add a node to the end of the list 
                     inputContainer.appendChild(smooth_input);
                     // create cycle_time input
+                    
                     cycle_input = document.createElement("input");
                     cycle_input.setAttribute("type", "number");
                     cycle_input.setAttribute("name", "cycle_time");
@@ -356,8 +357,9 @@ id_workdata:
             {
             //  to update  
              {%for i in cycle%}
-                var id = {{i.workdata_id }};
+                var id = {{i.workdata_id}};
                 console.log(id);
+                console.log('*******',event.id)
                 if (event.id == id) {
                         // create smooh_family input 
                         smooth_input = document.createElement("input");

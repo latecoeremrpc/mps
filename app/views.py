@@ -154,7 +154,7 @@ def calendar(request,division,product):
     #get smooth family from product
     smooth_family =Product.undeleted_objects.filter(id = product).values('material__Smooth_Family').distinct().order_by('material__Smooth_Family')
     # get cycle objects
-    cycle=Cycle.undeleted_objects.all()
+    cycle=Cycle.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
     #material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # get product object to display in calendar
     products_data= Product.undeleted_objects.all()
@@ -263,46 +263,57 @@ def delete_day(request,division,product):
     
 #********************Custom calendar****************************
 
-#duplicate calendar
+#duplicate calendar : 
+# delete old data( holidayscalendar, workdata, cycle) and get data from calendar and save new data
 def duplicate_calendar(request,division,product):
     #Delete custom holidays
     custom_holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product,owner = 'marwa')
     custom_holidays.delete()
-    #Delete custom work
+    ##Delete custom workday
+    # delete workdata
     work = WorkData.undeleted_objects.all().filter(product_id = product,owner = 'marwa')
     work.delete()
+    # delete cycle 
+    cycle = Cycle.undeleted_objects.all().filter(product_id = product,owner = 'marwa')
+    cycle.delete()
     #save data for loop holidays
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product)
     for data in holidays:
         custom_holidays = HolidaysCalendar(name=data.name,holidaysDate=data.holidaysDate,product_id =data.product_id,owner = 'marwa')
         custom_holidays.save()
     #save data for loop work
-    work = WorkData.undeleted_objects.all().filter(product_id = product)
+    work = WorkData.undeleted_objects.all().filter(product_id = product)  
     for data in work:
         custom_work_data = WorkData(date=data.date,startTime=data.startTime,endTime=data.endTime,FTEhourByDay=data.FTEhourByDay,ExtraHour=data.ExtraHour,Absenteeism_ratio=data.Absenteeism_ratio,Unproductiveness_ratio=data.Unproductiveness_ratio,Efficienty_ratio=data.Efficienty_ratio,product_id =data.product_id,owner = 'marwa')
-        custom_work_data.save()  
-    #custom_holidays = HolidayCalendar.undeleted_objects.all().filter(product_id = product,owner = 'marwa')
-    #call function create new holiday object
-    custom_calendar(request,division,product)
+        custom_work_data.save()
+        # get cycle object with product_id and workdata_id 
+        cycles = Cycle.undeleted_objects.all().filter(product_id = product, workdata_id=data.id) 
+        print('*****')
+        print(cycles)
+        # save cycle with new value of workdata_id 
+        for cycle in cycles:
+            custom_cycle= Cycle(work_day=cycle.work_day,division=cycle.division,profit_center=cycle.profit_center,smooth_family=cycle.smooth_family,cycle_time=cycle.cycle_time, workdata_id=custom_work_data.id,product_id = product, owner = 'marwa')
+            custom_cycle.save()
+    create_custom_calendar(request,division,product)
     #call function create new work data object 
     custom_work(request,division,product)
     return redirect("../customcalendar")
     #return render(request,"app/calendar/custom_calendar.html", {'product':product,'holidays':custom_holidays})
 
-
+#custom calendar
 def custom_calendar(request,division,product):
     #get smooth family
     smooth_family =Product.undeleted_objects.filter(id = product).values('material__Smooth_Family').distinct().order_by('material__Smooth_Family')
-    cycle=Cycle.undeleted_objects.all() 
+    cycle= Cycle.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
     # material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # get all holiday objects to display in Calendar
-    holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product ,owner = 'marwa') 
+    holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product , owner = 'marwa') 
     # get all work data objects to display in Calendar    
     work = WorkData.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
     return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'smooth_family': smooth_family,'cycle':cycle})
     
 
-#custom calendar
+#create custom calendar
 def create_custom_calendar(request,division,product):
     # get list of days from dataBase to compare if exist 
     days = list(HolidaysCalendar.objects.values_list('holidaysDate',flat=True))
@@ -343,6 +354,8 @@ def create_custom_calendar(request,division,product):
                 else:
                     exist_on_days = WorkData.undeleted_objects.all().filter(date = startDate,product_id =product,owner = 'marwa') 
                     exist_on_days.delete()
+                    exist_cycle=Cycle.undeleted_objects.all().filter(work_day = startDate,product_id =product,owner = 'marwa')
+                    exist_cycle.delete()
                     data = HolidaysCalendar(name=name,holidaysDate=startDate,product_id =product, owner = owner)
                     data.save()
             # add list of days in database       
@@ -363,6 +376,8 @@ def create_custom_calendar(request,division,product):
                     else :
                         exist_on_days = WorkData.undeleted_objects.all().filter(date = day,product_id =product,owner = 'marwa') 
                         exist_on_days.delete()
+                        exist_cycle=Cycle.undeleted_objects.all().filter(work_day = day,product_id =product,owner = 'marwa')
+                        exist_cycle.delete()
                         data = HolidaysCalendar(name=name,holidaysDate=day,product_id =product, owner = owner)
                         data.save()    
     return redirect("../customcalendar")
@@ -866,6 +881,9 @@ def copy_calendar(request,division,product):
     #Delete work
     work_data = WorkData.objects.all().filter(product_id = product)
     work_data.delete() 
+    # Delete cycle
+    cycle_data = Cycle.objects.all().filter(product_id = product)
+    cycle_data.delete() 
     #get product copied id 
     product_copied= request.POST.get('product_copied')
     #get holiday object with product id
@@ -875,11 +893,17 @@ def copy_calendar(request,division,product):
         holidays = HolidaysCalendar(name=data.name,holidaysDate=data.holidaysDate,product_id = product)
         holidays.save()
     #get work data object with product id 
-    work_data = WorkData.undeleted_objects.all().filter(product_id = product_copied ,owner = 'officiel')
-    #save workdata object in DB
-    for data in work_data:
+    work = WorkData.undeleted_objects.all().filter(product_id = product_copied ,owner = 'officiel')  
+    #save data for loop work
+    for data in work:
         work_data = WorkData(date=data.date,startTime=data.startTime,endTime=data.endTime,FTEhourByDay=data.FTEhourByDay,ExtraHour=data.ExtraHour,Absenteeism_ratio=data.Absenteeism_ratio,Unproductiveness_ratio=data.Unproductiveness_ratio,Efficienty_ratio=data.Efficienty_ratio,product_id = product)
-        work_data.save() 
+        work_data.save()
+        # get cycle object with product_id and workdata_id 
+        cycles = Cycle.undeleted_objects.all().filter(product_id = product_copied, workdata_id=data.id, owner = 'officiel') 
+        # save cycle with new value of workdata_id 
+        for cycle in cycles:
+            custom_cycle= Cycle(work_day=cycle.work_day,division=cycle.division,profit_center=cycle.profit_center,smooth_family=cycle.smooth_family,cycle_time=cycle.cycle_time, workdata_id=work_data.id,product_id = product)
+            custom_cycle.save()  
     return redirect("../calendar")
 
 #********************************Save uploads************************************

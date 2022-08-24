@@ -323,8 +323,10 @@ function editEvent(event) {
             {
             //  to update  
              {%for i in cycle%}
-                var id = {{i.workdata_id }};
+                var id = {{i.workdata_id}};
                 console.log(id);
+                console.log('*******',event.id)
+
                 if (event.id == id) {
                         // create smooh_family input 
                         smooth_input = document.createElement("input");
