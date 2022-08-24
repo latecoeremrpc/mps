@@ -171,7 +171,6 @@ def calendar(request,division,product):
 def create_calendar(request,division,product):
     # get list of days from dataBase to compare if exist 
     days = list(HolidaysCalendar.objects.values_list('holidaysDate',flat=True))
-    print(days)
     # get list of product_id from database to compare if exist
     products =list(HolidaysCalendar.objects.values_list('product_id',flat=True))
     if request.method=='POST' and 'save-event' in request.POST:
@@ -208,9 +207,9 @@ def create_calendar(request,division,product):
                     # delete workdata
                     exist_on_days = WorkData.undeleted_objects.all().filter(date = startDate,product_id =product) 
                     exist_on_days.delete()
-                    # delete cycle with date and profit center
-                    # exist_cycle=Cycle.undeleted_objects.all().filter(work_day = startDate,profit_center = profit_center.get('Profit_center'))
-                    # exist_cycle.delete()
+                    # delete cycle with date and product_id
+                    exist_cycle=Cycle.undeleted_objects.all().filter(work_day = startDate,product_id =product)
+                    exist_cycle.delete()
                     data = HolidaysCalendar(name=name,holidaysDate=startDate,product_id =product)
                     data.save()
             # add list of days in database       
@@ -231,8 +230,9 @@ def create_calendar(request,division,product):
                     else :
                         exist_on_days = WorkData.undeleted_objects.all().filter(date = day,product_id =product) 
                         exist_on_days.delete()
-                        # delete cycle 
-
+                        # delete cycle with date and product_id
+                        exist_cycle=Cycle.undeleted_objects.all().filter(work_day = day,product_id =product)
+                        exist_cycle.delete()
                         data = HolidaysCalendar(name=name,holidaysDate=day,product_id =product)
                         data.save()
     return redirect("../calendar")
