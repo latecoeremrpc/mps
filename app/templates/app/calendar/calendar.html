@@ -361,20 +361,23 @@ id_workdata:
                 console.log(id);
                 console.log('*******',event.id)
                 if (event.id == id) {
-                        // create smooh_family input 
+                        let td1 = document.createElement('td'); 
+                        // create smooh_family input
                         smooth_input = document.createElement("input");
                         smooth_input.setAttribute("type", "text");
                         smooth_input.setAttribute("name", "smooth_family");
                         smooth_input.setAttribute("value", "{{i.smooth_family}}"),
-
-                        // add a node to the end of the list 
-                        inputContainer.appendChild(smooth_input);
+                        // add a node to the end of the list
+                        td1.appendChild(smooth_input);
+                        inputContainer.appendChild(td1);
+                        let td2 = document.createElement('td');
                         // create cycle_time input
                         cycle_input = document.createElement("input");
                         cycle_input.setAttribute("type", "number");
                         cycle_input.setAttribute("name", "cycle_time");
-                        cycle_input.setAttribute("value", "{{i.cycle_time}}"), 
-                        inputContainer.appendChild(cycle_input);
+                        cycle_input.setAttribute("value", "{{i.cycle_time}}"),
+                        td2.appendChild(cycle_input); 
+                        inputContainer.appendChild(td2);
                         // create cycle_id input
                         cycle_i = document.createElement("input");
                         cycle_i.setAttribute("type", "hidden");

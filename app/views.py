@@ -892,17 +892,20 @@ def copy_calendar(request,division,product):
     for data in holidays_data:
         holidays = HolidaysCalendar(name=data.name,holidaysDate=data.holidaysDate,product_id = product)
         holidays.save()
+
     #get work data object with product id 
     work = WorkData.undeleted_objects.all().filter(product_id = product_copied ,owner = 'officiel')  
     #save data for loop work
     for data in work:
         work_data = WorkData(date=data.date,startTime=data.startTime,endTime=data.endTime,FTEhourByDay=data.FTEhourByDay,ExtraHour=data.ExtraHour,Absenteeism_ratio=data.Absenteeism_ratio,Unproductiveness_ratio=data.Unproductiveness_ratio,Efficienty_ratio=data.Efficienty_ratio,product_id = product)
         work_data.save()
+        # get profit center from product
+        profit_center =Product.undeleted_objects.filter(id=product).values('Profit_center')
         # get cycle object with product_id and workdata_id 
         cycles = Cycle.undeleted_objects.all().filter(product_id = product_copied, workdata_id=data.id, owner = 'officiel') 
         # save cycle with new value of workdata_id 
         for cycle in cycles:
-            custom_cycle= Cycle(work_day=cycle.work_day,division=cycle.division,profit_center=cycle.profit_center,smooth_family=cycle.smooth_family,cycle_time=cycle.cycle_time, workdata_id=work_data.id,product_id = product)
+            custom_cycle= Cycle(work_day=cycle.work_day,division=cycle.division,profit_center=profit_center,smooth_family=cycle.smooth_family,cycle_time=cycle.cycle_time, workdata_id=work_data.id,product_id = product)
             custom_cycle.save()  
     return redirect("../calendar")
 
