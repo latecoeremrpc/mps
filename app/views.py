@@ -489,15 +489,9 @@ def work_data(request,division,product):
         profit_center= Product.objects.all().filter(id = product).values('Profit_center').first()
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
-        # time = request.POST.getlist('cycle-type-day')
+        # type = request.POST.getlist('cycle-type-8A')
+        # type = request.POST.getlist('cycle-type-M2')
         cycle_id = request.POST.getlist('cycle_id')
-        print('//////////')
-        # print(time)
-
-        # print("*************",time)
-        # if time == 'Days':
-        #     cycle_time = 24 * float(cycle_time)
-        #     print(cycle_time)
         # If id exist Update Object if not create new one
 
         if id and cycle_id:
@@ -522,13 +516,17 @@ def work_data(request,division,product):
                 # convert two list in dict
                 cycle_dict = dict(zip(cycle_id, cycle_time))
                 for key,value in cycle_dict.items(): 
+
                     # get cycle object with key
                     cycle_info= Cycle.objects.all().filter(id=key).first()  #intilisation object
-                    # update cycle_time
-                    cycle_info.cycle_time=value
+                    cycle_type_input = request.POST.get('cycle-type-'+cycle_info.smooth_family)
+                    if cycle_type_input == 'Days':
+                        # update cycle_time
+                        cycle_info.cycle_time=float(value) * 24
+                    if cycle_type_input =='Hours':
+                        cycle_info.cycle_time= float(value)
                     cycle_info.save()
-                
-                
+                        
                 return redirect("../calendar")
         # create new object         
         else :
@@ -547,9 +545,15 @@ def work_data(request,division,product):
                     exist_cycle.delete()
                     #Save into Workdata table
                     data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
+                    data.save()
                     #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id,product_id = product)
+                        cycle_type_input = request.POST.get('cycle-type-'+i)
+                        if cycle_type_input == 'Days':
+                            new_cycle_time= float(j) * 24
+                        if cycle_type_input == 'Hours':
+                            new_cycle_time=j
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
                         cycle_data.save()
                     
                     return redirect("../calendar")
@@ -561,7 +565,12 @@ def work_data(request,division,product):
                     data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
                     data.save()
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id,product_id = product)
+                        cycle_type_input = request.POST.get('cycle-type-'+i)
+                        if cycle_type_input == 'Days':
+                            new_cycle_time= float(j) * 24
+                        if cycle_type_input == 'Hours':
+                            new_cycle_time=j
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
                         cycle_data.save()    
                     return redirect("../calendar")
             # add list of days in database       
@@ -585,7 +594,12 @@ def work_data(request,division,product):
                         data.save()
                         #Save into Cycle table
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id,product_id = product)
+                            cycle_type_input = request.POST.get('cycle-type-'+i)
+                            if cycle_type_input == 'Days':
+                                new_cycle_time= float(j) * 24
+                            if cycle_type_input == 'Hours':
+                                new_cycle_time=j
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
                             cycle_data.save()    
                     else :
                         #replace holidays with work data
@@ -598,11 +612,17 @@ def work_data(request,division,product):
                         data.save()
                         #Save into Cycle table
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id,product_id = product)
+                            cycle_type_input = request.POST.get('cycle-type-'+i)
+                            if cycle_type_input == 'Days':
+                                print('*****j',j)
+                                new_cycle_time= float(j) * 24
+                            if cycle_type_input == 'Hours':
+                                new_cycle_time=j
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
                             cycle_data.save()  
                 return redirect("../calendar")       
         
-    return render(request,"app/calendar/calendar.html",{'product':product,'division':division, 'work':work, 'cycle_time':cycle_time})
+    # return render(request,"app/calendar/calendar.html",{'product':product,'division':division, 'work':work, 'cycle_time':cycle_time})
       
 
 #********************custom work data****************************
@@ -634,12 +654,7 @@ def custom_work(request,division,product):
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
         cycle_id = request.POST.getlist('cycle_id')
-        # print(time)
-        # print(cycle_time)
-        # if time == 'Days':
-        #     cycle_time = 24 * float(cycle_time)
-        #     print(cycle_time)
-        # If id exist Update Object if not create new one
+        # if id update else save
         if id:
             #get object work data
             #first : to get object not queryset 
@@ -664,8 +679,12 @@ def custom_work(request,division,product):
                 for key,value in cycle_dict.items(): 
                     # get cycle object with key
                     cycle_info= Cycle.objects.all().filter(id=key).first()  #intilisation object
-                    # update cycle_time
-                    cycle_info.cycle_time=value
+                    cycle_type_input = request.POST.get('cycle-type-'+cycle_info.smooth_family)
+                    if cycle_type_input == 'Days':
+                        # update cycle_time
+                        cycle_info.cycle_time=float(value) * 24
+                    if cycle_type_input =='Hours':
+                        cycle_info.cycle_time= float(value)
                     cycle_info.save()
                 return redirect("../customcalendar")
         # create new object         
@@ -687,7 +706,12 @@ def custom_work(request,division,product):
                     data.save()
                     #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id,owner = owner,product_id = product)
+                        cycle_type_input = request.POST.get('cycle-type-'+i)
+                        if cycle_type_input == 'Days':
+                            new_cycle_time= float(j) * 24
+                        if cycle_type_input == 'Hours':
+                            new_cycle_time=j
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
                         cycle_data.save()
                     
                     return redirect("../customcalendar")
@@ -701,7 +725,12 @@ def custom_work(request,division,product):
                     data.save()
                     #Save into Cycle table
                     for i,j in zip(smooth_family,cycle_time):
-                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id,owner = owner,product_id = product)
+                        cycle_type_input = request.POST.get('cycle-type-'+i)
+                        if cycle_type_input == 'Days':
+                            new_cycle_time= float(j) * 24
+                        if cycle_type_input == 'Hours':
+                            new_cycle_time=j
+                        cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
                         cycle_data.save() 
                     return redirect("../customcalendar")
             # add list of days in database       
@@ -725,7 +754,12 @@ def custom_work(request,division,product):
                         data.save()
                         # save into cycle object 
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id,owner = owner,product_id = product)
+                            cycle_type_input = request.POST.get('cycle-type-'+i)
+                        if cycle_type_input == 'Days':
+                            new_cycle_time= float(j) * 24
+                        if cycle_type_input == 'Hours':
+                            new_cycle_time=j  
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
                             cycle_data.save() 
                     else :
                         #replace holidays with work data
@@ -738,7 +772,12 @@ def custom_work(request,division,product):
                         data.save()
                         # save into cycle object 
                         for i,j in zip(smooth_family,cycle_time):
-                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=j,workdata_id=data.id,owner = owner,product_id = product)
+                            cycle_type_input = request.POST.get('cycle-type-'+i)
+                            if cycle_type_input == 'Days':
+                                new_cycle_time= float(j) * 24
+                            if cycle_type_input == 'Hours':
+                                new_cycle_time=j
+                            cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
                             cycle_data.save() 
                 return redirect("../customcalendar")
     return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division, 'work':work}) 

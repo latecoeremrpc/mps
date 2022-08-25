@@ -412,7 +412,7 @@ id_workdata:
                         hour_input = document.createElement("input");
                         hour_input.setAttribute("type", "radio");
                         hour_input.setAttribute("id", "hour");
-                        hour_input.setAttribute("name", "cycle-type-{{d.Smooth_Family}}");
+                        hour_input.setAttribute("name", "cycle-type-{{i.smooth_family}}");
                         hour_input.setAttribute("value", "Hours");
                         td3.appendChild(hour_input);
                         // create label for day 
@@ -423,13 +423,28 @@ id_workdata:
                         day_input = document.createElement("input");
                         day_input.setAttribute("type", "radio");
                         day_input.setAttribute("id", "day");
-                        day_input.setAttribute("name", "cycle-type-{{d.Smooth_Family}}");
+                        day_input.setAttribute("name", "cycle-type-{{i.smooth_family}}");
                         day_input.setAttribute("value", "Days");
                         td3.appendChild(day_input);
                         tr.appendChild(td3);
                         inputContainer.appendChild(tr);
-                        
-                        
+                        // *********************************
+                        // document.getElementById("hour").checked = true;
+                        // document.getElementById("day").checked = true;
+                        // hours =document.getElementById("hour").value
+                        // console.log(hours)
+                        // days =document.getElementById("day").value
+                        // console.log(days)
+
+                        // if  (hours === 'Hours') {
+                        //     document.getElementById("hour").checked=true;
+                        // }else{
+                        //     document.getElementById("day").checked=true;
+                               
+                        // }
+
+                         
+ 
                         // **********************************
                         // create cycle_id input
                         cycle_i = document.createElement("input");
