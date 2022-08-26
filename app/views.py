@@ -623,7 +623,6 @@ def work_data(request,division,product):
         
     # return render(request,"app/calendar/calendar.html",{'product':product,'division':division, 'work':work, 'cycle_time':cycle_time})
       
-
 #********************custom work data****************************
 
 #create work data for custom calendar
@@ -1413,6 +1412,8 @@ def planning(request):
     week_demonstrated_capacity_count=df_status.groupby('year_week_end_date')['id'].count().reset_index()
     
     return render(request,'app/planning.html',{'records':df_data,'week_count':week_count,'week_demonstrated_capacity_count':week_demonstrated_capacity_count})
+
+
 #Test for web excel jquery
 def data_table(request):
     return render(request,'app/Shopfloor/datatable.html') 
