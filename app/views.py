@@ -954,7 +954,7 @@ def upload_files(request):
 
 #save coois   
 def save_coois(request):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     try:
         #Delete coois data 
         coois_data = Coois.undeleted_objects.all().filter(created_by='Marwa')
@@ -971,7 +971,7 @@ def save_coois(request):
         
 #save zpp   
 def save_zpp(request):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #Delete zpp data 
     zpp_data = Zpp.undeleted_objects.all().filter(created_by='Marwa')
     zpp_data.delete()
@@ -1127,17 +1127,26 @@ def shopfloor(request):
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
     material_data=Material.objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
     # to use in smoothing calcul
-    product_work_data=Product.objects.values('planning','workdata__date','workdata__cycle_time')
+    # product_work_data=Product.objects.values('planning','workdata__date','cycle__cycle_time')
+    cycle_infos_data=Cycle.objects.values('profit_center','cycle_time','work_day')
 
+    print('****************')
+    print(cycle_infos_data)
+    print(cycle_infos_data.count())
+    # print( product_work_data)
+    # print(product_work_data.count())
+    # print('****************')
+    # product_work_data=Product.objects.values('planning','workdata__date')
+    
     #Convert to DataFrame
     df_zpp=pd.DataFrame(list(zpp_data))
     df_coois=pd.DataFrame(list(coois_data))
     df_material=pd.DataFrame(list(material_data))
+    df_cycle_infos_data=pd.DataFrame(list(cycle_infos_data))
     # rename df_material column 
     df_material=df_material.rename(columns={'product__program':'program','product__division__name':'division'})
-    df_product_work_data=pd.DataFrame(list(product_work_data))
     # rename  df_product_work_data column
-    df_product_work_data=df_product_work_data.rename(columns={'workdata__date':'workdate','workdata__cycle_time':'cycle_time'})
+    # df_cycle_infos_data=df_cycle_infos_data.rename(columns={'workdata__date':'workdate','cycle__cycle_time':'cycle_time'})
     
     
 
@@ -1145,15 +1154,16 @@ def shopfloor(request):
     df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str) 
     #add column key for coois (concatinate material, order, created_by )    
     df_coois['key']=df_coois['material'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
-    
-    
+
     #add column key for material (concatinate material, created_by )  
     df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)+df_material['created_by'].astype(str) 
     #add column key for coois (concatinate material,division,profit_centre, created_by )    
     df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['created_by'].astype(str)
+    
     # add column key for material_work_data (concatinate material, workdate ) 
-    df_product_work_data['key']= df_product_work_data['planning'].astype(str)+df_product_work_data['workdate'].astype(str)
- 
+    df_cycle_infos_data['key']= df_cycle_infos_data['profit_center'].astype(str)+df_cycle_infos_data['work_day'].astype(str)
+    print('////////////////////////')
+    print(df_cycle_infos_data['key'])
     #Convert df_zpp to dict
     df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
     df_zpp_dict_date_reordo=dict(zip(df_zpp.key, df_zpp.date_reordo))
@@ -1278,6 +1288,8 @@ def create_shopfloor(request):
 
         # #Check if at least the first end date is present for each Smooth Family
         df_for_check = df[~df['closed'].str.contains('Closed')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
+        print('----------------------')
+        print(df_for_check)
         for i in range(len(df_for_check)):
             if (df_for_check.loc[i,'Freeze_end_date']==''):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
@@ -1291,7 +1303,7 @@ def create_shopfloor(request):
 #******************************save_shopfloor*****************************************************    
 
 def save_shopfloor(df):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='AdminMPS',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #insert base informations into file
     df.insert(0,'created_at',datetime.now())
     df.insert(1,'updated_at',datetime.now())
