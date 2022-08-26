@@ -302,6 +302,7 @@ function editEvent(event) {
                     cycle_input.setAttribute("type", "number");
                     cycle_input.setAttribute("name", "cycle_time");
                     cycle_input.setAttribute("class", "form-control"),
+                    cycle_input.setAttribute('required', '');
                     td2.appendChild(cycle_input);
                     tr1.appendChild(td2);
                     
@@ -317,6 +318,7 @@ function editEvent(event) {
                     hour_input.setAttribute("id", "hour");
                     hour_input.setAttribute("name", "cycle-type-{{i.material__Smooth_Family}}");
                     hour_input.setAttribute("value", "Hours");
+                    hour_input.setAttribute("checked", "checked");
                     td3.appendChild(hour_input);
                     // create label for day 
                     day_label = document.createElement("label");
@@ -427,7 +429,7 @@ function deleteEvent(event) {
             if (event.id == id) {
                 // create cycle_id input
                 cycle_i = document.createElement("input");
-                cycle_i.setAttribute("type", "text");
+                cycle_i.setAttribute("type", "hidden");
                 cycle_i.setAttribute("name", "cycle_id");
                 cycle_i.setAttribute("value", "{{i.id}}"), 
                 deleteCycle.appendChild(cycle_i);

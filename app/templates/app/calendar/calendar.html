@@ -98,8 +98,8 @@ id_workdata:
               </button>
           </div>
           <div class="modal-body">
-              <input type="text" name="date_id" class="form-control">
-              <input type="text" name="date_type" class="form-control">
+              <input type="hidden" name="date_id" class="form-control">
+              <input type="hidden" name="date_type" class="form-control">
               <!-- <input type="text" name="cycle_id" class="form-control"> -->
               <div id="deleteCycle"></div>
             <p>Are you sure you want to delete these Records?</p>
@@ -336,6 +336,7 @@ id_workdata:
                     cycle_input.setAttribute("type", "number");
                     cycle_input.setAttribute("name", "cycle_time");
                     cycle_input.setAttribute("class", "form-control"),
+                    cycle_input.setAttribute('required', '');
                     td2.appendChild(cycle_input);
                     tr1.appendChild(td2);
                     
@@ -351,6 +352,7 @@ id_workdata:
                     hour_input.setAttribute("id", "hour");
                     hour_input.setAttribute("name", "cycle-type-{{i.material__Smooth_Family}}");
                     hour_input.setAttribute("value", "Hours");
+                    hour_input.setAttribute("checked", "checked");
                     td3.appendChild(hour_input);
                     // create label for day 
                     day_label = document.createElement("label");
@@ -428,6 +430,12 @@ id_workdata:
                         td3.appendChild(day_input);
                         tr.appendChild(td3);
                         inputContainer.appendChild(tr);
+                        // create cycle_id input
+                        cycle_i = document.createElement("input");
+                        cycle_i.setAttribute("type", "hidden");
+                        cycle_i.setAttribute("name", "cycle_id");
+                        cycle_i.setAttribute("value", "{{i.id}}"), 
+                        inputContainer.appendChild(cycle_i);
                         // *********************************
                         // document.getElementById("hour").checked = true;
                         // document.getElementById("day").checked = true;
@@ -443,15 +451,16 @@ id_workdata:
                                
                         // }
 
+                        // if  document.getElementById("day").isChecked() {}
                          
- 
+                        //  if (day_input.checked) {
+                        //   console.log('Marwa')
+                        //  }
+
+                        //  if (hour_input.checked){
+                        //   console.log('Noomene')
+                        //  }
                         // **********************************
-                        // create cycle_id input
-                        cycle_i = document.createElement("input");
-                        cycle_i.setAttribute("type", "hidden");
-                        cycle_i.setAttribute("name", "cycle_id");
-                        cycle_i.setAttribute("value", "{{i.id}}"), 
-                        inputContainer.appendChild(cycle_i);
 
                         
                 } 
@@ -474,7 +483,7 @@ id_workdata:
             if (event.id == id) {
                 // create cycle_id input
                 cycle_i = document.createElement("input");
-                cycle_i.setAttribute("type", "text");
+                cycle_i.setAttribute("type", "hidden");
                 cycle_i.setAttribute("name", "cycle_id");
                 cycle_i.setAttribute("value", "{{i.id}}"), 
                 deleteCycle.appendChild(cycle_i);
