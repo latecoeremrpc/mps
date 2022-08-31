@@ -1200,31 +1200,61 @@ def shopfloor(request):
 
 
 #******************************smooth end date*****************************************************
+#calcul smooth end date(Recursive Function)
+# def smooth_date_calcul(current_date,table,designation,prev_cycle=None,prev_date=None):
+#     #Get cycle for current day
+#     key_date=str(designation)+str(current_date).split(' ')[0]
+#     #initial case treatment (when prev_date =  current_date)
+#     if prev_date is None:
+#         prev_date=current_date
+#     # Check and get cycle
+#     try:
+#         # key : contains the concatenation between designation and date of the table 
+#         # value : c'est la valeur de cycle time de work data 
+#         for key,value in table:
+#             if key_date == key:
+#                 cycle=value
+#         print(cycle)
+#     #when cycle not found  in table return date(1900,1,1)    
+#     except Exception:
+#         return date(1900,1,1)
+#     #stop condition to avoid the infinite loop
+#     if cycle==prev_cycle:
+#         return current_date
+#     new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
+#     print('new date',new_date)
+#     return   smooth_date_calcul(new_date,table,designation,cycle,current_date)
+
+
+
+
 
 #calcul smooth end date(Recursive Function)
-def smooth_date_calcul(current_date,table,designation,prev_cycle=None,prev_date=None):
+def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle=None,prev_date=None):
     #Get cycle for current day
-    key_date=str(designation)+str(current_date).split(' ')[0]
+    key_date=str(profit_center)+str(Smooth_Family)+str(current_date).split(' ')[0]
+    # print('*****************',key_date)
     #initial case treatment (when prev_date =  current_date)
     if prev_date is None:
         prev_date=current_date
     # Check and get cycle
     try:
-        # key : contains the concatenation between designation and date of the table 
+        # key : contains the concatenation between profit_center and smooth family and date of the table 
         # value : c'est la valeur de cycle time de work data 
         for key,value in table:
             if key_date == key:
                 cycle=value
         print(cycle)
+        print(key,'***',value)
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
-        return date(1900,1,1)
+        return date(1900,1,1)   
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
     new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
     print('new date',new_date)
-    return   smooth_date_calcul(new_date,table,designation,cycle,current_date)
+    return   smooth_date_calcul(new_date,table,profit_center,Smooth_Family,cycle,current_date)
 
 #******************************create_shopfloor*****************************************************
 #create shopfloor
@@ -1374,48 +1404,68 @@ def save_shopfloor(df):
     conn.commit()
     
 #******************************result ***********************************************************       
-        
+# @allowed_users(allowed_roles=["Planificateur"])        
+# def result(request):
+#     #Get Work date data
+#     product_work_data=Product.undeleted_objects.values('planning','workdata__date','workdata__cycle_time')
+#     df_product_work_data=pd.DataFrame(list(product_work_data))
+#     df_product_work_data=df_product_work_data.rename(columns={'workdata__date':'workdate','workdata__cycle_time':'cycle_time'})
+#     df_product_work_data['key']= df_product_work_data['planning'].astype(str)+df_product_work_data['workdate'].astype(str)
+#     # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
+#     df_product_work_data_dict_cycle=dict(zip(df_product_work_data.key, df_product_work_data.cycle_time))
+#     #Get Shopfloor from DB
+#     data=Shopfloor.objects.all().values()
+#     df_data=pd.DataFrame(list(data))
+#     df_data=df_data.sort_values('Ranking') #To add designation as sort
+#     #Add col freezed to know how row is freezed
+#     df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
+
+#     df_data['key']=df_data['designation'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
+#     # df_data['Freeze_end_date']=pd.to_datetime(df_data['Freeze_end_date'])
+#     # df_data['cycle']=df_data['key'].map(df_product_work_data_dict_cycle)
+#     # df_data.insert(0,'freezed_start_date',None)
+#     # df_data['freezed_start_date']=np.where((df_data['freezed']=='Freezed'),df_data['Freeze_end_date'],df_data['freezed_start_date'])
+#     # df_data['freezed_start_date']=pd.to_datetime(df_data['freezed_start_date'])
+#     # df_data['freezed_start_date']=df_data['Freeze_end_date']
+
+#     df_data[['Freeze_end_date']] = df_data[['Freeze_end_date']].astype(object).where(df_data[['Freeze_end_date']].notnull(), None)
+#     df_data['smoothing_end_date']=df_data['Freeze_end_date']
+#     df_data.insert(0,'key_start_day','')
+#     for i in range(len(df_data)-1):
+#         if (df_data.loc[i+1,'freezed']=='not_freezed'):
+#             df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_product_work_data_dict_cycle.items(),df_data.loc[i,'designation'])            
+#     # print(df_data.loc[i+1,'smoothing_end_date'])
+#     df_data=df_data.sort_values('id')
+#     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
+
+
+
 # @allowed_users(allowed_roles=["Planificateur"])        
 def result(request):
     #Get Work date data
-    cycle_infos_data=Cycle.objects.values('profit_center','cycle_time','work_day')
-    # product_work_data=Product.undeleted_objects.values('planning','workdata__date','workdata__cycle_time')
+    cycle_data=Cycle.objects.values('profit_center','smooth_family','cycle_time','work_day') 
     #Convert to DataFrame
-    df_cycle_infos_data=pd.DataFrame(list(cycle_infos_data))
-    # df_product_work_data=df_product_work_data.rename(columns={'workdata__date':'workdate','workdata__cycle_time':'cycle_time'})
-
-    # df_cycle_infos_data['key']= df_cycle_infos_data['planning'].astype(str)+df_cycle_infos_data['workdate'].astype(str)
-
-    # concatinate profit_center and cycle_time and work_day
-    df_cycle_infos_data['key']= df_cycle_infos_data['profit_center'].astype(str)+df_cycle_infos_data['cycle_time'].astype(str)+df_cycle_infos_data['work_day'].astype(str)
-    print('************************')
-    print(df_cycle_infos_data)
-    
-    
+    df_cycle_data=pd.DataFrame(list(cycle_data))
+    # concatinate profit_center and smooth_family and work_day
+    df_cycle_data['key']= df_cycle_data['profit_center'].astype(str)+df_cycle_data['smooth_family'].astype(str)+df_cycle_data['work_day'].astype(str)
     # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
-    # df_product_work_data_dict_cycle=dict(zip(df_product_work_data.key, df_product_work_data.cycle_time))
-    
+    df_dict_cycle=dict(zip(df_cycle_data.key, df_cycle_data.cycle_time))
     #Get Shopfloor from DB
     data=Shopfloor.objects.all().values()
     df_data=pd.DataFrame(list(data))
     df_data=df_data.sort_values('Ranking') #To add designation as sort
     #Add col freezed to know how row is freezed
     df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
+    df_data['key']=df_data['profit_centre'].astype(str)+df_data['Smooth_Family'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
+    
 
-    df_data['key']=df_data['designation'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
-    # df_data['Freeze_end_date']=pd.to_datetime(df_data['Freeze_end_date'])
-    # df_data['cycle']=df_data['key'].map(df_product_work_data_dict_cycle)
-    # df_data.insert(0,'freezed_start_date',None)
-    # df_data['freezed_start_date']=np.where((df_data['freezed']=='Freezed'),df_data['Freeze_end_date'],df_data['freezed_start_date'])
-    # df_data['freezed_start_date']=pd.to_datetime(df_data['freezed_start_date'])
-    # df_data['freezed_start_date']=df_data['Freeze_end_date']
     df_data[['Freeze_end_date']] = df_data[['Freeze_end_date']].astype(object).where(df_data[['Freeze_end_date']].notnull(), None)
     df_data['smoothing_end_date']=df_data['Freeze_end_date']
     df_data.insert(0,'key_start_day','')
     for i in range(len(df_data)-1):
         if (df_data.loc[i+1,'freezed']=='not_freezed'):
-            df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_product_work_data_dict_cycle.items(),df_data.loc[i,'designation'])            
-    # print(df_data.loc[i+1,'smoothing_end_date'])
+            df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])            
+    print(df_dict_cycle)
     df_data=df_data.sort_values('id')
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
