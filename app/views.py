@@ -1128,11 +1128,12 @@ def shopfloor(request):
     material_data=Material.objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
     # to use in smoothing calcul
     # product_work_data=Product.objects.values('planning','workdata__date','cycle__cycle_time')
-    cycle_infos_data=Cycle.objects.values('profit_center','cycle_time','work_day')
 
-    print('****************')
-    print(cycle_infos_data)
-    print(cycle_infos_data.count())
+    # cycle_infos_data=Cycle.objects.values('profit_center','cycle_time','work_day')
+
+    # print('****************')
+    # print(cycle_infos_data)
+    # print(cycle_infos_data.count())
     # print( product_work_data)
     # print(product_work_data.count())
     # print('****************')
@@ -1142,7 +1143,7 @@ def shopfloor(request):
     df_zpp=pd.DataFrame(list(zpp_data))
     df_coois=pd.DataFrame(list(coois_data))
     df_material=pd.DataFrame(list(material_data))
-    df_cycle_infos_data=pd.DataFrame(list(cycle_infos_data))
+    # ,df_cycle_infos_data=pd.DataFrame(list(cycle_infos_data))
     # rename df_material column 
     df_material=df_material.rename(columns={'product__program':'program','product__division__name':'division'})
     # rename  df_product_work_data column
@@ -1161,9 +1162,9 @@ def shopfloor(request):
     df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['created_by'].astype(str)
     
     # add column key for material_work_data (concatinate material, workdate ) 
-    df_cycle_infos_data['key']= df_cycle_infos_data['profit_center'].astype(str)+df_cycle_infos_data['work_day'].astype(str)
-    print('////////////////////////')
-    print(df_cycle_infos_data['key'])
+    # df_cycle_infos_data['key']= df_cycle_infos_data['profit_center'].astype(str)+df_cycle_infos_data['work_day'].astype(str)
+    # print('////////////////////////')
+    # print(df_cycle_infos_data['key'])
     #Convert df_zpp to dict
     df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
     df_zpp_dict_date_reordo=dict(zip(df_zpp.key, df_zpp.date_reordo))
@@ -1252,7 +1253,7 @@ def create_shopfloor(request):
         Allocated_Time_On_Workstation = request.POST.getlist('Allocated_Time_On_Workstation')
         Smooth_Family = request.POST.getlist('Smooth_Family')
         Ranking = request.POST.getlist('Ranking')
-        Freeze_end_date = request.POST.getlist('Freeze end date')
+        Freeze_end_date = request.POST.getlist('freeze_end_date')
         Remain_to_do = request.POST.getlist('Remain to do')
         closed = request.POST.getlist('closed')
 
@@ -1284,12 +1285,17 @@ def create_shopfloor(request):
             'closed':closed, 
             }
         df=pd.DataFrame(data)
+        print(df)
+        # delete old objects of shopfloor and save new
         Shopfloor.objects.all().delete()
 
         # #Check if at least the first end date is present for each Smooth Family
-        df_for_check = df[~df['closed'].str.contains('Closed')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
+        df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
+
+        # df_for_check = df[df['closed']==False]
         print('----------------------')
         print(df_for_check)
+        # test line by line to return the index of smooth family is not filled
         for i in range(len(df_for_check)):
             if (df_for_check.loc[i,'Freeze_end_date']==''):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
@@ -1372,12 +1378,23 @@ def save_shopfloor(df):
 # @allowed_users(allowed_roles=["Planificateur"])        
 def result(request):
     #Get Work date data
-    product_work_data=Product.undeleted_objects.values('planning','workdata__date','workdata__cycle_time')
-    df_product_work_data=pd.DataFrame(list(product_work_data))
-    df_product_work_data=df_product_work_data.rename(columns={'workdata__date':'workdate','workdata__cycle_time':'cycle_time'})
-    df_product_work_data['key']= df_product_work_data['planning'].astype(str)+df_product_work_data['workdate'].astype(str)
+    cycle_infos_data=Cycle.objects.values('profit_center','cycle_time','work_day')
+    # product_work_data=Product.undeleted_objects.values('planning','workdata__date','workdata__cycle_time')
+    #Convert to DataFrame
+    df_cycle_infos_data=pd.DataFrame(list(cycle_infos_data))
+    # df_product_work_data=df_product_work_data.rename(columns={'workdata__date':'workdate','workdata__cycle_time':'cycle_time'})
+
+    # df_cycle_infos_data['key']= df_cycle_infos_data['planning'].astype(str)+df_cycle_infos_data['workdate'].astype(str)
+
+    # concatinate profit_center and cycle_time and work_day
+    df_cycle_infos_data['key']= df_cycle_infos_data['profit_center'].astype(str)+df_cycle_infos_data['cycle_time'].astype(str)+df_cycle_infos_data['work_day'].astype(str)
+    print('************************')
+    print(df_cycle_infos_data)
+    
+    
     # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
-    df_product_work_data_dict_cycle=dict(zip(df_product_work_data.key, df_product_work_data.cycle_time))
+    # df_product_work_data_dict_cycle=dict(zip(df_product_work_data.key, df_product_work_data.cycle_time))
+    
     #Get Shopfloor from DB
     data=Shopfloor.objects.all().values()
     df_data=pd.DataFrame(list(data))
