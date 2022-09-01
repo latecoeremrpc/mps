@@ -1,3 +1,4 @@
+from time import timezone
 from django.db import models
 
 # Create your models here.
@@ -226,7 +227,7 @@ class Shopfloor(BaseModel,SoftDeleteModel):
     Allocated_Time_On_Workstation =models.FloatField()
     Smooth_Family=models.CharField(max_length=50)
     Ranking=models.DateField()
-    Freeze_end_date=models.DateTimeField(null=True)
+    Freeze_end_date=models.DateTimeField(null=True,)
     Remain_to_do=models.FloatField(null=True)
     smoothing_end_date=models.DateTimeField(null=True)
     closed=models.BooleanField(null=True)

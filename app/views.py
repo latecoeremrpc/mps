@@ -1245,7 +1245,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
             if key_date == key:
                 cycle=value
         print(cycle)
-        print(key,'***',value)
+        # print(key,'***',value)
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
         return date(1900,1,1)   
@@ -1253,7 +1253,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     if cycle==prev_cycle:
         return current_date
     new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
-    print('new date',new_date)
+    # print('new date',new_date)
     return   smooth_date_calcul(new_date,table,profit_center,Smooth_Family,cycle,current_date)
 
 #******************************create_shopfloor*****************************************************
@@ -1323,8 +1323,8 @@ def create_shopfloor(request):
         df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
 
         # df_for_check = df[df['closed']==False]
-        print('----------------------')
-        print(df_for_check)
+        # print('----------------------')
+        # print(df_for_check)
         # test line by line to return the index of smooth family is not filled
         for i in range(len(df_for_check)):
             if (df_for_check.loc[i,'Freeze_end_date']==''):
@@ -1443,7 +1443,7 @@ def save_shopfloor(df):
 # @allowed_users(allowed_roles=["Planificateur"])        
 def result(request):
     #Get Work date data
-    cycle_data=Cycle.objects.values('profit_center','smooth_family','cycle_time','work_day') 
+    cycle_data=Cycle.undeleted_objects.values('profit_center','smooth_family','cycle_time','work_day') 
     #Convert to DataFrame
     df_cycle_data=pd.DataFrame(list(cycle_data))
     # concatinate profit_center and smooth_family and work_day
@@ -1463,10 +1463,13 @@ def result(request):
     df_data['smoothing_end_date']=df_data['Freeze_end_date']
     df_data.insert(0,'key_start_day','')
     for i in range(len(df_data)-1):
-        if (df_data.loc[i+1,'freezed']=='not_freezed'):
+        
+        # test if not freezed and not closed calcul smoothing
+        if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']==False):
             df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])            
-    print(df_dict_cycle)
+    # print(df_dict_cycle)
     df_data=df_data.sort_values('id')
+    print(df_data)
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
 

@@ -99,10 +99,10 @@
                                     <td>{{ data.Smooth_Family}} </td>
                                     <!--User Input-->
                                     <td>{{ data.Ranking | date:'d/m/Y'}}  </td>
-                                    <td>{{data.Freeze_end_date | date:'d/m/Y'}}</td>
+                                    <td>{{data.Freeze_end_date | date:'d/m/Y'}} {{data.Freeze_end_date | time:'H:i'}}</td>
                                     <td>{{ data.Remain_to_do}} </td>
                                     <!--Smoothing-->
-                                    <td>{{data.smoothing_end_date | date:'d/m/Y'}}</td>
+                                    <td>{{data.smoothing_end_date | date:'d/m/Y'}} {{data.smoothing_end_date | time:'H:i'}}</td>
                                     </tr>
                                     {%empty%}
                                     <tr><td> Data Empty</td></tr>
