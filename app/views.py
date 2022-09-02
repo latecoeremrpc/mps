@@ -3,12 +3,14 @@ from django.http import HttpResponse
 from django.shortcuts import render ,redirect ,get_object_or_404
 from app.models import Division,Material,HolidaysCalendar,Product,WorkData,CalendarConfigurationTreatement,CalendarConfigurationCpordo,Coois,Zpp,Shopfloor,Cycle
 from app.forms import DivisionForm,MaterialForm,ProductForm,CalendarConfigurationCpordoForm,CalendarConfigurationTreatementForm 
-from datetime import  date, datetime, timedelta
+from datetime import  date, datetime, timedelta, time
 from io import StringIO
 import psycopg2, pandas as pd
 import numpy as np
 from django.contrib import messages
 from app.decorators import allowed_users
+
+
 
 
 
@@ -1233,7 +1235,6 @@ def shopfloor(request):
 def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle=None,prev_date=None):
     #Get cycle for current day
     key_date=str(profit_center)+str(Smooth_Family)+str(current_date).split(' ')[0]
-    # print('*****************',key_date)
     #initial case treatment (when prev_date =  current_date)
     if prev_date is None:
         prev_date=current_date
@@ -1244,16 +1245,65 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
         for key,value in table:
             if key_date == key:
                 cycle=value
-        print(cycle)
-        # print(key,'***',value)
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
         return date(1900,1,1)   
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
-    new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
-    # print('new date',new_date)
+
+    # get start time for current date
+    start_time = WorkData.undeleted_objects.filter(date=current_date).values_list('startTime',flat=True).first()
+    # get end time for current date
+    end_time = WorkData.undeleted_objects.filter(date=current_date).values_list('endTime',flat=True).first()
+    
+    # dictionary of business_hours
+    business_hours = {
+    # monday = 0, tuesday = 1, ... same pattern as date.weekday()
+    # "weekdays": [0, 1, 2, 3, 4],
+    "from": start_time, # startTime
+    "to": end_time,  # endTime
+    }
+    
+    # get Holidays 
+    holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True) # flat=True this will mean the returned results are single values, rather than one-tuples
+    
+    # function is_in_open_hours
+    def is_in_open_hours(dt):
+        # return dt.weekday() in business_hours["weekdays"] \
+        #    and dt.date() not in holidays \
+        #    and business_hours["from"].hour <= dt.time().hour < business_hours["to"].hour
+            return  dt.date() not in holidays \
+           and business_hours["from"].hour <= dt.time().hour < business_hours["to"].hour
+   
+    # function get_next_open_datetime 
+    def get_next_open_datetime(dt):
+        while True:
+            # dt = dt + timedelta(days=1)
+            # if dt.weekday() in business_hours["weekdays"] and dt.date() not in holidays:
+            #     dt = datetime.combine(dt.date(), business_hours["from"])
+            #     return dt
+
+            dt = dt + timedelta(days=1)
+            # check if open date
+            if dt.date() not in holidays:
+                dt = datetime.combine(dt.date(), business_hours["from"])
+                return dt    
+   
+    # function add hours
+    def add_hours(dt, hours):
+        while hours != 0:
+            # check if open hour for open date
+            if is_in_open_hours(dt):
+                dt = dt + timedelta(hours=1)
+                hours = hours - 1
+            else:
+                dt = get_next_open_datetime(dt)
+        return dt
+    # new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
+    new_date=add_hours(prev_date, cycle)
+
+    
     return   smooth_date_calcul(new_date,table,profit_center,Smooth_Family,cycle,current_date)
 
 #******************************create_shopfloor*****************************************************
@@ -1469,7 +1519,7 @@ def result(request):
             df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])            
     # print(df_dict_cycle)
     df_data=df_data.sort_values('id')
-    print(df_data)
+    # print(df_data)
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
 
