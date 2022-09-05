@@ -1251,7 +1251,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
-
+        print(cycle)
     # get start time for current date
     start_time = WorkData.undeleted_objects.filter(date=current_date).values_list('startTime',flat=True).first()
     # get end time for current date
@@ -1264,7 +1264,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     "from": start_time, # startTime
     "to": end_time,  # endTime
     }
-    
+
     # get Holidays 
     holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True) # flat=True this will mean the returned results are single values, rather than one-tuples
     
