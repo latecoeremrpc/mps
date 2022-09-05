@@ -59,37 +59,40 @@
             
             
                 {% for d in data %}
-                <tr>
-                <td>{{ d.id}}</td> 
-                <td>{{ d.program}}</td>
-                <td>{{ d.has_treatement}}</td>   
-                <td>{{ d.product}}</td>
-                <td>{{ d.planning}}</td>
-                <td>{{d.Profit_center}}</td>
-                <td><a href="{% url 'material' division d.id  %}" style="text-decoration: none;">Material</a></td>
-                <td><a href="{% url 'calendar' division d.id %}" style="text-decoration: none; ">Calendar</a></td>
-                {%if d.has_treatement %}
-                    <td><a href="{% url 'configTrait' division d.id %}"style="text-decoration: none; ">Calendar Config Treatment</a></td>
-                    <td><a href="{% url 'configCpordo' division d.id %}"style="text-decoration: none; ">Calendar Config CpOrdo</a></td>
+                    <tr>
+                        <td>{{ d.id}}</td> 
+                        <td>{{ d.program}}</td>
+                        <td>{{ d.has_treatement}}</td>   
+                        <td>{{ d.product}}</td>
+                        <td>{{ d.planning}}</td>
+                        <td>{{d.Profit_center}}</td>
+                        <td><a href="{% url 'material' division d.id  %}" style="text-decoration: none;">Material</a></td>
+                        <td><a href="{% url 'calendar' division d.id %}" style="text-decoration: none; ">Calendar</a></td>
+                        {%if d.has_treatement %}
+                            <td><a href="{% url 'configTrait' division d.id %}"style="text-decoration: none; ">Calendar Config Treatment</a></td>
+                            <td><a href="{% url 'configCpordo' division d.id %}"style="text-decoration: none; ">Calendar Config CpOrdo</a></td>
 
-                {%else%}
-                    <td>N/A</td>
-                    <td>N/A</td>
-                {%endif%}
-                {% if d.is_deleted%} 
-                <td style="color: red;">Deleted</td> 
-                {%else%} 
-                <td >Active</td> 
-                {%endif%}
-                <td>
-                    {% if d.is_deleted%}
-                    <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
-                    {%else%}
-                <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-traitement="{{d.has_treatement}}" data-product="{{d.product}}" data-profitcenter="{{d.Profit_center}}" data-program="{{d.program}}" data-planning="{{d.planning}}"  ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
-                <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
-                {%endif%}
-                </td>
-                </tr>
+                        {%else%}
+                            <td>N/A</td>
+                            <td>N/A</td>
+                        {%endif%}
+
+                        {% if d.is_deleted%} 
+                        <td style="color: red;">Deleted</td> 
+                        {%else%} 
+                        <td >Active</td> 
+                        {%endif%}
+                        <td>
+                            {% if d.is_deleted%}
+                                <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                            {%else%}
+                                <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-traitement="{{d.has_treatement}}" data-product="{{d.product}}" data-profitcenter="{{d.Profit_center}}" data-program="{{d.program}}" data-planning="{{d.planning}}"  ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                            {%endif%}
+                        </td>
+                    </tr>
+                    {%empty%}
+                        <tr><td> Data Empty</td></tr>
                 {% endfor %}
         </tbody>               
     </table>

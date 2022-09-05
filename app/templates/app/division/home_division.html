@@ -45,37 +45,35 @@
                                     <th>Description division</th>
                                     <th>Product</th>
                                     <th>State</th>
-                                    <th colspan="2">Actions</th>
-                                    
+                                    <th colspan="2">Actions</th>  
                                 </tr>
                             </thead>
                             <tbody>
-                                
-                                   
-                                    {% for d in data %}
+                                {% for d in data %}
                                     <tr>
-                                    <td>{{ d.id}}</td>   
-                                    <td>{{ d.name}}</td>
-                                    <td>{{ d.description}}</td>
-                                    <td><a href="{% url 'product' d.id %}" style="text-decoration: none;">Product</a></td> 
-                                    {% if d.is_deleted%} 
-                                    <td style="color: red;">Deleted</td> 
-                                    {%else%} 
-                                    <td >Active</td> 
-                                    {%endif%}
-                                    <td>
-                                        {% if d.is_deleted%}
-                                        <button class="btn" data-target="#restore" data-toggle="modal" data-id="{{d.id}}" data-name="{{d.name}}" ><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                                        <td>{{ d.id}}</td>   
+                                        <td>{{ d.name}}</td>
+                                        <td>{{ d.description}}</td>
+                                        <td><a href="{% url 'product' d.id %}" style="text-decoration: none;">Product</a></td> 
+                                            {% if d.is_deleted%} 
+                                            <td style="color: red;">Deleted</td> 
+                                            {%else%} 
+                                            <td >Active</td> 
+                                            {%endif%}
+                                        <td>
+                                            {% if d.is_deleted%}
+                                            <button class="btn" data-target="#restore" data-toggle="modal" data-id="{{d.id}}" data-name="{{d.name}}" ><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
 
-                                        {%else%}
-                                            <button class="btn" data-target="#update" data-id="{{d.id}}" data-name="{{d.name}}" data-description="{{d.description}}" data-toggle="modal"><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
-                                            <button class="btn" data-target="#delete" data-id="{{d.id}}" data-name="{{d.name}}" data-toggle="modal" ><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
-                                        {%endif%}
-                                    </td>
-                                </tr>
+                                            {%else%}
+                                                <button class="btn" data-target="#update" data-id="{{d.id}}" data-name="{{d.name}}" data-description="{{d.description}}" data-toggle="modal"><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                                <button class="btn" data-target="#delete" data-id="{{d.id}}" data-name="{{d.name}}" data-toggle="modal" ><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                            {%endif%}
+                                        </td>
+                                    </tr>
+                                    {%empty%}
+                                    <tr><td> Data Empty</td></tr>
                                     {% endfor %} 
-                            </tbody>        
-                                          
+                            </tbody>                      
                         </table>
                       </div>
                      </div>
