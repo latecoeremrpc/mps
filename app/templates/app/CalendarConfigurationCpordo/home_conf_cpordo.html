@@ -48,30 +48,29 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                
                                    
                                     {% for d in data %}
-                                    <tr>
-                                        <td>{{ d.id}}</td>  
-                                        <td>{{ d.msn}}</td>
-                                        <td>{{ d.first_def}}</td>
-                                        <td>{{ d.last_def}}</td>
-                                        {% if d.is_deleted%} 
-                                        <td style="color: red;">Deleted</td> 
-                                        {%else%} 
-                                        <td >Active</td> 
-                                        {%endif%}
-                                        <td>
-                                            {% if d.is_deleted%}  
-                                            <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-msn="{{d.msn}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
-                                            {%else%}
-                                            <button class="btn"data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-msn="{{d.msn}}" data-lastdef="{{d.first_def}}" data-firstdef="{{d.last_def}}"><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
-                                            <button class="btn"data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-msn="{{d.msn}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                        <tr>
+                                            <td>{{ d.id}}</td>  
+                                            <td>{{ d.msn}}</td>
+                                            <td>{{ d.first_def}}</td>
+                                            <td>{{ d.last_def}}</td>
+                                            {% if d.is_deleted%} 
+                                            <td style="color: red;">Deleted</td> 
+                                            {%else%} 
+                                            <td >Active</td> 
                                             {%endif%}
-                                        </td>
-                                    {%empty%}
-                                    <tr><td> Data Empty</td></tr>     
-                                    </tr>
+                                            <td>
+                                                {% if d.is_deleted%}  
+                                                <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-msn="{{d.msn}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                                                {%else%}
+                                                <button class="btn"data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-msn="{{d.msn}}" data-lastdef="{{d.first_def}}" data-firstdef="{{d.last_def}}"><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                                <button class="btn"data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-msn="{{d.msn}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                                {%endif%}
+                                            </td>
+                                        {%empty%}
+                                            <tr><td> Data Empty</td></tr>     
+                                        </tr>
                                     {% endfor %}             
                             </tbody>              
                         </table>

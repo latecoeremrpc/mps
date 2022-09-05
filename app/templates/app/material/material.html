@@ -57,34 +57,34 @@
                                     
                                        
                                         {% for d in data %}
-                                        <tr>
-                                            <td>{{ d.id}}</td>   
-                                            <td>{{ d.material}}</td>
-                                            <td>{{ d.AllocatedTime}}</td>
-                                            <td>{{ d.Leadtime}}</td>
-                                            <td>{{ d.Delta_First_Def_And_StartManuf}}</td>
-                                            <td>{{ d.Delta_Last_Def_And_End_Of_Manuf}}</td>
-                                            <td>{{ d.Delta_Buffer_OTD}}</td>
-                                            <td>{{ d.workstation}}</td>
-                                            <td>{{ d.Allocated_Time_On_Workstation}}</td>
-                                            <td>{{ d.Smooth_Family}}</td>
-                                            {% if d.is_deleted%} 
-                                            <td style="color: red;">Deleted</td> 
-                                            {%else%} 
-                                            <td >Active</td> 
-                                            {%endif%}
-                                            <td>
-                                            {% if d.is_deleted%}
-                                            <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-material="{{d.material}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
-                                            {%else%}
-                                            <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-leadtime="{{d.Leadtime}}" data-smoothfamily="{{d.Smooth_Family}}" data-allocated="{{d.Allocated_Time_On_Workstation}}" data-workstation="{{d.workstation}}" data-deltabuffer="{{d.Delta_Buffer_OTD}}" data-deltalast="{{d.Delta_Last_Def_And_End_Of_Manuf}}" data-allocatedtime="{{d.AllocatedTime}}" data-deltafirst="{{d.Delta_First_Def_And_StartManuf}}" data-material="{{d.material}}" ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
-                                            <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-material="{{d.material}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
-                                            {%endif%}
-                                            </td>
-                                            
-                                        {%empty%}
-                                        <tr><td> Data Empty</td></tr> 
-                                        </tr>
+                                            <tr>
+                                                <td>{{ d.id}}</td>   
+                                                <td>{{ d.material}}</td>
+                                                <td>{{ d.AllocatedTime}}</td>
+                                                <td>{{ d.Leadtime}}</td>
+                                                <td>{{ d.Delta_First_Def_And_StartManuf}}</td>
+                                                <td>{{ d.Delta_Last_Def_And_End_Of_Manuf}}</td>
+                                                <td>{{ d.Delta_Buffer_OTD}}</td>
+                                                <td>{{ d.workstation}}</td>
+                                                <td>{{ d.Allocated_Time_On_Workstation}}</td>
+                                                <td>{{ d.Smooth_Family}}</td>
+                                                {% if d.is_deleted%} 
+                                                <td style="color: red;">Deleted</td> 
+                                                {%else%} 
+                                                <td >Active</td> 
+                                                {%endif%}
+                                                <td>
+                                                {% if d.is_deleted%}
+                                                <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-material="{{d.material}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                                                {%else%}
+                                                <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-leadtime="{{d.Leadtime}}" data-smoothfamily="{{d.Smooth_Family}}" data-allocated="{{d.Allocated_Time_On_Workstation}}" data-workstation="{{d.workstation}}" data-deltabuffer="{{d.Delta_Buffer_OTD}}" data-deltalast="{{d.Delta_Last_Def_And_End_Of_Manuf}}" data-allocatedtime="{{d.AllocatedTime}}" data-deltafirst="{{d.Delta_First_Def_And_StartManuf}}" data-material="{{d.material}}" ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                                <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-material="{{d.material}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                                {%endif%}
+                                                </td>
+                                                
+                                            {%empty%}
+                                                <tr><td> Data Empty</td></tr> 
+                                            </tr>
                                         {% endfor %}
                                 </tbody>               
                             </table>
