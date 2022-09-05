@@ -65,42 +65,40 @@
                             </thead>
                             <tbody>
                                 {% for index,data in records.iterrows %}
-                                <tr {%if data.closed == True %} style="display:none;" {% endif %}>
-                                    <!--coois-->
-                                    <!-- <td>{{data.id}}</td> -->
-                                    <td><input id="index" name="index" type="text" class="form-control custom-input"  value="{{data.id}}" readonly="readonly"> </td> 
-                                    <td><input id="closed" name="closed" type="text" class="form-control custom-input"  value="{{data.closed}}" readonly="readonly"> </td> 
-                                    <td><input id="division" name="division" type="text" class="form-control custom-input"  value="{{ data.division }}" readonly="readonly"></td> 
-                                    <td><input id="profit_centre" name="profit_centre" type="text" class="form-control custom-input"  value="{{ data.profit_centre}}"readonly="readonly"  ></td>
-                                    <td><input id="order" name="order" type="text" class="form-control custom-input"  value="{{data.order}}" readonly="readonly" ></td>   
-                                    <td><input id="material" name="material" type="text" class="form-control custom-input"  value="{{data.material}}"readonly="readonly"  ></td>
-                                    <td><input id="designation" name="designation" type="text" class="form-control custom-input"  value="{{ data.designation}}"readonly="readonly" readonly="readonly"></td>
-                                    <td><input id="order_type" name="order_type" type="text" class="form-control custom-input"  value="{{ data.order_type}}" readonly="readonly" ></td>
-                                    <td><input id="order_quantity" name="order_quantity" type="text" class="form-control custom-input"  value="{{ data.order_quantity}}" readonly="readonly"  ></td>
-                                    <td><input id="date_start_plan" name="date_start_plan" type="text" class="form-control custom-input"  value="{{ data.date_start_plan | date:'d/m/Y'}}" readonly="readonly"></td>
-                                    <td><input id="date_end_plan" name="date_end_plan" type="text" class="form-control custom-input"  value="{{ data.date_end_plan | date:'d/m/Y'}}" readonly="readonly"></td>
-                                    <td><input id="fixation" name="fixation" type="text" class="form-control custom-input"  value="{{ data.fixation}}" readonly="readonly"  ></td>
-                                    <td><input id="order_stat" name="order_stat" type="text" class="form-control custom-input"  value="{{ data.order_stat }}" readonly="readonly"  ></td>
-                                    <td><input id="customer_order" name="customer_order" type="text" class="form-control custom-input"  value="{{ data.customer_order}}" readonly="readonly"  ></td>
-                                    <td><input id="date_end_real" name="date_end_real" type="text" class="form-control custom-input"  value="{{data.date_end_real | date:'d/m/Y'}}" readonly="readonly"  ></td>
-                                    <!--zpp-->
-                                    <td><input id="date_reordo" name="date_reordo" type="text" class="form-control custom-input"  value="{{ data.date_reordo | date:'d/m/Y'}}" readonly="readonly"  ></td>
-                                    <td><input id="message" name="message" type="text" class="form-control custom-input"  value="{{ data.message}}" readonly="readonly"  ></td>
-                                    <!--material-->
-                                    <td><input id="AllocatedTime" name="AllocatedTime" type="text" class="form-control custom-input"  value="{{ data.AllocatedTime}}" readonly="readonly"  ></td>
-                                    <td><input id="Leadtime" name="Leadtime" type="text" class="form-control custom-input"  value="{{data.Leadtime}}" readonly="readonly"  ></td>
-                                    <td><input id="workstation" name="workstation" type="text" class="form-control custom-input"  value="{{data.workstation}}" readonly="readonly"  ></td>
-                                    <td><input id="Allocated_Time_On_Workstation" name="Allocated_Time_On_Workstation" type="text" class="form-control custom-input"  value="{{ data.Allocated_Time_On_Workstation}}" readonly="readonly"  ></td>
-                                    <td><input id="Smooth_Family" name="Smooth_Family" type="text" class="form-control custom-input"  value="{{ data.Smooth_Family}}" readonly="readonly" ></td>
-                                    <td><input  id="Ranking" name="Ranking" type="date" class="form-control" value="{{ data.Ranking| date:'Y-m-d'}}"></td>
-                                    <td><input  id="freeze_end_date" name="freeze_end_date" type="datetime-local" class="form-control" custom-input></td>
-                                    <td><input  id="Remain to do" name="Remain to do" type="text" class="form-control" custom-input ></td>
-                                    <!-- <td>{{data.smoothing_end_date}}</td> -->
+                                    <tr {%if data.closed == True %} style="display:none;" {% endif %}>
+                                        <!--coois-->
+                                        <!-- <td>{{data.id}}</td> -->
+                                        <td><input id="index" name="index" type="text" class="form-control custom-input"  value="{{data.id}}" readonly="readonly"> </td> 
+                                        <td><input id="closed" name="closed" type="text" class="form-control custom-input"  value="{{data.closed}}" readonly="readonly"> </td> 
+                                        <td><input id="division" name="division" type="text" class="form-control custom-input"  value="{{ data.division }}" readonly="readonly"></td> 
+                                        <td><input id="profit_centre" name="profit_centre" type="text" class="form-control custom-input"  value="{{ data.profit_centre}}"readonly="readonly"  ></td>
+                                        <td><input id="order" name="order" type="text" class="form-control custom-input"  value="{{data.order}}" readonly="readonly" ></td>   
+                                        <td><input id="material" name="material" type="text" class="form-control custom-input"  value="{{data.material}}"readonly="readonly"  ></td>
+                                        <td><input id="designation" name="designation" type="text" class="form-control custom-input"  value="{{ data.designation}}"readonly="readonly" readonly="readonly"></td>
+                                        <td><input id="order_type" name="order_type" type="text" class="form-control custom-input"  value="{{ data.order_type}}" readonly="readonly" ></td>
+                                        <td><input id="order_quantity" name="order_quantity" type="text" class="form-control custom-input"  value="{{ data.order_quantity}}" readonly="readonly"  ></td>
+                                        <td><input id="date_start_plan" name="date_start_plan" type="text" class="form-control custom-input"  value="{{ data.date_start_plan | date:'d/m/Y'}}" readonly="readonly"></td>
+                                        <td><input id="date_end_plan" name="date_end_plan" type="text" class="form-control custom-input"  value="{{ data.date_end_plan | date:'d/m/Y'}}" readonly="readonly"></td>
+                                        <td><input id="fixation" name="fixation" type="text" class="form-control custom-input"  value="{{ data.fixation}}" readonly="readonly"  ></td>
+                                        <td><input id="order_stat" name="order_stat" type="text" class="form-control custom-input"  value="{{ data.order_stat }}" readonly="readonly"  ></td>
+                                        <td><input id="customer_order" name="customer_order" type="text" class="form-control custom-input"  value="{{ data.customer_order}}" readonly="readonly"  ></td>
+                                        <td><input id="date_end_real" name="date_end_real" type="text" class="form-control custom-input"  value="{{data.date_end_real | date:'d/m/Y'}}" readonly="readonly"  ></td>
+                                        <!--zpp-->
+                                        <td><input id="date_reordo" name="date_reordo" type="text" class="form-control custom-input"  value="{{ data.date_reordo | date:'d/m/Y'}}" readonly="readonly"  ></td>
+                                        <td><input id="message" name="message" type="text" class="form-control custom-input"  value="{{ data.message}}" readonly="readonly"  ></td>
+                                        <!--material-->
+                                        <td><input id="AllocatedTime" name="AllocatedTime" type="text" class="form-control custom-input"  value="{{ data.AllocatedTime}}" readonly="readonly"  ></td>
+                                        <td><input id="Leadtime" name="Leadtime" type="text" class="form-control custom-input"  value="{{data.Leadtime}}" readonly="readonly"  ></td>
+                                        <td><input id="workstation" name="workstation" type="text" class="form-control custom-input"  value="{{data.workstation}}" readonly="readonly"  ></td>
+                                        <td><input id="Allocated_Time_On_Workstation" name="Allocated_Time_On_Workstation" type="text" class="form-control custom-input"  value="{{ data.Allocated_Time_On_Workstation}}" readonly="readonly"  ></td>
+                                        <td><input id="Smooth_Family" name="Smooth_Family" type="text" class="form-control custom-input"  value="{{ data.Smooth_Family}}" readonly="readonly" ></td>
+                                        <td><input  id="Ranking" name="Ranking" type="date" class="form-control" value="{{ data.Ranking| date:'Y-m-d'}}"></td>
+                                        <td><input  id="freeze_end_date" name="freeze_end_date" type="datetime-local" class="form-control" custom-input></td>
+                                        <td><input  id="Remain to do" name="Remain to do" type="text" class="form-control" custom-input ></td>
+                                        <!-- <td>{{data.smoothing_end_date}}</td> -->
                                     </tr>
-                
-
                                     {%empty%}
-                                    <tr><td> Data Empty</td></tr>
+                                        <tr><td> Data Empty</td></tr>
                                     {% endfor %}
                             </tbody>      
                          </table>   

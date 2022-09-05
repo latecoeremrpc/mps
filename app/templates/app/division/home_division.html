@@ -1,5 +1,6 @@
 <!-- Read Modal HTML -->
 {% extends 'base.html' %}
+{% load static %}
 {% load crispy_forms_filters %}
 {% block content %}
 
@@ -71,7 +72,7 @@
                                         </td>
                                     </tr>
                                     {%empty%}
-                                        <tr><td> Data Empty</td></tr>
+                                        <tr><td colspan="6"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td></tr> 
                                     {% endfor %} 
                             </tbody>                      
                         </table>
