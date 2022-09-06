@@ -11,12 +11,53 @@
                 {%include 'app/alerts/alert.html'%}
             {% endfor %}
         {% endif %}
+
+        
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card card-outline collapsed-card">
+                                <div class="card-header ui-sortable-handle">
+                                    <h5 class="card-title" ><strong> Setup </strong></h5>
+                                    <!--card tools-->
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                              <div class="card-body" style="width:600 ;">
+                                <label >Official calendar</label>
+                                <input  type="radio" id="official_calendar" name="calendar" value="Custom calendar" checked>    
+                                <label >Custom calendar</label>
+                                <input  type="radio" id="custom_calendar" name="calendar" value="Custom calendar">
+                              </div>
+                              <!-- <div class="card-footer clearfix">
+                              </div> -->
+                        </div>  
+                    </div>
+                </div>
+           <!--disabled radio custom calendar-->     
+          <script>
+            document.getElementById("custom_calendar").disabled = true;
+          </script> 
         
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary card-outline">
-                      <div class="card-header">
-                        <h5 class="m-0">Planning</h5>
+                      <div class="card-header ui-sortable-handle">
+                        <h5 class="card-title" ><strong> Shopfloor </strong></h5>
+                        <!--card tools-->
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                            <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                       </div>
                       <div class="card-body table-responsive p-0 " style="height: 600px;">
                       <div class="card-body">
@@ -106,6 +147,7 @@
                     </div>
                 </div>  
                 <input type="submit" class="btn btn:hover btn-primary custom-save-shopfloor" value="Save" >
+                <!-- <input type="button"  data-target="#launching_calculation" data-toggle="modal" class="btn btn:hover btn-primary custom-save-shopfloor" value="Save"  > -->
                 <!-- <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" style="float: right;"> -->
             
              </form>  
@@ -118,5 +160,32 @@
 <!-- <script>
     jspreadsheet(document.getElementById('spreadsheet')); 
 </script> -->
+
+
+<!--------------------------Model for shopfloor----------------------->
+<!--create Division modal-->
+<!-- <div class="modal" id="launching_calculation">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action ="">
+                {% csrf_token %}
+                <div class="modal-header">						
+                <h4 class="modal-title">Setup</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="radio">
+                    custom (disabled) / officiel (selected) 
+                </div>
+                
+                <div class="modal-footer">
+                <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <input type="submit" class="btn btn:hover btn-primary" value="Save">
+                </div>
+        </form>
+        </div>
+    </div>
+  </div> -->
+
+<!-------------------------------------------------------------------->
 
 {% endblock %}
