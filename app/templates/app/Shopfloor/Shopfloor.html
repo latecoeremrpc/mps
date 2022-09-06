@@ -12,9 +12,10 @@
             {% endfor %}
         {% endif %}
 
-        
+                <!--card close by default-->
                 <div class="row">
                     <div class="col-12">
+                        <!--collapsed-card -->
                         <div class="card card-outline collapsed-card">
                                 <div class="card-header ui-sortable-handle">
                                     <h5 class="card-title" ><strong> Setup </strong></h5>
@@ -28,11 +29,25 @@
                                         </button>
                                     </div>
                                 </div>
-                              <div class="card-body" style="width:600 ;">
-                                <label >Official calendar</label>
-                                <input  type="radio" id="official_calendar" name="calendar" value="Custom calendar" checked>    
-                                <label >Custom calendar</label>
-                                <input  type="radio" id="custom_calendar" name="calendar" value="Custom calendar">
+                                <div class="card-body" >
+                                    <h4>Calendar :</h4>
+                                    <!-- <div class="custom-control custom-radio">
+
+                                        <label class="custom-control-label"  for="official_calendar" >Official calendar</label>
+                                        <input type="radio" id="official_calendar" name="calendar"  class="custom-control-input" checked>    
+                                        
+                                        <label class="custom-control-label" for="custom_calendar">Custom calendar</label>
+                                        <input type="radio" id="custom_calendar" name="calendar" >
+                                    </div>
+                                    -->
+                                    <div class="custom-control custom-radio">
+                                        <input class="custom-control-input" type="radio" id="official" name="calendar" checked="">
+                                        <label for="official" class="custom-control-label">Official calendar</label>
+                                    </div>
+                                    <div class="custom-control custom-radio">
+                                        <input class="custom-control-input" type="radio" id="custom" name="calendar">
+                                        <label for="custom" class="custom-control-label">Custom calendar</label>
+                                    </div>
                               </div>
                               <!-- <div class="card-footer clearfix">
                               </div> -->
@@ -41,7 +56,7 @@
                 </div>
            <!--disabled radio custom calendar-->     
           <script>
-            document.getElementById("custom_calendar").disabled = true;
+            document.getElementById("custom").disabled = true;
           </script> 
         
         <div class="row">
