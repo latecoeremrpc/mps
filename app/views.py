@@ -494,6 +494,16 @@ def work_data(request,division,product):
         # type = request.POST.getlist('cycle-type-M2')
         cycle_id = request.POST.getlist('cycle_id')
         # If id exist Update Object if not create new one
+        # ******************************
+        print('******************************')
+        print(product)
+        print(cycle_time)
+        print(smooth_family)
+        print(profit_center)
+
+
+        # ******************************
+
 
         if id and cycle_id:
             # get object workdata
@@ -1127,7 +1137,7 @@ def shopfloor(request):
     # to use in shopfloor
     zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
-    material_data=Material.objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
+    material_data=Material.undeleted_objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
     # to use in smoothing calcul
     # product_work_data=Product.objects.values('planning','workdata__date','cycle__cycle_time')
 
@@ -1245,6 +1255,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
         for key,value in table:
             if key_date == key:
                 cycle=value
+        print(cycle)        
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
         return date(1900,1,1)   
