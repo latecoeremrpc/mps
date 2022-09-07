@@ -1251,7 +1251,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
-        print(cycle)
+    print(cycle)
     # get start time for current date
     start_time = WorkData.undeleted_objects.filter(date=current_date).values_list('startTime',flat=True).first()
     # get end time for current date

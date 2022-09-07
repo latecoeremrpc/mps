@@ -323,6 +323,7 @@ id_workdata:
                     smooth_input = document.createElement("input");
                     smooth_input.setAttribute("type", "text");
                     smooth_input.setAttribute("name", "smooth_family");
+                    smooth_input.setAttribute("disabled", "");
                     smooth_input.setAttribute("value", "{{i.material__Smooth_Family}}"),
                     smooth_input.setAttribute("class", "form-control"),
                     // add a node to the end of the list 
@@ -335,6 +336,7 @@ id_workdata:
                     cycle_input = document.createElement("input");
                     cycle_input.setAttribute("type", "number");
                     cycle_input.setAttribute("name", "cycle_time");
+                    cycle_input.setAttribute("step", "0.01");
                     cycle_input.setAttribute("class", "form-control"),
                     cycle_input.setAttribute('required', '');
                     td2.appendChild(cycle_input);
@@ -386,6 +388,7 @@ id_workdata:
                         smooth_input = document.createElement("input");
                         smooth_input.setAttribute("type", "text");
                         smooth_input.setAttribute("name", "smooth_family");
+                        smooth_input.setAttribute("disabled", "");
                         smooth_input.setAttribute("value", "{{i.smooth_family}}"),
                         smooth_input.setAttribute("class", "form-control"),
 
@@ -398,6 +401,7 @@ id_workdata:
                         // create cycle_time input
                         cycle_input = document.createElement("input");
                         cycle_input.setAttribute("type", "number");
+                        cycle_input.setAttribute("step", "0.01");
                         cycle_input.setAttribute("name", "cycle_time");
                         cycle_input.setAttribute("value", "{{i.cycle_time}}"),
                         cycle_input.setAttribute("class", "form-control"),
@@ -416,7 +420,6 @@ id_workdata:
                         hour_input.setAttribute("id", "hour");
                         hour_input.setAttribute("name", "cycle-type-{{i.smooth_family}}");
                         hour_input.setAttribute("value", "Hours");
-                        hour_input.setAttribute("checked", "checked");
                         hour_input.setAttribute("checked", "checked");
 
                         td3.appendChild(hour_input);
