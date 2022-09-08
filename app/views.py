@@ -154,7 +154,9 @@ def material(request ,division, product):
 #******************** calendar****************************
 def calendar(request,division,product):
     #get smooth family from product
-    smooth_family =Product.undeleted_objects.filter(id = product).values('material__Smooth_Family').distinct().order_by('material__Smooth_Family')
+    smooth_family =Material.undeleted_objects.filter(id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
+    print('**********')
+    print(smooth_family)
     # get cycle objects
     cycle=Cycle.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
     #material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
@@ -303,7 +305,8 @@ def duplicate_calendar(request,division,product):
 #custom calendar
 def custom_calendar(request,division,product):
     #get smooth family
-    smooth_family =Product.undeleted_objects.filter(id = product).values('material__Smooth_Family').distinct().order_by('material__Smooth_Family')
+    smooth_family =Material.undeleted_objects.filter(id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
+    print(smooth_family)
     #  get cycle data objects
     cycle= Cycle.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
     # material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')

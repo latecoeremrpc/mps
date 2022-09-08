@@ -290,7 +290,7 @@ function editEvent(event) {
                     smooth_input.setAttribute("type", "text");
                     smooth_input.setAttribute("name", "smooth_family");
                     smooth_input.setAttribute("readonly", "");
-                    smooth_input.setAttribute("value", "{{i.material__Smooth_Family}}"),
+                    smooth_input.setAttribute("value", "{{i.Smooth_Family}}"),
                     smooth_input.setAttribute("class", "form-control"),
                     // add a node to the end of the list 
                     td1.appendChild(smooth_input);
@@ -318,7 +318,7 @@ function editEvent(event) {
                     hour_input = document.createElement("input");
                     hour_input.setAttribute("type", "radio");
                     hour_input.setAttribute("id", "hour");
-                    hour_input.setAttribute("name", "cycle-type-{{i.material__Smooth_Family}}");
+                    hour_input.setAttribute("name", "cycle-type-{{i.Smooth_Family}}");
                     hour_input.setAttribute("value", "Hours");
                     hour_input.setAttribute("checked", "checked");
                     td3.appendChild(hour_input);
@@ -330,7 +330,7 @@ function editEvent(event) {
                     day_input = document.createElement("input");
                     day_input.setAttribute("type", "radio");
                     day_input.setAttribute("id", "day");
-                    day_input.setAttribute("name", "cycle-type-{{i.material__Smooth_Family}}");
+                    day_input.setAttribute("name", "cycle-type-{{i.Smooth_Family}}");
                     day_input.setAttribute("value", "Days");
                     td3.appendChild(day_input);
                     tr1.appendChild(td3);
