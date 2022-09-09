@@ -510,7 +510,10 @@ def work_data(request,division,product):
         # print(type(startTime))
         # print((endTime - startTime))
         # print(type(endTime) - type(startTime))
-        
+        # start_time = datetime.strptime(startTime, '%H:%M:%S')
+        # end_time = datetime.strptime(endTime, '%H:%M:%S')
+        # print(start_time)
+        # print(end_time)
 
         # ******************************
 
@@ -543,6 +546,12 @@ def work_data(request,division,product):
                     cycle_type_input = request.POST.get('cycle-type-'+cycle_info.smooth_family)
                     if cycle_type_input == 'Days':
                         # update cycle_time
+                        # print('value:',value)
+                        # print(end_time - start_time)
+                        # print(end_time)
+                        # print(start_time)
+                        # print(type(end_time - start_time))
+                        # print(type(value))
                         cycle_info.cycle_time=float(value) * 16
                         # cycle_info.cycle_time=float(value) * (endTime - startTime)
 
