@@ -154,9 +154,9 @@ def material(request ,division, product):
 #******************** calendar****************************
 def calendar(request,division,product):
     #get smooth family from product
-    smooth_family =Material.undeleted_objects.filter(id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
-    print('**********')
-    print(smooth_family)
+    smooth_family= Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
+    # print('**********')
+    # print(smooth_family)
     # get cycle objects
     cycle=Cycle.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
     #material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
@@ -306,7 +306,7 @@ def duplicate_calendar(request,division,product):
 def custom_calendar(request,division,product):
     #get smooth family
     smooth_family =Material.undeleted_objects.filter(id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
-    print(smooth_family)
+    # print(smooth_family)
     #  get cycle data objects
     cycle= Cycle.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
     # material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
@@ -498,12 +498,19 @@ def work_data(request,division,product):
         cycle_id = request.POST.getlist('cycle_id')
         # If id exist Update Object if not create new one
         # ******************************
-        print('******************************')
-        print(product)
-        print(cycle_time)
-        print(smooth_family)
-        print(profit_center)
-
+        # print('******************************')
+        # print(product)
+        # print(cycle_time)
+        # print(smooth_family)
+        # print(profit_center)
+        # print(endTime)
+        # print(type(endTime))
+        # print(int(float(endTime)))
+        # print(startTime)
+        # print(type(startTime))
+        # print((endTime - startTime))
+        # print(type(endTime) - type(startTime))
+        
 
         # ******************************
 
@@ -536,7 +543,9 @@ def work_data(request,division,product):
                     cycle_type_input = request.POST.get('cycle-type-'+cycle_info.smooth_family)
                     if cycle_type_input == 'Days':
                         # update cycle_time
-                        cycle_info.cycle_time=float(value) * 24
+                        cycle_info.cycle_time=float(value) * 16
+                        # cycle_info.cycle_time=float(value) * (endTime - startTime)
+
                     if cycle_type_input =='Hours':
                         cycle_info.cycle_time= float(value)
                     cycle_info.save()
@@ -564,7 +573,8 @@ def work_data(request,division,product):
                     for i,j in zip(smooth_family,cycle_time):
                         cycle_type_input = request.POST.get('cycle-type-'+i)
                         if cycle_type_input == 'Days':
-                            new_cycle_time= float(j) * 24
+                            # new_cycle_time= float(j) * (endTime - startTime)
+                            cycle_info.cycle_time=float(value) * 16
                         if cycle_type_input == 'Hours':
                             new_cycle_time=j
                         cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -581,7 +591,7 @@ def work_data(request,division,product):
                     for i,j in zip(smooth_family,cycle_time):
                         cycle_type_input = request.POST.get('cycle-type-'+i)
                         if cycle_type_input == 'Days':
-                            new_cycle_time= float(j) * 24
+                            new_cycle_time= float(j) * 16
                         if cycle_type_input == 'Hours':
                             new_cycle_time=j
                         cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -610,7 +620,7 @@ def work_data(request,division,product):
                         for i,j in zip(smooth_family,cycle_time):
                             cycle_type_input = request.POST.get('cycle-type-'+i)
                             if cycle_type_input == 'Days':
-                                new_cycle_time= float(j) * 24
+                                new_cycle_time= float(j) * 16
                             if cycle_type_input == 'Hours':
                                 new_cycle_time=j
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -629,7 +639,7 @@ def work_data(request,division,product):
                             cycle_type_input = request.POST.get('cycle-type-'+i)
                             if cycle_type_input == 'Days':
                                 print('*****j',j)
-                                new_cycle_time= float(j) * 24
+                                new_cycle_time= float(j) * 16
                             if cycle_type_input == 'Hours':
                                 new_cycle_time=j
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -1241,8 +1251,7 @@ def shopfloor(request):
 #     return   smooth_date_calcul(new_date,table,designation,cycle,current_date)
 
 
-
-
+ 
 
 #calcul smooth end date(Recursive Function)
 def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle=None,prev_date=None):
@@ -1254,7 +1263,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     # Check and get cycle
     try:
         # key : contains the concatenation between profit_center and smooth family and date of the table 
-        # value : c'est la valeur de cycle time de work data 
+        # value :cycle time
         for key,value in table:
             if key_date == key:
                 cycle=value
@@ -1265,12 +1274,14 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
-    print(cycle)
+    
+    # ***************************************
+
     # get start time for current date
     start_time = WorkData.undeleted_objects.filter(date=current_date).values_list('startTime',flat=True).first()
     # get end time for current date
     end_time = WorkData.undeleted_objects.filter(date=current_date).values_list('endTime',flat=True).first()
-    
+        
     # dictionary of business_hours
     business_hours = {
     # monday = 0, tuesday = 1, ... same pattern as date.weekday()
@@ -1280,16 +1291,17 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     }
 
     # get Holidays 
+    #get product id using profit center
     holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True) # flat=True this will mean the returned results are single values, rather than one-tuples
-    
+
     # function is_in_open_hours
     def is_in_open_hours(dt):
         # return dt.weekday() in business_hours["weekdays"] \
         #    and dt.date() not in holidays \
         #    and business_hours["from"].hour <= dt.time().hour < business_hours["to"].hour
             return  dt.date() not in holidays \
-           and business_hours["from"].hour <= dt.time().hour < business_hours["to"].hour
-   
+            and business_hours["from"].hour <= dt.time().hour < business_hours["to"].hour
+
     # function get_next_open_datetime 
     def get_next_open_datetime(dt):
         while True:
@@ -1297,27 +1309,38 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
             # if dt.weekday() in business_hours["weekdays"] and dt.date() not in holidays:
             #     dt = datetime.combine(dt.date(), business_hours["from"])
             #     return dt
-
+            # print('get next day')
+            # print('--------------',dt.date())
+            # print('get next day')
+            # print('--------------',holidays)
             dt = dt + timedelta(days=1)
             # check if open date
             if dt.date() not in holidays:
                 dt = datetime.combine(dt.date(), business_hours["from"])
-                return dt    
-   
+                # print('--------------',dt)
+                return dt  
     # function add hours
     def add_hours(dt, hours):
         while hours != 0:
+            print('dt:',dt)
+            print('hours:',hours)
+            print(type(hours))
+            if hours < 0:
+                return dt+timedelta(hours=hours)
             # check if open hour for open date
             if is_in_open_hours(dt):
                 dt = dt + timedelta(hours=1)
                 hours = hours - 1
             else:
                 dt = get_next_open_datetime(dt)
+                # print('****************dt',dt)
         return dt
+
+    # ***************************************
+
+    # print(cycle)
     # new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
     new_date=add_hours(prev_date, cycle)
-
-    
     return   smooth_date_calcul(new_date,table,profit_center,Smooth_Family,cycle,current_date)
 
 #******************************create_shopfloor*****************************************************
@@ -1385,7 +1408,7 @@ def create_shopfloor(request):
 
         # #Check if at least the first end date is present for each Smooth Family
         df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
-
+        print(df_for_check)
         # df_for_check = df[df['closed']==False]
         # print('----------------------')
         # print(df_for_check)
@@ -1531,7 +1554,7 @@ def result(request):
         # test if not freezed and not closed calcul smoothing
         if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']==False):
             df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])            
-    # print(df_dict_cycle)
+    # print(df_data.loc[i+1,'smoothing_end_date'])
     df_data=df_data.sort_values('id')
     # print(df_data)
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
