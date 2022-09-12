@@ -156,7 +156,7 @@ def calendar(request,division,product):
     #get smooth family from product
     smooth_family= Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # print('**********')
-    # print(smooth_family)
+    print(smooth_family)
     # get cycle objects
     cycle=Cycle.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
     #material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
@@ -305,8 +305,8 @@ def duplicate_calendar(request,division,product):
 #custom calendar
 def custom_calendar(request,division,product):
     #get smooth family
-    smooth_family =Material.undeleted_objects.filter(id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
-    # print(smooth_family)
+    smooth_family= Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
+    print('**************',smooth_family)
     #  get cycle data objects
     cycle= Cycle.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
     # material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
@@ -493,31 +493,20 @@ def work_data(request,division,product):
         profit_center= Product.objects.all().filter(id = product).values('Profit_center').first()
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
-        # type = request.POST.getlist('cycle-type-8A')
-        # type = request.POST.getlist('cycle-type-M2')
         cycle_id = request.POST.getlist('cycle_id')
+        # convert starttime and endtime to datetime
+        start_time = datetime.strptime(startTime, '%H:%M:%S')
+        end_time = datetime.strptime(endTime, '%H:%M:%S')
+        if start_time == end_time :
+            work_hours= 24
+        elif end_time > start_time:
+            work_hours= ((end_time - start_time).total_seconds() / 3600)
+        else:
+            work_hours = ((end_time+ timedelta(days =1)) - start_time ).total_seconds() / 3600
+            
+        
+
         # If id exist Update Object if not create new one
-        # ******************************
-        # print('******************************')
-        # print(product)
-        # print(cycle_time)
-        # print(smooth_family)
-        # print(profit_center)
-        # print(endTime)
-        # print(type(endTime))
-        # print(int(float(endTime)))
-        # print(startTime)
-        # print(type(startTime))
-        # print((endTime - startTime))
-        # print(type(endTime) - type(startTime))
-        # start_time = datetime.strptime(startTime, '%H:%M:%S')
-        # end_time = datetime.strptime(endTime, '%H:%M:%S')
-        # print(start_time)
-        # print(end_time)
-
-        # ******************************
-
-
         if id and cycle_id:
             # get object workdata
             #first : to get object not queryset 
@@ -546,15 +535,10 @@ def work_data(request,division,product):
                     cycle_type_input = request.POST.get('cycle-type-'+cycle_info.smooth_family)
                     if cycle_type_input == 'Days':
                         # update cycle_time
-                        # print('value:',value)
-                        # print(end_time - start_time)
-                        # print(end_time)
-                        # print(start_time)
-                        # print(type(end_time - start_time))
-                        # print(type(value))
-                        cycle_info.cycle_time=float(value) * 16
-                        # cycle_info.cycle_time=float(value) * (endTime - startTime)
-
+                        # cycle_info.cycle_time=float(value) * 16
+                        print(end_time)
+                        print(type(end_time))
+                        cycle_info.cycle_time= float(value) * work_hours
                     if cycle_type_input =='Hours':
                         cycle_info.cycle_time= float(value)
                     cycle_info.save()
@@ -583,7 +567,7 @@ def work_data(request,division,product):
                         cycle_type_input = request.POST.get('cycle-type-'+i)
                         if cycle_type_input == 'Days':
                             # new_cycle_time= float(j) * (endTime - startTime)
-                            cycle_info.cycle_time=float(value) * 16
+                            cycle_info.cycle_time=float(value) * work_hours
                         if cycle_type_input == 'Hours':
                             new_cycle_time=j
                         cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -600,7 +584,7 @@ def work_data(request,division,product):
                     for i,j in zip(smooth_family,cycle_time):
                         cycle_type_input = request.POST.get('cycle-type-'+i)
                         if cycle_type_input == 'Days':
-                            new_cycle_time= float(j) * 16
+                            new_cycle_time= float(j) * work_hours
                         if cycle_type_input == 'Hours':
                             new_cycle_time=j
                         cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -629,7 +613,7 @@ def work_data(request,division,product):
                         for i,j in zip(smooth_family,cycle_time):
                             cycle_type_input = request.POST.get('cycle-type-'+i)
                             if cycle_type_input == 'Days':
-                                new_cycle_time= float(j) * 16
+                                new_cycle_time= float(j) * work_hours
                             if cycle_type_input == 'Hours':
                                 new_cycle_time=j
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -648,7 +632,7 @@ def work_data(request,division,product):
                             cycle_type_input = request.POST.get('cycle-type-'+i)
                             if cycle_type_input == 'Days':
                                 print('*****j',j)
-                                new_cycle_time= float(j) * 16
+                                new_cycle_time= float(j) * work_hours
                             if cycle_type_input == 'Hours':
                                 new_cycle_time=j
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -686,6 +670,16 @@ def custom_work(request,division,product):
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
         cycle_id = request.POST.getlist('cycle_id')
+
+        start_time = datetime.strptime(startTime, '%H:%M:%S')
+        end_time = datetime.strptime(endTime, '%H:%M:%S')
+        if start_time == end_time :
+            work_hours= 24
+        elif end_time > start_time:
+            work_hours= ((end_time - start_time).total_seconds() / 3600)
+        else:
+            work_hours = ((end_time+ timedelta(days =1)) - start_time ).total_seconds() / 3600
+
         # if id update else save
         if id:
             #get object work data
@@ -740,7 +734,7 @@ def custom_work(request,division,product):
                     for i,j in zip(smooth_family,cycle_time):
                         cycle_type_input = request.POST.get('cycle-type-'+i)
                         if cycle_type_input == 'Days':
-                            new_cycle_time= float(j) * 24
+                            new_cycle_time= float(j) * work_hours
                         if cycle_type_input == 'Hours':
                             new_cycle_time=j
                         cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
@@ -759,7 +753,7 @@ def custom_work(request,division,product):
                     for i,j in zip(smooth_family,cycle_time):
                         cycle_type_input = request.POST.get('cycle-type-'+i)
                         if cycle_type_input == 'Days':
-                            new_cycle_time= float(j) * 24
+                            new_cycle_time= float(j) * work_hours
                         if cycle_type_input == 'Hours':
                             new_cycle_time=j
                         cycle_data=Cycle(work_day=startDate,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
@@ -788,7 +782,7 @@ def custom_work(request,division,product):
                         for i,j in zip(smooth_family,cycle_time):
                             cycle_type_input = request.POST.get('cycle-type-'+i)
                         if cycle_type_input == 'Days':
-                            new_cycle_time= float(j) * 24
+                            new_cycle_time= float(j) * work_hours
                         if cycle_type_input == 'Hours':
                             new_cycle_time=j  
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
@@ -806,7 +800,7 @@ def custom_work(request,division,product):
                         for i,j in zip(smooth_family,cycle_time):
                             cycle_type_input = request.POST.get('cycle-type-'+i)
                             if cycle_type_input == 'Days':
-                                new_cycle_time= float(j) * 24
+                                new_cycle_time= float(j) * work_hours
                             if cycle_type_input == 'Hours':
                                 new_cycle_time=j
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
