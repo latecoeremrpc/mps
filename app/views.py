@@ -1570,20 +1570,33 @@ def planning(request):
     data=Shopfloor.objects.all()
     #Convert to DF
     df_data=pd.DataFrame(data.values())
+    # Program demand count per week
     #Get week from date_end_plan if date_reordo is null or Get week from date_reordo
     df_data['week_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
     df_data['year_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.year),(pd.to_datetime(df_data['date_reordo']).dt.year)).astype(int)
     df_data['year_week_programm_demand']=df_data['year_programm_demand'].astype(str)+'_'+df_data['week_programm_demand'].astype(str)
-    
     #Program demand count per week
     week_count=df_data.groupby('year_week_programm_demand')['id'].count().reset_index()
-    
+    print('************************************')
+    print(df_data['week_programm_demand'])
+    print(df_data['year_programm_demand'])
+    print(df_data['year_week_programm_demand'])
+
     #Demonstrated_capacity count per week
     df_status=df_data[df_data['order_stat'].str.contains('TCLO|LIVR')]
     df_status['year_week_end_date']=(pd.to_datetime(df_data['date_end_plan']).dt.year).astype(str)+'_'+(pd.to_datetime(df_data['date_end_plan']).dt.week).astype(str)
     week_demonstrated_capacity_count=df_status.groupby('year_week_end_date')['id'].count().reset_index()
     
-    return render(request,'app/planning.html',{'records':df_data,'week_count':week_count,'week_demonstrated_capacity_count':week_demonstrated_capacity_count})
+    # Production Plan count per week
+    # Get week from smoothing end date if freeze end date is null or Get week from freeze end date
+    df_data['week_production_plan']=np.where((df_data['Freeze_end_date'].isna()),(pd.to_datetime(df_data['smoothing_end_date']).dt.week),(pd.to_datetime(df_data['Freeze_end_date']).dt.week)).astype(int)
+    # df_data['week_production_plan']=np.where((df_data['Freeze_end_date'].isna()),df_data['smoothing_end_date'],False)
+    df_data['year_production_plan']=np.where((df_data['Freeze_end_date'].isna()),(pd.to_datetime(df_data['smoothing_end_date']).dt.year),(pd.to_datetime(df_data['Freeze_end_date']).dt.year)).astype(int)
+    df_data['year_week_production_plan']=df_data['year_production_plan'].astype(str)+'_'+df_data['week_production_plan'].astype(str)
+    week_production_plan_count=df_data.groupby('year_week_production_plan')['id'].count().reset_index()
+    # df_data.to_csv('df.csv')
+    
+    return render(request,'app/planning.html',{'records':df_data,'week_count':week_count,'week_demonstrated_capacity_count':week_demonstrated_capacity_count,'week_production_plan_count':week_production_plan_count})
 
 
 #Test for web excel jquery

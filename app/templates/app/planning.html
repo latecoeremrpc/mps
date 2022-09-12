@@ -4,16 +4,17 @@
 {% block content %} 
 
 <div class="row">
-    <div class="col-12">
+    <div class="col-6">
         {% include 'app/charts/week_count.html' %}
     </div>
-</div>
-<div class="row">
-    <div class="col-12">
+    <div class="col-6">
         {% include 'app/charts/week_demonstrated_capacity_count.html' %}
     </div>
-</div>
 
+    <div class="col-12">
+        {% include 'app/charts/week_production_plan.html' %}
+    </div>
+</div>
 
 
 {% endblock content%}
