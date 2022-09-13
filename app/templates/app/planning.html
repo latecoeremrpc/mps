@@ -1,20 +1,51 @@
 {% extends 'base.html' %}
-
-
 {% block content %} 
-
-<div class="row">
-    <div class="col-6">
-        {% include 'app/charts/week_count.html' %}
-    </div>
-    <div class="col-6">
-        {% include 'app/charts/week_demonstrated_capacity_count.html' %}
-    </div>
-
-    <div class="col-12">
-        {% include 'app/charts/week_production_plan.html' %}
+<div class="col-12">
+    <div class="info-box">
+        <span class="info-box-icon bg-info elevation-1"><i class="fa-regular fa-compass"></i></span>
+        <div class="info-box-content">
+            <span class="info-box-text">Demand vs. Production</span>
+            <!-- <span class="info-box-number">
+            10
+            <small>%</small>
+            </span> -->
+       </div>
     </div>
 </div>
+<div>
+    <!-- <h4 style="margin-bottom: 20px;">Demand vs. production visualization</h4> -->
+    <div class="row">
+        <div class="col-6">
+            {% include 'app/charts/week_count.html' %}
+        </div>
+        <div class="col-6">
+            {% include 'app/charts/week_demonstrated_capacity_count.html' %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            {% include 'app/charts/week_production_plan.html' %}
+        </div>
+    </div> 
+</div>
+<div class="col-12">
+    <div class="info-box">
+        <span class="info-box-icon bg-danger elevation-1"><i class="fa-solid fa-cart-flatbed"></i></span>
+        <div class="info-box-content">
+            <span class="info-box-text">Logistic stock</span>
+            <!-- <span class="info-box-number">
+            10
+            <small>%</small>
+            </span> -->
+            </div>
+    </div>
+</div>
+
+<!-- <div>
+    <h3>Logistic stock</h3>
+    
+</div> -->
+
 
 
 {% endblock content%}

@@ -1560,6 +1560,9 @@ def result(request):
     # print(df_data.loc[i+1,'smoothing_end_date'])
     df_data=df_data.sort_values('id')
     # print(df_data)
+    # df_data.to_csv('result.csv')
+
+
     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
 

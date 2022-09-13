@@ -5,73 +5,92 @@
         <i class="far fa-chart-bar"></i>
         Production Plan count per week
         </h3>
-        <div class="card-tools">
-            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-            </button>
+        <div class="card-tools"> 
+            <ul class="list-group list-group-horizontal" style="height: 35px;">
+                <li class="list-group-item" style="padding:7px;"><i type="button" data-toggle="modal" data-target="#week_production_plan" class="info fas fa-info-circle"></i></li>
+                <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i></button></li>
+                <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></i></button></li>
+            </ul>  
+        </div> 
+    </div>
+    <div class="card-body">  
+        <div style="height: 400px" >
+            <canvas id="week_production_plan_count" ></canvas>
+            <script>
+                var xValues = [{% for index, data in week_production_plan_count.iterrows %}  '{{data.year_week_production_plan}}', {% endfor %}];
+                var data = [{% for index, data in week_production_plan_count.iterrows %} {{data.id}}, {% endfor %}];
+                
+                const week_production_plan_count=new Chart("week_production_plan_count", {
+                    // plugins: [ChartDataLabels],
+                    type: "line",
+                    data: {
+                            labels: xValues,
+                            datasets: [
+                                {
+                                label: 'QTE Production Plan',
+                                backgroundColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b','#065a60','#006466','#38b000'],
+                                borderColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b',,'#065a60',"#006466",'#38b000'],
+                                borderWidth: 1,
+                                data: data
+                                }
+                            ]
+                            },
+                    options: {
+                        plugins: {
+                                datalabels: {
+                                    // anchor: 'end',
+                                    clamp: true,
+                                    color: 'black',
+                                    
+                                },
+                                legend: {
+                                display: true,
+                                position:'top',
+                                align:'middle',
+                                labels: {
+                                usePointStyle: true,
+                                boxWidth: 6,
+                                },
+                                },
+
+                                title: {
+                                    display: false,
+                                    text: "this is title"
+                                },
+                                
+                            },
+                            scales: {
+                                    y: {
+                                        min: 0
+                                    }
+                                },
+                            responsive: true,
+                            maintainAspectRatio:false, 
+                    }
+                });
+            </script>
         </div>
     </div>
-    <div class="card-body">
-          
-<div style="height: 400px" >
-    <canvas id="week_production_plan_count" ></canvas>
-    <script>
-        var xValues = [{% for index, data in week_production_plan_count.iterrows %}  '{{data.year_week_production_plan}}', {% endfor %}];
-        var data = [{% for index, data in week_production_plan_count.iterrows %} {{data.id}}, {% endfor %}];
-        
-        const week_production_plan_count=new Chart("week_production_plan_count", {
-            // plugins: [ChartDataLabels],
-            type: "line",
-            data: {
-                    labels: xValues,
-                    datasets: [
-                        {
-                        label: 'QTE Production Plan',
-                        backgroundColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b','#065a60','#006466','#38b000'],
-                        borderColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b',,'#065a60',"#006466",'#38b000'],
-                        borderWidth: 1,
-                        data: data
-                        }
-                    ]
-                    },
-            options: {
-                plugins: {
-                        datalabels: {
-                            // anchor: 'end',
-                            clamp: true,
-                            color: 'black',
-                            
-                        },
-                        legend: {
-                        display: true,
-                        position:'top',
-                        align:'middle',
-                        labels: {
-                        usePointStyle: true,
-                        boxWidth: 6,
-                        },
-                        },
-
-                        title: {
-                            display: false,
-                            text: "this is title"
-                        },
-                        
-                    },
-                    scales: {
-                            y: {
-                                min: 0
-                            }
-                        },
-                    responsive: true,
-                    maintainAspectRatio:false, 
-            }
-        });
-    </script>
-</div>
-
-    </div>
     <div class="card-footer clearfix">
-  </div>
+    </div>
 </div> 
+
+<!--Production plan informations-->
+<div class="modal" id="week_production_plan" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">						
+                <h4 class="modal-title">Production Plan</h4>
+            </div>
+            <div class="modal-body">	
+
+            </div>
+            <div class="modal-footer">
+                <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <!-- <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>   -->
+            </div>
+        </div>
+    </div>
+</div>
 
