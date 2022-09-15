@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render ,redirect ,get_object_or_404
 from app.models import Division,Material,HolidaysCalendar,Product,WorkData,CalendarConfigurationTreatement,CalendarConfigurationCpordo,Coois,Zpp,Shopfloor,Cycle
 from app.forms import DivisionForm,MaterialForm,ProductForm,CalendarConfigurationCpordoForm,CalendarConfigurationTreatementForm 
-from datetime import  date, datetime, timedelta, time
+from datetime import  date, datetime, timedelta, time, timezone
 from io import StringIO
 import psycopg2, pandas as pd
 import numpy as np
@@ -1259,6 +1259,16 @@ def shopfloor(request):
 #calcul smooth end date(Recursive Function)
 def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle=None,prev_date=None):
     #Get cycle for current day
+    print("**************")
+    print(current_date)
+    print(type(current_date))
+
+    # *******************************
+    # current_date = datetime.fromisoformat(current_date).astimezone(timezone.utc)
+    # current_date.strftime('%Y-%m-%d %H:%M:%S')
+    # print("current_date:",current_date)
+
+    # *******************************
     key_date=str(profit_center)+str(Smooth_Family)+str(current_date).split(' ')[0]
     #initial case treatment (when prev_date =  current_date)
     if prev_date is None:
@@ -1402,16 +1412,18 @@ def create_shopfloor(request):
             'Ranking':Ranking, 
             'Freeze_end_date':Freeze_end_date, 
             'Remain_to_do':Remain_to_do, 
-            'closed':closed, 
+            'closed':closed,
             }
+        # convert data to dataframe 
         df=pd.DataFrame(data)
-        print(df)
-        # delete old objects of shopfloor and save new
+        # convert freeze_end_date to datetime 
+        df['Freeze_end_date'] = pd.to_datetime(df['Freeze_end_date'])
+        # delete old objects of shopfloor and save new objects
         Shopfloor.objects.all().delete()
 
         # #Check if at least the first end date is present for each Smooth Family
         df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
-        print(df_for_check)
+        # print(df_for_check)
         # df_for_check = df[df['closed']==False]
         # print('----------------------')
         # print(df_for_check)
@@ -1420,10 +1432,21 @@ def create_shopfloor(request):
             if (df_for_check.loc[i,'Freeze_end_date']==''):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
                 return redirect("shopfloor")
+        #result
+        df=smoothing_calculate(df)
+        # df.to_csv('smoothing.csv')
+        # delete column from df
+        del df['key']
+        del df['freezed']
+        del df['key_start_day']
+        # delete index from df
+        df=df.reset_index(drop=True)
         #Save data
         save_shopfloor(df)
+
         messages.success(request,"Data saved successfully!") 
         return redirect(result)
+        # return render(request,'app/Shopfloor/result.html')
     
     
 #******************************save_shopfloor*****************************************************    
@@ -1444,8 +1467,11 @@ def save_shopfloor(df):
     # Using the StringIO method to set
     # as file object
     shopfloor = StringIO()
+
+    # df.to_csv('dfSaveShopfloor.csv',index=False)
+
     #convert file to csv
-    shopfloor.write(df.to_csv(index=None , header=None,sep=';'))
+    shopfloor.write(df.to_csv(index=False , header=None,sep=';'))
     # This will make the cursor at index 0
     shopfloor.seek(0)
     with conn.cursor() as c:
@@ -1486,8 +1512,10 @@ def save_shopfloor(df):
                     'Ranking',
                     'Freeze_end_date',
                     'Remain_to_do',
-                    'closed'
+                    'closed',
+                    'smoothing_end_date',
                     ],
+
             null="",
             sep=";",
         )
@@ -1531,7 +1559,7 @@ def save_shopfloor(df):
 
 
 # @allowed_users(allowed_roles=["Planificateur"])        
-def result(request):
+def smoothing_calculate(df_data):
     #Get Work date data
     cycle_data=Cycle.undeleted_objects.values('profit_center','smooth_family','cycle_time','work_day') 
     #Convert to DataFrame
@@ -1541,30 +1569,49 @@ def result(request):
     # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
     df_dict_cycle=dict(zip(df_cycle_data.key, df_cycle_data.cycle_time))
     #Get Shopfloor from DB
-    data=Shopfloor.objects.all().values()
-    df_data=pd.DataFrame(list(data))
+    # data=Shopfloor.objects.all().values()
+    # df_data=pd.DataFrame(list(data))
     df_data=df_data.sort_values('Ranking') #To add designation as sort
     #Add col freezed to know how row is freezed
+    # df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
     df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
     df_data['key']=df_data['profit_centre'].astype(str)+df_data['Smooth_Family'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
-    
 
     df_data[['Freeze_end_date']] = df_data[['Freeze_end_date']].astype(object).where(df_data[['Freeze_end_date']].notnull(), None)
     df_data['smoothing_end_date']=df_data['Freeze_end_date']
+    
+    
+    
+    # df_data.to_csv('freeze.csv')
     df_data.insert(0,'key_start_day','')
     for i in range(len(df_data)-1):
-        
         # test if not freezed and not closed calcul smoothing
-        if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']==False):
+        # if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']=='False'):
+        if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']== 'False'):
+            print("marwa")
             df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])            
     # print(df_data.loc[i+1,'smoothing_end_date'])
-    df_data=df_data.sort_values('id')
+    # df_data=df_data.sort_values('id')
     # print(df_data)
     # df_data.to_csv('result.csv')
+    # delete old objects of shopfloor and save new objects
+    # Shopfloor.objects.all().delete()
+
+    # df_data.drop(['key'])
+    # df_data.drop(['freezed'])
+    # df_data.to_csv('df.csv',index=False)
+    return df_data
+    # return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
 
-    return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
-
+# def result
+def result(request):
+    data=Shopfloor.objects.all().values().order_by('Smooth_Family','Ranking')
+    # print("'***********'")
+    # print(data)
+    # df_data=pd.DataFrame(list(data))
+    # df_data.to_csv('result.csv')
+    return render(request,'app/Shopfloor/result.html',{'records':data}) 
 
 #******************************Planning*****************************************************    
 #calcul KPIs
@@ -1598,6 +1645,8 @@ def planning(request):
     df_data['year_week_production_plan']=df_data['year_production_plan'].astype(str)+'_'+df_data['week_production_plan'].astype(str)
     week_production_plan_count=df_data.groupby('year_week_production_plan')['id'].count().reset_index()
     # df_data.to_csv('df.csv')
+
+    #Stock count per week
     
     return render(request,'app/planning.html',{'records':df_data,'week_count':week_count,'week_demonstrated_capacity_count':week_demonstrated_capacity_count,'week_production_plan_count':week_production_plan_count})
 

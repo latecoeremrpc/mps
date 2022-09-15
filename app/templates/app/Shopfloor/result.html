@@ -78,45 +78,46 @@
             
             
                                 
-                                {% for index,data in records.iterrows %}
-                                <tr>
-                                    <!--coois-->
-                                    <!-- <td>{{data.id}}</td> -->
-                                    <td>{{data.id}} </td> 
-                                    <td>{{data.closed}}</td>
-                                    <td>{{ data.division }}</td> 
-                                    <td>{{ data.profit_centre}}  </td>
-                                    <td>{{data.order}}  </td>   
-                                    <td>{{data.material}}  </td>
-                                    <td>{{ data.designation}} </td>
-                                    <td>{{ data.order_type}}  </td>
-                                    <td>{{ data.order_quantity}}</td>
-                                    <td>{{ data.date_start_plan | date:'d/m/Y'}} </td>
-                                    <td>{{ data.date_end_plan | date:'d/m/Y'}} </td>
-                                    <td>{{ data.fixation}}   </td>
-                                    <td>{{ data.order_stat }}   </td>
-                                    <td>{{ data.customer_order}}   </td>
-                                    <td>{{data.date_end_real | date:'d/m/Y'}}</td>
-                                    <!--zpp-->
-                                    <td>{{ data.date_reordo | date:'d/m/Y'}}</td>
-                                    <td>{{ data.message}}</td>
+                                {% for data in records %}
+                                    <tr>
+                                        <!--coois-->
+                                        <!-- <td>{{data.id}}</td> -->
+                                        <td>{{data.id}} </td> 
+                                        <td>{{data.closed}}</td>
+                                        <td>{{ data.division }}</td> 
+                                        <td>{{ data.profit_centre}}  </td>
+                                        <td>{{data.order}}  </td>   
+                                        <td>{{data.material}}  </td>
+                                        <td>{{ data.designation}} </td>
+                                        <td>{{ data.order_type}}  </td>
+                                        <td>{{ data.order_quantity}}</td>
+                                        <td>{{ data.date_start_plan | date:'d/m/Y'}} </td>
+                                        <td>{{ data.date_end_plan | date:'d/m/Y'}} </td>
+                                        <td>{{ data.fixation}}   </td>
+                                        <td>{{ data.order_stat }}   </td>
+                                        <td>{{ data.customer_order}}   </td>
+                                        <td>{{data.date_end_real | date:'d/m/Y'}}</td>
+                                        <!--zpp-->
+                                        <td>{{ data.date_reordo | date:'d/m/Y'}}</td>
+                                        <td>{{ data.message}}</td>
 
-                                    <!--material-->
-                                    <td>{{ data.AllocatedTime}}   </td>
-                                    <td>{{data.Leadtime}}   </td>
-                                    <td>{{data.workstation}}   </td>
-                                    <td>{{ data.Allocated_Time_On_Workstation}}</td>
-                                    <td>{{ data.Smooth_Family}} </td>
-                                    <!--User Input-->
-                                    <td>{{ data.Ranking | date:'d/m/Y'}}  </td>
-                                    <td>{{data.Freeze_end_date | date:'d/m/Y'}} {{data.Freeze_end_date | time:'H:i'}}</td>
-                                    <td>{{ data.Remain_to_do}} </td>
-                                    <!--Smoothing-->
-                                    <td>{{data.smoothing_end_date | date:'d/m/Y'}} {{data.smoothing_end_date | time:'H:i'}}</td>
+                                        <!--material-->
+                                        <td>{{ data.AllocatedTime}}   </td>
+                                        <td>{{data.Leadtime}}   </td>
+                                        <td>{{data.workstation}}   </td>
+                                        <td>{{ data.Allocated_Time_On_Workstation}}</td>
+                                        <td>{{ data.Smooth_Family}} </td>
+                                        <!--User Input-->
+                                        <td>{{ data.Ranking | date:'d/m/Y'}}  </td>
+                                        <td>{{data.Freeze_end_date | date:'d/m/Y'}} {{data.Freeze_end_date | time:'H:i'}}</td>
+
+                                        <td>{{ data.Remain_to_do}} </td>
+                                        <!--Smoothing-->
+                                        <td>{{data.smoothing_end_date | date:'d/m/Y'}} {{data.smoothing_end_date | time:'H:i'}}</td>
                                     </tr>
                                     {%empty%}
                                     <tr><td> Data Empty</td></tr>
-                                    {% endfor %}
+                                {% endfor %}
                             </tbody>      
                          </table>   
                       </div>
