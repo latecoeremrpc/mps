@@ -1258,17 +1258,8 @@ def shopfloor(request):
 
 #calcul smooth end date(Recursive Function)
 def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle=None,prev_date=None):
+    
     #Get cycle for current day
-    print("**************")
-    print(current_date)
-    print(type(current_date))
-
-    # *******************************
-    # current_date = datetime.fromisoformat(current_date).astimezone(timezone.utc)
-    # current_date.strftime('%Y-%m-%d %H:%M:%S')
-    # print("current_date:",current_date)
-
-    # *******************************
     key_date=str(profit_center)+str(Smooth_Family)+str(current_date).split(' ')[0]
     #initial case treatment (when prev_date =  current_date)
     if prev_date is None:
@@ -1283,7 +1274,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
         print(cycle)        
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
-        return date(1900,1,1)   
+        return datetime(1900, 1, 1, 6)   
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
@@ -1331,14 +1322,16 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
             if dt.date() not in holidays:
                 dt = datetime.combine(dt.date(), business_hours["from"])
                 # print('--------------',dt)
-                return dt  
+                return dt
     # function add hours
     def add_hours(dt, hours):
         while hours != 0:
             print('dt:',dt)
             print('hours:',hours)
-            print(type(hours))
-            if hours < 0:
+            if hours < 1:
+                print('hours:',hours)
+                print(type(hours))
+                print(dt+timedelta(hours=hours))
                 return dt+timedelta(hours=hours)
             # check if open hour for open date
             if is_in_open_hours(dt):
@@ -1353,6 +1346,7 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
 
     # print(cycle)
     # new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
+
     new_date=add_hours(prev_date, cycle)
     return   smooth_date_calcul(new_date,table,profit_center,Smooth_Family,cycle,current_date)
 
@@ -1423,13 +1417,11 @@ def create_shopfloor(request):
 
         # #Check if at least the first end date is present for each Smooth Family
         df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
-        # print(df_for_check)
-        # df_for_check = df[df['closed']==False]
-        # print('----------------------')
-        # print(df_for_check)
+        print(df_for_check)
         # test line by line to return the index of smooth family is not filled
+        
         for i in range(len(df_for_check)):
-            if (df_for_check.loc[i,'Freeze_end_date']==''):
+            if (pd.isnull(df_for_check.loc[i,'Freeze_end_date'])):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
                 return redirect("shopfloor")
         #result
@@ -1556,6 +1548,31 @@ def save_shopfloor(df):
 #     df_data=df_data.sort_values('id')
 #     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
+def get_next_open_day(dt):
+    # flat=True this will mean the returned results are single values, rather than one-tuples
+    
+    # dictionary of business_hours
+    business_hours = {
+    # monday = 0, tuesday = 1, ... same pattern as date.weekday()
+    # "weekdays": [0, 1, 2, 3, 4],
+    "from": time(hour=6), # startTime
+    "to": time(hour=22),  # endTime
+    }
+    if dt.time().hour != business_hours["to"].hour:
+        return dt
+    
+    holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True)
+    
+    while True:
+            # check if open date
+            dt = dt + timedelta(days=1)
+            # print(dt)
+            # print(type(dt))
+            # print(dt.date())
+            if dt.date() not in holidays:
+                # dt = datetime.combine(dt.date(), business_hours["from"])
+                dt = datetime.combine(dt.date(), business_hours["from"])
+                return dt  
 
 
 # @allowed_users(allowed_roles=["Planificateur"])        
@@ -1584,12 +1601,16 @@ def smoothing_calculate(df_data):
     
     # df_data.to_csv('freeze.csv')
     df_data.insert(0,'key_start_day','')
+    
     for i in range(len(df_data)-1):
         # test if not freezed and not closed calcul smoothing
         # if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']=='False'):
         if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']== 'False'):
-            print("marwa")
-            df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])            
+            df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])  
+
+            df_data.loc[i+1,'smoothing_end_date'] = get_next_open_day(df_data.loc[i+1,'smoothing_end_date']+timedelta(minutes=df_data.loc[i,'smoothing_end_date'].time().minute))         
+    
+
     # print(df_data.loc[i+1,'smoothing_end_date'])
     # df_data=df_data.sort_values('id')
     # print(df_data)
