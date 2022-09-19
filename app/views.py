@@ -1609,14 +1609,17 @@ def smoothing_calculate(df_data):
 # def result
 def result(request):
     data=Shopfloor.objects.all().values().order_by('Smooth_Family','Ranking')
+    if request.method == 'POST':
+        # Download file 
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=Smoothing_result.csv'
+        # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+        df_data=pd.DataFrame(list(data))
+        df_data.to_csv(path_or_buf=response,index=False)
+        return response
+
     return render(request,'app/Shopfloor/result.html',{'records':data}) 
 
-#  download result in excel file format
-def download_result():
-    data=Shopfloor.objects.all().values().order_by('Smooth_Family','Ranking')
-    df_data=pd.DataFrame(list(data))
-    df_data.to_excel('test1.xlsx')
-    return redirect(result)
 
 
 #******************************Planning*****************************************************    
