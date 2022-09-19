@@ -71,10 +71,15 @@ urlpatterns = [
     path('files/savecoois',views.save_coois,name='savecoois'),
     path('files/savezpp',views.save_zpp,name='savezpp'), 
     
-    #url for shopfloor
+    #urls for shopfloor
     path('shopfloor/',views.shopfloor,name='shopfloor'),
     path('shopfloor/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
-    path('shopfloor/result/',views.result,name='result'), 
+    path('shopfloor/result/',views.result,name='result'),
+    path('shopfloor/downloadresult/',views.download_result,name='downloadresult'),
+
+    
+
+    # urls for planning 
     path('shopfloor/planning/',views.planning,name='planning'), 
     path('shopfloor/datatable/',views.data_table,name='datatable'), 
      

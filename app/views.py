@@ -1273,7 +1273,9 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
         print(cycle)        
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
-        return datetime(1900, 1, 1, 6)   
+        return datetime(1900, 1, 1, 6) 
+          
+
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
@@ -1531,11 +1533,6 @@ def save_shopfloor(df):
 #     return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
 def get_next_open_day(dt):
-    # flat=True this will mean the returned results are single values, rather than one-tuples
-    # get start time for current date
-    # get end time for current date
-    end_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('endTime',flat=True).first()
-    print("endtime",end_time)
     # dictionary of business_hours
      # dictionary of business_hours
     # business_hours = {
@@ -1544,20 +1541,29 @@ def get_next_open_day(dt):
     # "from": time(hour=6), # startTime
     # "to": time(hour=22),  # endTime
     # }
-    if dt.time().hour != end_time:
+
+    # flat=True this will mean the returned results are single values, rather than one-tuples
+    end_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('endTime',flat=True).first()
+    # print(type(end_time))
+    # print("endtime",end_time)
+    # when calculating in hours and minutes return date
+    # if dt.time().hour != business_hours["to"].hour:
+    if dt.time() != end_time:
         return dt
-    
+
+    # get holidays from database 
     holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True)
-    
     while True:
-            # check if open date
-            dt = dt + timedelta(days=1)
-            start_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('startTime',flat=True).first()
-            print('start time calcul',start_time)
-            if dt.date() not in holidays:
-                # dt = datetime.combine(dt.date(), business_hours["from"])
-                dt = datetime.combine(dt.date(),start_time)
-                return dt  
+        # check if open date
+        dt = dt + timedelta(days=1)
+        start_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('startTime',flat=True).first()
+        # print(type(start_time))
+        # print('start time calcul',start_time)
+        if dt.date() not in holidays:
+            # dt = datetime.combine(dt.date(), business_hours["from"])
+            dt = datetime.combine(dt.date(),start_time)
+            return dt  
+   
 
 
 
@@ -1593,7 +1599,7 @@ def smoothing_calculate(df_data):
         # if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']=='False'):
         if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']== 'False'):
             df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])  
-
+            
             df_data.loc[i+1,'smoothing_end_date'] = get_next_open_day(df_data.loc[i+1,'smoothing_end_date']+timedelta(minutes=df_data.loc[i,'smoothing_end_date'].time().minute))         
     
     return df_data
@@ -1603,11 +1609,15 @@ def smoothing_calculate(df_data):
 # def result
 def result(request):
     data=Shopfloor.objects.all().values().order_by('Smooth_Family','Ranking')
-    # print("'***********'")
-    # print(data)
-    # df_data=pd.DataFrame(list(data))
-    # df_data.to_csv('result.csv')
     return render(request,'app/Shopfloor/result.html',{'records':data}) 
+
+#  download result in excel file format
+def download_result():
+    data=Shopfloor.objects.all().values().order_by('Smooth_Family','Ranking')
+    df_data=pd.DataFrame(list(data))
+    df_data.to_excel('test1.xlsx')
+    return redirect(result)
+
 
 #******************************Planning*****************************************************    
 #calcul KPIs
@@ -1623,11 +1633,7 @@ def planning(request):
     df_data['year_week_programm_demand']=df_data['year_programm_demand'].astype(str)+'_'+df_data['week_programm_demand'].astype(str)
     #Program demand count per week
     week_count=df_data.groupby('year_week_programm_demand')['id'].count().reset_index()
-    # print('************************************')
-    # print(df_data['week_programm_demand'])
-    # print(df_data['year_programm_demand'])
-    # print(df_data['year_week_programm_demand'])
-
+    
     #Demonstrated_capacity count per week
     df_status=df_data[df_data['order_stat'].str.contains('TCLO|LIVR')]
     df_status['year_week_end_date']=(pd.to_datetime(df_data['date_end_plan']).dt.year).astype(str)+'_'+(pd.to_datetime(df_data['date_end_plan']).dt.week).astype(str)
@@ -1636,6 +1642,9 @@ def planning(request):
     # Production Plan count per week
     # Get week from smoothing end date if freeze end date is null or Get week from freeze end date
     df_data['week_production_plan']=np.where((df_data['Freeze_end_date'].isna()),(pd.to_datetime(df_data['smoothing_end_date']).dt.week),(pd.to_datetime(df_data['Freeze_end_date']).dt.week)).astype(int)
+    # df_data['week_production_plan']=np.where((df_data['week_production_plan'] < 0),(df_data['week_production_plan'] == 0 )) 
+    # df_data['week_production_plan']=np.where((df_data['week_production_plan'] < 0)) 
+    print( df_data['week_production_plan'])
     # df_data['week_production_plan']=np.where((df_data['Freeze_end_date'].isna()),df_data['smoothing_end_date'],False)
     df_data['year_production_plan']=np.where((df_data['Freeze_end_date'].isna()),(pd.to_datetime(df_data['smoothing_end_date']).dt.year),(pd.to_datetime(df_data['Freeze_end_date']).dt.year)).astype(int)
     df_data['year_week_production_plan']=df_data['year_production_plan'].astype(str)+'_'+df_data['week_production_plan'].astype(str)
@@ -1648,7 +1657,7 @@ def planning(request):
     df_zpp_stock =pd.DataFrame(zpp_stock.values())
     df_zpp_stock['week_production_plan'] = df_data['week_production_plan']
     df_zpp_stock['week_programm_demand']=df_data['week_programm_demand'] 
-    df_zpp_stock['week_logistic_stock ']=(df_zpp_stock['qte_available'] + df_data['week_production_plan'] )/ df_zpp_stock['week_programm_demand'] 
+    df_zpp_stock['week_logistic_stock ']=(df_zpp_stock['qte_available'] + df_data['week_production_plan'] ) / df_zpp_stock['week_programm_demand'] 
     df_zpp_stock.to_csv('df.csv')
     
     
