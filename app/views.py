@@ -851,7 +851,6 @@ def delete_conf_trait(request, division ,id):
     return redirect(f'../{str(obj.product_id)}/configTrait')
     
 
-
 # restore object (CalendarConfigurationTraitement) by id
 def restore_conf_trait(request, division ,id):
     # fetch the object related to passed id
@@ -1285,6 +1284,8 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     start_time = WorkData.undeleted_objects.filter(date=current_date).values_list('startTime',flat=True).first()
     # get end time for current date
     end_time = WorkData.undeleted_objects.filter(date=current_date).values_list('endTime',flat=True).first()
+    # print("start_time:",start_time)
+    # print("end_time:",end_time)
         
     # dictionary of business_hours
     business_hours = {
@@ -1309,29 +1310,15 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     # function get_next_open_datetime 
     def get_next_open_datetime(dt):
         while True:
-            # dt = dt + timedelta(days=1)
-            # if dt.weekday() in business_hours["weekdays"] and dt.date() not in holidays:
-            #     dt = datetime.combine(dt.date(), business_hours["from"])
-            #     return dt
-            # print('get next day')
-            # print('--------------',dt.date())
-            # print('get next day')
-            # print('--------------',holidays)
             dt = dt + timedelta(days=1)
             # check if open date
             if dt.date() not in holidays:
                 dt = datetime.combine(dt.date(), business_hours["from"])
-                # print('--------------',dt)
                 return dt
     # function add hours
     def add_hours(dt, hours):
         while hours != 0:
-            print('dt:',dt)
-            print('hours:',hours)
             if hours < 1:
-                print('hours:',hours)
-                print(type(hours))
-                print(dt+timedelta(hours=hours))
                 return dt+timedelta(hours=hours)
             # check if open hour for open date
             if is_in_open_hours(dt):
@@ -1339,12 +1326,8 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
                 hours = hours - 1
             else:
                 dt = get_next_open_datetime(dt)
-                # print('****************dt',dt)
         return dt
 
-    # ***************************************
-
-    # print(cycle)
     # new_date=pd.to_datetime(str(prev_date))+timedelta(hours=cycle)
 
     new_date=add_hours(prev_date, cycle)
@@ -1439,8 +1422,7 @@ def create_shopfloor(request):
         messages.success(request,"Data saved successfully!") 
         return redirect(result)
         # return render(request,'app/Shopfloor/result.html')
-    
-    
+       
 #******************************save_shopfloor*****************************************************    
 
 def save_shopfloor(df):
@@ -1550,15 +1532,19 @@ def save_shopfloor(df):
 
 def get_next_open_day(dt):
     # flat=True this will mean the returned results are single values, rather than one-tuples
-    
+    # get start time for current date
+    # get end time for current date
+    end_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('endTime',flat=True).first()
+    print("endtime",end_time)
     # dictionary of business_hours
-    business_hours = {
-    # monday = 0, tuesday = 1, ... same pattern as date.weekday()
-    # "weekdays": [0, 1, 2, 3, 4],
-    "from": time(hour=6), # startTime
-    "to": time(hour=22),  # endTime
-    }
-    if dt.time().hour != business_hours["to"].hour:
+     # dictionary of business_hours
+    # business_hours = {
+    # # monday = 0, tuesday = 1, ... same pattern as date.weekday()
+    # # "weekdays": [0, 1, 2, 3, 4],
+    # "from": time(hour=6), # startTime
+    # "to": time(hour=22),  # endTime
+    # }
+    if dt.time().hour != end_time:
         return dt
     
     holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True)
@@ -1566,13 +1552,13 @@ def get_next_open_day(dt):
     while True:
             # check if open date
             dt = dt + timedelta(days=1)
-            # print(dt)
-            # print(type(dt))
-            # print(dt.date())
+            start_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('startTime',flat=True).first()
+            print('start time calcul',start_time)
             if dt.date() not in holidays:
                 # dt = datetime.combine(dt.date(), business_hours["from"])
-                dt = datetime.combine(dt.date(), business_hours["from"])
+                dt = datetime.combine(dt.date(),start_time)
                 return dt  
+
 
 
 # @allowed_users(allowed_roles=["Planificateur"])        
@@ -1610,17 +1596,6 @@ def smoothing_calculate(df_data):
 
             df_data.loc[i+1,'smoothing_end_date'] = get_next_open_day(df_data.loc[i+1,'smoothing_end_date']+timedelta(minutes=df_data.loc[i,'smoothing_end_date'].time().minute))         
     
-
-    # print(df_data.loc[i+1,'smoothing_end_date'])
-    # df_data=df_data.sort_values('id')
-    # print(df_data)
-    # df_data.to_csv('result.csv')
-    # delete old objects of shopfloor and save new objects
-    # Shopfloor.objects.all().delete()
-
-    # df_data.drop(['key'])
-    # df_data.drop(['freezed'])
-    # df_data.to_csv('df.csv',index=False)
     return df_data
     # return render(request,'app/Shopfloor/result.html',{'records':df_data}) 
 
@@ -1648,10 +1623,10 @@ def planning(request):
     df_data['year_week_programm_demand']=df_data['year_programm_demand'].astype(str)+'_'+df_data['week_programm_demand'].astype(str)
     #Program demand count per week
     week_count=df_data.groupby('year_week_programm_demand')['id'].count().reset_index()
-    print('************************************')
-    print(df_data['week_programm_demand'])
-    print(df_data['year_programm_demand'])
-    print(df_data['year_week_programm_demand'])
+    # print('************************************')
+    # print(df_data['week_programm_demand'])
+    # print(df_data['year_programm_demand'])
+    # print(df_data['year_week_programm_demand'])
 
     #Demonstrated_capacity count per week
     df_status=df_data[df_data['order_stat'].str.contains('TCLO|LIVR')]
@@ -1668,6 +1643,14 @@ def planning(request):
     # df_data.to_csv('df.csv')
 
     #Stock count per week
+    # get data 
+    zpp_stock =Zpp.objects.values('qte_available')
+    df_zpp_stock =pd.DataFrame(zpp_stock.values())
+    df_zpp_stock['week_production_plan'] = df_data['week_production_plan']
+    df_zpp_stock['week_programm_demand']=df_data['week_programm_demand'] 
+    df_zpp_stock['week_logistic_stock ']=(df_zpp_stock['qte_available'] + df_data['week_production_plan'] )/ df_zpp_stock['week_programm_demand'] 
+    df_zpp_stock.to_csv('df.csv')
+    
     
     return render(request,'app/planning.html',{'records':df_data,'week_count':week_count,'week_demonstrated_capacity_count':week_demonstrated_capacity_count,'week_production_plan_count':week_production_plan_count})
 
