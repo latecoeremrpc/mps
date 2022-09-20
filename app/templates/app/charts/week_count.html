@@ -22,14 +22,16 @@
                         
                         const week_count=new Chart("week_count", {
                             // plugins: [ChartDataLabels],
-                            type: "line",
+                            type: "bar",
                             data: {
                                     labels: xValues,
                                     datasets: [
                                         {
                                         label: 'QTE Program demand',
-                                        backgroundColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b','#065a60','#006466','#38b000'],
-                                        borderColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b',,'#065a60',"#006466",'#38b000'],
+                                        // backgroundColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b','#065a60','#006466','#38b000'],
+                                        // borderColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b',,'#065a60',"#006466",'#38b000'],
+                                        backgroundColor:  ['#34a0a4'],
+                                        borderColor: ['#34a0a4'], 
                                         borderWidth: 1,
                                         data: data
                                         }
