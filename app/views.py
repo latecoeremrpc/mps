@@ -1210,6 +1210,9 @@ def shopfloor(request):
 #create shopfloor
 # get inputs value, calculate smoothing end date and save 
 def create_shopfloor(request):
+    # make holidays as global varibal to reduce access to database
+    
+
     if request.method=='POST':
         # get inputs values
         id = request.POST.getlist('index')
@@ -1237,6 +1240,9 @@ def create_shopfloor(request):
         Freeze_end_date = request.POST.getlist('freeze_end_date')
         Remain_to_do = request.POST.getlist('Remain to do')
         closed = request.POST.getlist('closed')
+        global holidays
+        holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True)    
+ 
 
         #Convert Input Data to DateFrame
         data={
@@ -1364,10 +1370,6 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
     "to": end_time,  # endTime
     }
 
-    # get Holidays 
-    # flat=True this will mean the returned results are single values, rather than one-tuples
-    holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True) 
-
     # function is_in_open_hours
     def is_in_open_hours(dt):
             return  dt.date() not in holidays \
@@ -1408,7 +1410,7 @@ def get_next_open_day(dt):
         return dt
 
     # get holidays from database 
-    holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True)
+    # holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True)
     while True:
         # check if open date
         dt = dt + timedelta(days=1)
