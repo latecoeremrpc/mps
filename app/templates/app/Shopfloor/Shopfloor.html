@@ -44,70 +44,53 @@
                     </div>
                 </div> -->
            <!--disabled radio custom calendar-->     
-          <script>
+          <!-- <script>
             document.getElementById("custom").disabled = true;
-          </script> 
+          </script>  -->
         
         <div class="row">
             <div class="col-12">
+                <!-- <form method="POST" action="{%url 'createshopfloor' %}"> -->
+                    <!-- Security token -->
+                    <!-- {% csrf_token %} -->
                 <div class="card card-primary card-outline">
                       <div class="card-header ui-sortable-handle">
                         <h5 class="card-title" ><strong> Shopfloor</strong></h5>
                         <!--card tools-->
                         <div class="card-tools">
+                            <form method="POST" action="{%url 'createshopfloor' %}">
+                                <!-- Security token -->
+                                {% csrf_token %}
                             <ul class="list-group list-group-horizontal" style="height: 35px;">
                                 <!-- <li class="list-group-item" style="padding:7px;"><i type="button" data-toggle="modal" data-target="#inventory_accuracy_count_per_division_modal" class="info fas fa-info-circle"></i></li> -->
                                 <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="collapse">
                                     <i class="fas fa-minus"></i></button></li>
-                            
+                                    
                             <li class="list-group-item" style="padding:7px;"><div class="btn-group">
                                 <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-wrench"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right" role="menu" >
-                                    <a href="#" class="dropdown-item">Calendar</a>
-                                    <hr>
-                                    <input class="control-input" type="radio" id="official" name="calendar" checked="" style="margin-left: 10px;">
+                                    <a href="#" class="dropdown-item">Calendar</a><hr>
+                                    
+                                    <input class="control-input" type="radio" id="official" name="calendar" checked="" style="margin-left: 10px;" value="official">
                                     <label for="official" class="control-label" >Official</label>
                                     <br>
-                                    <input class="control-input" type="radio" id="custom" name="calendar" style="margin-left: 10px;">
+                                    <input class="control-input" type="radio" id="custom" name="calendar" style="margin-left: 10px;" value="custom">
                                     <label for="custom" class="control-label">Custom</label>
-                                    <hr>
-                                    <a href="#" class="dropdown-item">Exemple</a>
+                                    <!-- <hr>
+                                    <a href="#" class="dropdown-item">Exemple</a> -->
                                 </div>
                             </div></li>
                             <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></i></button></li>
                             </ul>
-                            <!-- <div class="btn-group">
-                                <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-wrench"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right" role="menu" >
-                                    <a href="#" class="dropdown-item">Calendar</a>
-                                    <hr>
-                                    <input class="control-input" type="radio" id="official" name="calendar" checked="">
-                                    <label for="official" class="control-label">Official</label>
-                                    <br>
-                                    <input class="control-input" type="radio" id="custom" name="calendar">
-                                    <label for="custom" class="control-label">Custom</label>
-                                    <hr>
-                                    <a href="#" class="dropdown-item">Exemple</a>
-                                </div>
-                            </div> -->
-                            <!-- <button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></i></button>          -->
-                            <!-- <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                            </button>
-                            <button type="button" class="btn btn-tool" data-card-widget="remove">
-                            <i class="fas fa-times"></i>
-                            </button> -->
                         </div>
                       </div>
                       <div class="card-body table-responsive p-0 " style="height: 600px;">
                       <div class="card-body">
-                        <form method="POST" action="{%url 'createshopfloor' %}">
+                        <!-- <form method="POST" action="{%url 'createshopfloor' %}"> -->
                             <!-- Security token -->
-                            {% csrf_token %}
+                            <!-- {% csrf_token %} -->
                         					
                          <table id="spreadsheet" class="table table-bordered table-head-fixed text-nowrap table-hover">
                             <thead >
@@ -193,8 +176,8 @@
                 <input type="submit" class="btn btn:hover btn-primary custom-save-shopfloor" value="Save" >
                 <!-- <input type="button"  data-target="#launching_calculation" data-toggle="modal" class="btn btn:hover btn-primary custom-save-shopfloor" value="Save"  > -->
                 <!-- <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" style="float: right;"> -->
-            
-             </form>  
+              
+                </form>  
         </div>
     </div>
 

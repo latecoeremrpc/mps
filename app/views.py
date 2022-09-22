@@ -1238,11 +1238,17 @@ def create_shopfloor(request):
         Freeze_end_date = request.POST.getlist('freeze_end_date')
         Remain_to_do = request.POST.getlist('Remain to do')
         closed = request.POST.getlist('closed')
+        calendar_type=request.POST.get('calendar')
+        print('****************',calendar_type )
         # make holidays and cycle_data as global varibale to reduce access to database
         global holidays, cycle_data
-        holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'officiel') 
-        cycle_data=Cycle.undeleted_objects.values('profit_center','smooth_family','cycle_time','work_day').filter( owner = 'officiel') 
- 
+        if calendar_type == 'official':
+            holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'officiel') 
+            cycle_data=Cycle.undeleted_objects.values('product__division__name','profit_center','smooth_family','cycle_time','work_day').filter( owner = 'officiel') 
+            print('cycle_data', cycle_data)
+        else:
+            holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'marwa') 
+            cycle_data=Cycle.undeleted_objects.values('product__division__name','profit_center','smooth_family','cycle_time','work_day').filter( owner = 'marwa') 
         #Convert Input Data to DateFrame
         data={
             'division':division,
@@ -1307,8 +1313,8 @@ def smoothing_calculate(df_data):
     #Convert to DataFrame
     df_cycle_data=pd.DataFrame(list(cycle_data))
     # concatinate profit_center and smooth_family and work_day
-    df_cycle_data['key']= df_cycle_data['profit_center'].astype(str)+df_cycle_data['smooth_family'].astype(str)+df_cycle_data['work_day'].astype(str)
-    # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
+    df_cycle_data['key']= df_cycle_data['product__division__name'].astype(str)+df_cycle_data['profit_center'].astype(str)+df_cycle_data['smooth_family'].astype(str)+df_cycle_data['work_day'].astype(str)
+   # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
     df_dict_cycle=dict(zip(df_cycle_data.key, df_cycle_data.cycle_time))
     #Get Shopfloor from DB
     # data=Shopfloor.objects.all().values()
@@ -1317,7 +1323,8 @@ def smoothing_calculate(df_data):
     df_data=df_data.sort_values('Ranking') 
     #Add col freezed to know how row is freezed
     df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
-    df_data['key']=df_data['profit_centre'].astype(str)+df_data['Smooth_Family'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
+    df_data['key']=df_data['division'].astype(str)+df_data['profit_centre'].astype(str)+df_data['Smooth_Family'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
+    print(df_data['key'])
     df_data[['Freeze_end_date']] = df_data[['Freeze_end_date']].astype(object).where(df_data[['Freeze_end_date']].notnull(), None)
     df_data['smoothing_end_date']=df_data['Freeze_end_date']
     # df_data.to_csv('freeze.csv')
@@ -1327,17 +1334,20 @@ def smoothing_calculate(df_data):
         # test if not freezed and not closed calcul smoothing
         # if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']=='False'):
         if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']== 'False'):
-            df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])  
+            df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'division'],df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])  
+            # print('1',df_data.loc[i+1,'smoothing_end_date'])
             df_data.loc[i+1,'smoothing_end_date'] = get_next_open_day(df_data.loc[i+1,'smoothing_end_date']+timedelta(minutes=df_data.loc[i,'smoothing_end_date'].time().minute))         
-    
+            # print('2',df_data.loc[i+1,'smoothing_end_date'])
+
     return df_data
     
 
 #calcul smooth end date(Recursive Function) to use in smoothing_calculate
-def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle=None,prev_date=None):
+def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,prev_cycle=None,prev_date=None):
     
     #Get cycle for current day
-    key_date=str(profit_center)+str(Smooth_Family)+str(current_date).split(' ')[0]
+    key_date=str(division)+str(profit_center)+str(Smooth_Family)+str(current_date).split(' ')[0]
+    
     #initial case treatment (when prev_date =  current_date)
     if prev_date is None:
         prev_date=current_date
@@ -1398,13 +1408,15 @@ def smooth_date_calcul(current_date,table,profit_center,Smooth_Family,prev_cycle
         return dt
 
     new_date=add_hours(prev_date, cycle)
-    return   smooth_date_calcul(new_date,table,profit_center,Smooth_Family,cycle,current_date)
+    return   smooth_date_calcul(new_date,table,division,profit_center,Smooth_Family,cycle,current_date)
 
 # get next open date to use in smoothing_calculate
 def get_next_open_day(dt):
     # flat=True this will mean the returned results are single values, rather than one-tuples
     end_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('endTime',flat=True).first()
     # when calculating in hours and minutes return date
+    print('end_time',end_time)
+    print(type(end_time))
     if dt.time() != end_time:
         return dt
 
@@ -1414,8 +1426,14 @@ def get_next_open_day(dt):
         # check if open date
         dt = dt + timedelta(days=1)
         start_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('startTime',flat=True).first()
+        print('start_time',start_time)
+        print(type(start_time))
         if dt.date() not in holidays:
-            dt = datetime.combine(dt.date(),start_time)
+            #Get the next day start end if not exist get current day end time
+            if start_time:
+                dt = datetime.combine(dt.date(),start_time)
+            else:
+                return datetime(1900, 1, 1, 6)
             return dt  
    
 # save shoploor to use in create_shopfloor
@@ -1552,7 +1570,7 @@ def planning(request):
     df_zpp_stock['week_programm_demand_count']=week_count['id']
     df_zpp_stock['year_week_production_plan']=week_production_plan_count['year_week_production_plan']
     df_zpp_stock['week_production_plan_count']=week_production_plan_count['id']
-    df_zpp_stock.to_csv('weektest.csv')
+    # df_zpp_stock.to_csv('weektest.csv')
 
     # df_zpp_stock['logistic_stock ']=( df_zpp_stock['qte_available'] + week_production_plan_count['id'].count() - week_production_plan_count['count'].count()) 
     
