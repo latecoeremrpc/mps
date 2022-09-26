@@ -1,0 +1,177 @@
+<div class="card card-primary card-outline">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="far fa-chart-bar"></i>
+       Test stocked
+        </h3>
+        <div class="card-tools"> 
+            <ul class="list-group list-group-horizontal" style="height: 35px;">
+                <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
+                    <i class="fas fa-minus"></i></button></li>
+                <li class="list-group-item" style="padding:8px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
+            </ul>  
+        </div> 
+        </div>
+            <div class="card-body">
+                <div style="height: 400px" >
+                    <canvas id="test" ></canvas>
+                    <script>
+                        var xValues_week_count = [{% for index, data in week_count.iterrows %}  '{{data.year_week_programm_demand}}', {% endfor %}];
+                        var data_week_count = [{% for index, data in week_count.iterrows %} {{data.id}}, {% endfor %}];
+                        var xValues_demonstrated_capacity = [{% for index, data in week_demonstrated_capacity_count.iterrows %}  '{{data.year_week_end_date}}', {% endfor %}];
+                        var data_demonstrated_capacity = [{% for index, data in week_demonstrated_capacity_count.iterrows %} {{data.id}}, {% endfor %}];
+                        var xValues_production_plan = [{% for index, data in week_production_plan_count.iterrows %}  '{{data.year_week_production_plan}}', {% endfor %}];
+                        var data_production_plan = [{% for index, data in week_production_plan_count.iterrows %} {{data.id}}, {% endfor %}];
+
+                        var barChartData = {
+                            labels: xValues_demonstrated_capacity, xValues_production_plan,xValues_week_count,
+                            datasets: [{
+                            data:data_week_count ,
+                            type: 'line',
+                            label: 'QTE Program demand',
+                            fill: false,
+                            backgroundColor: "#28a745",
+                            borderColor: "#28a745",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            lineTension: 0.3,
+                            pointBackgroundColor: "#28a745",
+                            pointBorderColor: "#28a745",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "#28a745",
+                            pointHoverBorderColor: "#28a745",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHitRadius: 10
+                            }, {
+                            data: data_demonstrated_capacity ,
+                            type: 'line',
+                            label: 'QTE Demonstrated capacity',
+                            fill: false,
+                            backgroundColor: "#6c757d",
+                            borderColor: "#6c757d",
+                            borderCapStyle: 'butt',
+                            borderDash: [2, 2],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            ineTension: .3,
+                            pointBackgroundColor: "#6c757d",
+                            pointBorderColor: "#6c757d",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "#6c757d",
+                            pointHoverBorderColor: "#6c757d",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHitRadius: 10
+                            },
+                             {
+                            label: 'QTE Production Plan',
+                            backgroundColor: "#00008B",
+                            borderColor: "#00008B",
+                            data:data_production_plan,
+                            pointBackgroundColor: "#007bff",
+                            pointBorderColor: "#007bff",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "#007bff",
+                            pointHoverBorderColor: "#007bff",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHitRadius: 10
+                            },
+
+                            {  
+                            label: 'Test',
+                            backgroundColor: "#6495ED",
+                            // yAxisID: "bar-y-axis",
+                            data: data_production_plan,
+                            }
+                        ]
+                        };
+                        
+
+                        window.onload = function() {
+                            var ctx = document.getElementById("test").getContext("2d");
+                            // Chart.defaults.global.defaultFontColor = '#fff';
+                            // Chart.defaults.global.defaultColor = 'rgba(0,0,0,0.1)';
+                            window.myBar = new Chart(ctx, {
+                            
+                            type: 'bar',
+                            data: barChartData,
+                            options: {
+                                legend: {
+                                    labels: {
+                                        fontColor: 'white'
+                                    }
+                                },
+                                 title: {
+                                display: true,
+                                text: "Chart.js "
+                                },
+                                tooltips: {
+                                mode: 'label'
+                                },
+                                responsive: true,
+                                maintainAspectRatio:false, 
+                                scales: {
+                                xAxes: [{
+                                    stacked: true,
+                                }],
+                                
+                                yAxes: [{
+                                    stacked: false,
+                                    ticks: {
+                                    beginAtZero: true,
+                                    min: 0,
+                                    max: 100
+                                    }
+                                }, {
+                                    id: "bar-y-axis",
+                                    stacked: true,
+                                    display: false, //optional
+                                    ticks: {
+                                    beginAtZero: true,
+                                    min: 30,
+                                    max: 100
+                                    },
+                                    type: 'linear'
+                                },
+
+                                 
+                            ]
+                                }
+                            }
+                            });
+                        };
+                        
+                    </script>  
+                </div>
+            </div>
+        <div class="card-footer clearfix">
+    </div>
+</div> 
+
+<!--Program demand  -->
+<div class="modal" id="test_stocked" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">						
+                <h4 class="modal-title">Informations</h4>
+            </div>
+            <div class="modal-body">	
+
+            </div>
+            <div class="modal-footer">
+                <input type="button" href="" class="btn btn-secondary" data-dismiss="modal" value="Cancel">
+                <!-- <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>   -->
+            </div>
+        </div>
+    </div>
+</div>
+
+

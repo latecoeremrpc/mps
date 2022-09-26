@@ -63,11 +63,11 @@
                                 {% csrf_token %}
                             <ul class="list-group list-group-horizontal" style="height: 35px;">
                                 <!-- <li class="list-group-item" style="padding:7px;"><i type="button" data-toggle="modal" data-target="#inventory_accuracy_count_per_division_modal" class="info fas fa-info-circle"></i></li> -->
-                                <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <li class="list-group-item" style="padding:5px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:4px;" >
                                     <i class="fas fa-minus"></i></button></li>
                                     
                             <li class="list-group-item" style="padding:7px;"><div class="btn-group">
-                                <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="padding:3px;">
                                 <i class="fas fa-wrench"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right" role="menu" >
@@ -82,7 +82,7 @@
                                     <a href="#" class="dropdown-item">Exemple</a> -->
                                 </div>
                             </div></li>
-                            <li class="list-group-item" style="padding:7px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></i></button></li>
+                            <li class="list-group-item" style="padding:5px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></i></button></li>
                             </ul>
                         </div>
                       </div>
@@ -92,8 +92,8 @@
                             <!-- Security token -->
                             <!-- {% csrf_token %} -->
                         					
-                         <table id="spreadsheet" class="table table-bordered table-head-fixed text-nowrap table-hover">
-                            <thead >
+                         <table id="shopfloor" class="table table-bordered table-head-fixed text-nowrap table-hover">
+                            <thead>
                                 <tr>
                                     <th colspan="2"></th>
                                     <th colspan="13" style="text-align: center; color:#b288ff;">COOIS</th>
@@ -127,43 +127,43 @@
                                     <th style='background: #007bff;color: white;'>Ranking</th>
                                     <th style='background: #007bff;color: white;'>Freeze end date</th>
                                     <th style='background: #007bff;color: white;'>Remain to do</th>
-                                    <!-- <th>Smoothing end date</th> -->
-                                    
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody >
                                 {% for index,data in records.iterrows %}
-                                    <tr {%if data.closed == True %} style="display:none;" {% endif %}>
+                                    <tr>
+                                        <!-- <tr {%if data.closed == True %} style="display:none;" {% endif %}> -->
+
                                         <!--coois-->
-                                        <!-- <td>{{data.id}}</td> -->
-                                        <td><input id="index" name="index" type="text" class="form-control custom-input"  value="{{data.id}}" readonly="readonly"> </td> 
-                                        <td><input id="closed" name="closed" type="text" class="form-control custom-input"  value="{{data.closed}}" readonly="readonly"> </td> 
-                                        <td><input id="division" name="division" type="text" class="form-control custom-input"  value="{{ data.division }}" readonly="readonly"></td> 
-                                        <td><input id="profit_centre" name="profit_centre" type="text" class="form-control custom-input"  value="{{ data.profit_centre}}"readonly="readonly"  ></td>
-                                        <td><input id="order" name="order" type="text" class="form-control custom-input"  value="{{data.order}}" readonly="readonly" ></td>   
-                                        <td><input id="material" name="material" type="text" class="form-control custom-input"  value="{{data.material}}"readonly="readonly"  ></td>
-                                        <td><input id="designation" name="designation" type="text" class="form-control custom-input"  value="{{ data.designation}}"readonly="readonly" readonly="readonly"></td>
-                                        <td><input id="order_type" name="order_type" type="text" class="form-control custom-input"  value="{{ data.order_type}}" readonly="readonly" ></td>
-                                        <td><input id="order_quantity" name="order_quantity" type="text" class="form-control custom-input"  value="{{ data.order_quantity}}" readonly="readonly"  ></td>
-                                        <td><input id="date_start_plan" name="date_start_plan" type="text" class="form-control custom-input"  value="{{ data.date_start_plan | date:'d/m/Y'}}" readonly="readonly"></td>
-                                        <td><input id="date_end_plan" name="date_end_plan" type="text" class="form-control custom-input"  value="{{ data.date_end_plan | date:'d/m/Y'}}" readonly="readonly"></td>
-                                        <td><input id="fixation" name="fixation" type="text" class="form-control custom-input"  value="{{ data.fixation}}" readonly="readonly"  ></td>
-                                        <td><input id="order_stat" name="order_stat" type="text" class="form-control custom-input"  value="{{ data.order_stat }}" readonly="readonly"  ></td>
-                                        <td><input id="customer_order" name="customer_order" type="text" class="form-control custom-input"  value="{{ data.customer_order}}" readonly="readonly"  ></td>
-                                        <td><input id="date_end_real" name="date_end_real" type="text" class="form-control custom-input"  value="{{data.date_end_real | date:'d/m/Y'}}" readonly="readonly"  ></td>
+                                        <!-- <td >{{data.id}}</td> -->
+                                        <td><input id="index" name="index" type="hidden" class="form-control custom-input"  value="{{data.id}}" readonly="readonly">{{data.id}} </td> 
+                                        <td><input id="closed" name="closed" type="hidden" class="form-control custom-input"  value="{{data.closed}}" readonly="readonly"> {{data.closed}} </td> 
+                                        <td><input id="division" name="division" type="hidden" class="form-control custom-input"  value="{{ data.division }}" readonly="readonly">{{data.division}}</td> 
+                                        <td><input id="profit_centre" name="profit_centre" type="hidden" class="form-control custom-input"  value="{{ data.profit_centre}}"readonly="readonly">{{ data.profit_centre}}</td>
+                                        <td><input id="order" name="order" type="hidden" class="form-control custom-input"  value="{{data.order}}" readonly="readonly">{{data.order}}</td>   
+                                        <td><input id="material" name="material" type="hidden" class="form-control custom-input"  value="{{data.material}}"readonly="readonly" >{{data.material}}</td>
+                                        <td><input id="designation" name="designation" type="hidden" class="form-control custom-input"  value="{{ data.designation}}"readonly="readonly">{{ data.designation}}</td>
+                                        <td><input id="order_type" name="order_type" type="hidden" class="form-control custom-input"  value="{{ data.order_type}}" readonly="readonly" >{{ data.order_type}}</td>
+                                        <td><input id="order_quantity" name="order_quantity" type="hidden" class="form-control custom-input"  value="{{ data.order_quantity}}" readonly="readonly">{{ data.order_quantity}}</td>
+                                        <td><input id="date_start_plan" name="date_start_plan" type="hidden" class="form-control custom-input"  value="{{data.date_start_plan | date:'d/m/Y'}}" readonly="readonly">{{ data.date_start_plan | date:'d/m/Y'}}</td>
+                                        <td><input id="date_end_plan" name="date_end_plan" type="hidden" class="form-control custom-input"  value="{{data.date_end_plan | date:'d/m/Y'}}" readonly="readonly">{{data.date_end_plan | date:'d/m/Y'}}</td>
+                                        <td><input id="fixation" name="fixation" type="hidden" class="form-control custom-input"  value="{{data.fixation}}" readonly="readonly">{{ data.fixation}}</td>
+                                        <td><input id="order_stat" name="order_stat" type="hidden" class="form-control custom-input"  value="{{data.order_stat }}" readonly="readonly">{{ data.order_stat }}</td>
+                                        <td><input id="customer_order" name="customer_order" type="hidden" class="form-control custom-input"  value="{{data.customer_order}}" readonly="readonly"  ></td>
+                                        <td><input id="date_end_real" name="date_end_real" type="hidden" class="form-control custom-input"  value="{{data.date_end_real | date:'d/m/Y'}}" readonly="readonly">{{data.date_end_real | date:'d/m/Y'}}</td>
                                         <!--zpp-->
-                                        <td><input id="date_reordo" name="date_reordo" type="text" class="form-control custom-input"  value="{{ data.date_reordo | date:'d/m/Y'}}" readonly="readonly"  ></td>
-                                        <td><input id="message" name="message" type="text" class="form-control custom-input"  value="{{ data.message}}" readonly="readonly"  ></td>
+                                        <td><input id="date_reordo" name="date_reordo" type="hidden" class="form-control custom-input"  value="{{ data.date_reordo | date:'d/m/Y'}}" readonly="readonly">{{data.date_reordo | date:'d/m/Y'}}</td>
+                                        <td><input id="message" name="message" type="hidden" class="form-control custom-input"  value="{{ data.message}}" readonly="readonly">{{ data.message}}</td>
                                         <!--material-->
-                                        <td><input id="AllocatedTime" name="AllocatedTime" type="text" class="form-control custom-input"  value="{{ data.AllocatedTime}}" readonly="readonly"  ></td>
-                                        <td><input id="Leadtime" name="Leadtime" type="text" class="form-control custom-input"  value="{{data.Leadtime}}" readonly="readonly"  ></td>
-                                        <td><input id="workstation" name="workstation" type="text" class="form-control custom-input"  value="{{data.workstation}}" readonly="readonly"  ></td>
-                                        <td><input id="Allocated_Time_On_Workstation" name="Allocated_Time_On_Workstation" type="text" class="form-control custom-input"  value="{{ data.Allocated_Time_On_Workstation}}" readonly="readonly"  ></td>
-                                        <td><input id="Smooth_Family" name="Smooth_Family" type="text" class="form-control custom-input"  value="{{ data.Smooth_Family}}" readonly="readonly" ></td>
-                                        <td><input  id="Ranking" name="Ranking" type="date" class="form-control" value="{{ data.Ranking| date:'Y-m-d'}}"></td>
+                                        <td><input id="AllocatedTime" name="AllocatedTime" type="hidden" class="form-control custom-input"  value="{{data.AllocatedTime}}" readonly="readonly">{{data.AllocatedTime}}</td>
+                                        <td><input id="Leadtime" name="Leadtime" type="hidden" class="form-control custom-input"  value="{{data.Leadtime}}" readonly="readonly">{{data.Leadtime}}</td>
+                                        <td><input id="workstation" name="workstation" type="hidden" class="form-control custom-input"  value="{{data.workstation}}" readonly="readonly">{{data.workstation}}</td>
+                                        <td><input id="Allocated_Time_On_Workstation" name="Allocated_Time_On_Workstation" type="hidden" class="form-control custom-input"  value="{{data.Allocated_Time_On_Workstation}}" readonly="readonly">{{data.Allocated_Time_On_Workstation}}</td>
+                                        <td><input id="Smooth_Family" name="Smooth_Family" type="hidden" class="form-control custom-input"  value="{{ data.Smooth_Family}}" readonly="readonly">{{ data.Smooth_Family}}</td>
+                                        <!--entry-->
+                                        <td><input  id="Ranking" name="Ranking" type="hidden" class="form-control" value="{{ data.Ranking| date:'Y-m-d'}}">{{data.Ranking| date:'Y-m-d'}}</td>
                                         <td><input  id="freeze_end_date" name="freeze_end_date" type="datetime-local" class="form-control" custom-input></td>
                                         <td><input  id="Remain to do" name="Remain to do" type="text" class="form-control" custom-input ></td>
-                                        <!-- <td>{{data.smoothing_end_date}}</td> -->
                                     </tr>
                                     {%empty%}
                                         <tr><td> Data Empty</td></tr>
@@ -184,9 +184,40 @@
 </div>
 </div>
 
-<!-- <script>
-    jspreadsheet(document.getElementById('spreadsheet')); 
-</script> -->
+
+
+<script>
+    $(document).ready( function () {
+    $('#shopfloor').DataTable({
+      "paging": true,
+      "lengthChange":false,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": true,
+      "responsive": false,
+      scrollX :'500px',
+      "lengthChange": false,
+      "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
+    //   "scrollCollapse": true,
+    //    scrollY: ,
+    // "dom": '<"search"f>i'
+    // dom: '<"top"i>rt<"bottom"flp><"clear">',
+    // dom: 'Bfrtip',
+    //     buttons: [
+    //         'copy', 'csv', 'excel', 'pdf', 'print'
+
+    //         ,{
+    //                     popoverTitle: 'Visibility control',
+    //                     extend: 'colvis',
+    //                     collectionLayout: 'two-column'
+    //                 }
+     
+    //     ]
+    });
+    
+} );
+</script>
 
 
 {% endblock %}

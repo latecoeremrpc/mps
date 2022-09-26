@@ -1284,7 +1284,8 @@ def create_shopfloor(request):
         Shopfloor.objects.all().delete()
 
         # #Check if at least the first end date is present for each Smooth Family
-        df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
+        # df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
+        df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()        
         # test line by line to return the index of smooth family is not filled
         for i in range(len(df_for_check)):
             if (pd.isnull(df_for_check.loc[i,'Freeze_end_date'])):
@@ -1310,7 +1311,7 @@ def create_shopfloor(request):
 def smoothing_calculate(df_data):
     #Get Work date data
     # cycle_data=Cycle.undeleted_objects.values('profit_center','smooth_family','cycle_time','work_day') 
-    #Convert to DataFrame
+    #Convert to DataFrame cycle_data( globale variable)
     df_cycle_data=pd.DataFrame(list(cycle_data))
     # concatinate profit_center and smooth_family and work_day
     df_cycle_data['key']= df_cycle_data['product__division__name'].astype(str)+df_cycle_data['profit_center'].astype(str)+df_cycle_data['smooth_family'].astype(str)+df_cycle_data['work_day'].astype(str)
@@ -1361,7 +1362,8 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
         print(cycle)        
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
-        return datetime(1900, 1, 1, 6) 
+            return datetime(1900, 1, 1, 6) 
+       
           
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
@@ -1434,6 +1436,7 @@ def get_next_open_day(dt):
                 dt = datetime.combine(dt.date(),start_time)
             else:
                 return datetime(1900, 1, 1, 6)
+                # print('error')
             return dt  
    
 # save shoploor to use in create_shopfloor
@@ -1537,13 +1540,13 @@ def planning(request):
     df_data['year_week_programm_demand']=df_data['year_programm_demand'].astype(str)+'-'+'W'+df_data['week_programm_demand'].astype(str)
     #Program demand count per week
     week_count=df_data.groupby('year_week_programm_demand')['id'].count().reset_index()
-    week_count.to_csv('test1.csv')
+    # week_count.to_csv('test1.csv')
     # *********************************************************************************************************
     #Demonstrated_capacity count per week
     df_status=df_data[df_data['order_stat'].str.contains('TCLO|LIVR')]
     df_status['year_week_end_date']=(pd.to_datetime(df_data['date_end_plan']).dt.year).astype(str)+'-'+'W'+(pd.to_datetime(df_data['date_end_plan']).dt.week).astype(str)
     week_demonstrated_capacity_count=df_status.groupby('year_week_end_date')['id'].count().reset_index()
-    # df_status.to_csv('status.csv')
+    # week_demonstrated_capacity_count.to_csv('test2.csv')
     
     #*********************************************************************************************************** 
     
@@ -1556,8 +1559,8 @@ def planning(request):
     # df_data_open['week_production_plan']=np.where((df_data_open['Freeze_end_date'].isna()),df_data_open['smoothing_end_date'],False)
     df_data_open['year_production_plan']=np.where((df_data_open['Freeze_end_date'].isna()),(pd.to_datetime(df_data_open['smoothing_end_date']).dt.year),(pd.to_datetime(df_data_open['Freeze_end_date']).dt.year)).astype(int)
     df_data_open['year_week_production_plan']=df_data_open['year_production_plan'].astype(str)+'-'+'W'+df_data_open['week_production_plan'].astype(str) 
-    # df_data_open.to_csv('dfopen.csv')
     week_production_plan_count=df_data_open.groupby('year_week_production_plan')['id'].count().reset_index()
+    week_production_plan_count.to_csv('test3.csv')
     
     # ************************************************************************************************************
     
@@ -1570,7 +1573,7 @@ def planning(request):
     df_zpp_stock['week_programm_demand_count']=week_count['id']
     df_zpp_stock['year_week_production_plan']=week_production_plan_count['year_week_production_plan']
     df_zpp_stock['week_production_plan_count']=week_production_plan_count['id']
-    # df_zpp_stock.to_csv('weektest.csv')
+    # df_zpp_stock.to_csv('test4.csv')
 
     # df_zpp_stock['logistic_stock ']=( df_zpp_stock['qte_available'] + week_production_plan_count['id'].count() - week_production_plan_count['count'].count()) 
     
