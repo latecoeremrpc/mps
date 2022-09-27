@@ -92,7 +92,7 @@
                             <!-- Security token -->
                             <!-- {% csrf_token %} -->
                         					
-                         <table id="shopfloor" class="table table-bordered table-head-fixed text-nowrap table-hover">
+                         <table  class="table table-bordered table-head-fixed text-nowrap table-hover">
                             <thead>
                                 <tr>
                                     <th colspan="2"></th>
@@ -131,8 +131,8 @@
                             </thead>
                             <tbody >
                                 {% for index,data in records.iterrows %}
-                                    <tr>
-                                        <!-- <tr {%if data.closed == True %} style="display:none;" {% endif %}> -->
+                                    
+                                    <tr {%if data.closed == True %} style="display:none;" {% endif %}>
 
                                         <!--coois-->
                                         <!-- <td >{{data.id}}</td> -->

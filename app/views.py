@@ -1203,7 +1203,8 @@ def shopfloor(request):
     # 2: for closed  : equal true where order_stat containes TCLO ou LIVR
     df_coois['closed']=np.where(df_coois['order_stat'].str.contains('TCLO|LIVR'),True,False)
     records=df_coois.sort_values(['Smooth_Family','Ranking']) 
-    
+    # print('***********************////////',records)
+    # records.to_csv('result.csv') 
     return render(request,'app/Shopfloor/Shopfloor.html',{'records': records} ) 
 
 
@@ -1212,8 +1213,9 @@ def shopfloor(request):
 def create_shopfloor(request):
     
     if request.method=='POST':
-        # get inputs values
         id = request.POST.getlist('index')
+
+        # get inputs values
         division = request.POST.getlist('division')
         profit_centre = request.POST.getlist('profit_centre')
         order = request.POST.getlist('order')
@@ -1239,13 +1241,13 @@ def create_shopfloor(request):
         Remain_to_do = request.POST.getlist('Remain to do')
         closed = request.POST.getlist('closed')
         calendar_type=request.POST.get('calendar')
-        print('****************',calendar_type )
+
         # make holidays and cycle_data as global varibale to reduce access to database
         global holidays, cycle_data
         if calendar_type == 'official':
             holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'officiel') 
             cycle_data=Cycle.undeleted_objects.values('product__division__name','profit_center','smooth_family','cycle_time','work_day').filter( owner = 'officiel') 
-            print('cycle_data', cycle_data)
+            # print('cycle_data', cycle_data)
         else:
             holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'marwa') 
             cycle_data=Cycle.undeleted_objects.values('product__division__name','profit_center','smooth_family','cycle_time','work_day').filter( owner = 'marwa') 
@@ -1276,21 +1278,28 @@ def create_shopfloor(request):
             'Remain_to_do':Remain_to_do, 
             'closed':closed,
             }
+  
         # convert data to dataframe 
-        df=pd.DataFrame(data)
+        df=pd.DataFrame.from_dict(data)
+
         # convert freeze_end_date to datetime 
         df['Freeze_end_date'] = pd.to_datetime(df['Freeze_end_date'])
         # delete old objects of shopfloor and save new objects
-        Shopfloor.objects.all().delete()
+        # Shopfloor.objects.all().delete()
+        
 
         # #Check if at least the first end date is present for each Smooth Family
         # df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
+        # print(data)
         df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()        
+        # print('#'*50)
+        # print(df_for_check)
         # test line by line to return the index of smooth family is not filled
         for i in range(len(df_for_check)):
             if (pd.isnull(df_for_check.loc[i,'Freeze_end_date'])):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
                 return redirect("shopfloor")
+                # return render(request, 'app/Shopfloor/result.html')
         #call function smoothing_calculate to calcul smoothing end date 
         df=smoothing_calculate(df)
         # delete key,freezed, key_start_day column
@@ -1300,12 +1309,13 @@ def create_shopfloor(request):
         # delete index from df
         df=df.reset_index(drop=True)
         #call function save shopfloor to save data
+        # df.sort_values(by=['Smooth_Family', 'Ranking'])
+        # df.to_csv('df.csv')
         save_shopfloor(df)
 
         messages.success(request,"Data saved successfully!") 
         return redirect(result)
         
-
 # @allowed_users(allowed_roles=["Planificateur"]) 
 #  calculate smoothing end date to use in create shopfloor       
 def smoothing_calculate(df_data):
@@ -1503,6 +1513,8 @@ def save_shopfloor(df):
                     'Remain_to_do',
                     'closed',
                     'smoothing_end_date',
+                    #  'version',
+                    #  'shared',
                     ],
 
             null="",

@@ -231,6 +231,8 @@ class Shopfloor(BaseModel,SoftDeleteModel):
     Remain_to_do=models.FloatField(null=True)
     smoothing_end_date=models.DateTimeField(null=True)
     closed=models.BooleanField(null=True)
+    version=models.IntegerField(null=True)
+    shared=models.BooleanField(null=True)
 
     # renames the instances of the Shopfloor
     # with their order

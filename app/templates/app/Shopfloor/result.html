@@ -43,6 +43,7 @@
                                     <th colspan="5" style="text-align: center; color:#e83e8c;">Material</th>
                                     <th colspan="3" style="text-align: center; color:#007bff;">User Input</th>
                                     <th colspan="1" style="text-align: center; color:#20c997;">Smoothing</th>
+                                    <th colspan="2"></th>
                                 </tr>
                                 <tr>
                                     <th>id</th>
@@ -73,8 +74,9 @@
                                     <th style='background: #007bff;color: white;'>Ranking</th>
                                     <th style='background: #007bff;color: white;'>Freeze end date</th>
                                     <th style='background: #007bff;color: white;'>Remain to do</th> 
-
                                     <th style='background: #20c997;;color: white;'>Smoothing end date</th>
+                                    <th>Version</th>
+                                    <th>Shared</th>
                                     
                                 </tr>
                             </thead>
@@ -118,6 +120,8 @@
                                         <td>{{ data.Remain_to_do}} </td>
                                         <!--Smoothing-->
                                         <td>{{data.smoothing_end_date | date:'d/m/Y'}} {{data.smoothing_end_date | time:'H:i'}}</td>
+                                        <td>1</td>
+                                        <td>False</td>
                                     </tr>
                                     {%empty%}
                                     <tr><td> Data Empty</td></tr>
@@ -193,10 +197,11 @@ var myDataGrid =new Handsontable(placeholder, {
         // ],
 
         buttons: { buttons: [ 
-         {extend: 'copy', className: 'btn btn-light btn-sm btn-rounded'},
-         {extend: 'csv', className: 'btn btn-light btn-sm btn-rounded'},
-         { extend: 'excel', className: 'btn btn-light btn-sm btn-rounded' },
-         { extend: 'pdf', className: 'btn btn-light btn-sm btn-rounded' },
+         {extend: 'copyHtml5', className: 'btn btn-light btn-sm btn-rounded'},
+         {extend: 'csvHtml5', className: 'btn btn-light btn-sm btn-rounded'},
+         { extend: 'excelHtml5', className: 'btn btn-light btn-sm btn-rounded' },
+         { extend: 'pdfHtml5', className: 'btn btn-light btn-sm btn-rounded',orientation: 'landscape', pageSize: '4A0', },
+         { extend: 'print', className: 'btn btn-light btn-sm btn-rounded'},
          { extend: 'colvis', className: 'btn btn-light btn-sm btn-rounded' ,popoverTitle: 'Visibility control',collectionLayout: 'two-column',},
         
 
@@ -206,6 +211,7 @@ var myDataGrid =new Handsontable(placeholder, {
     //     searchPlaceholder: "Search records",
     //     search: "",
     //   }
+    // stateSave: true,
     });
     
 } );
