@@ -32,7 +32,7 @@
                             </ul>  
                         </div> 
                       </div>
-                      <div class="card-body table-responsive p-0 " style="height: 600px;">
+                      <div class="card-body table-responsive p-0 " style="height: 650px;">
                       <div class="card-body">
                          <table id="smoothing" class="table table-bordered table-head-fixed text-nowrap table-hover">
                             <thead >
@@ -120,8 +120,8 @@
                                         <td>{{ data.Remain_to_do}} </td>
                                         <!--Smoothing-->
                                         <td>{{data.smoothing_end_date | date:'d/m/Y'}} {{data.smoothing_end_date | time:'H:i'}}</td>
-                                        <td>1</td>
-                                        <td>False</td>
+                                        <td>{{ data.version}} </td>
+                                        <td>{{ data.shared}} </td>
                                     </tr>
                                     {%empty%}
                                     <tr><td> Data Empty</td></tr>
@@ -180,7 +180,7 @@ var myDataGrid =new Handsontable(placeholder, {
       "responsive": false,
       scrollX :'500px',
       "lengthChange": false,
-      "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
+      "lengthMenu": [[8, 20, 30, -1], [8, 20, 30, "All"]],
       "scrollCollapse": true,
     // "dom": '<"search"f>i'
     // "dom:" '<"top"i>rt<"bottom"flp><"clear">',

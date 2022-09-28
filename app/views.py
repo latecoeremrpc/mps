@@ -1,4 +1,5 @@
 from itertools import cycle, groupby
+from queue import Empty
 from django.http import HttpResponse
 from django.shortcuts import render ,redirect ,get_object_or_404
 from app.models import Division,Material,HolidaysCalendar,Product,WorkData,CalendarConfigurationTreatement,CalendarConfigurationCpordo,Coois,Zpp,Shopfloor,Cycle
@@ -964,13 +965,13 @@ def copy_calendar(request,division,product):
         work_data = WorkData(date=data.date,startTime=data.startTime,endTime=data.endTime,FTEhourByDay=data.FTEhourByDay,ExtraHour=data.ExtraHour,Absenteeism_ratio=data.Absenteeism_ratio,Unproductiveness_ratio=data.Unproductiveness_ratio,Efficienty_ratio=data.Efficienty_ratio,product_id = product)
         work_data.save()
         # get profit center from product
-        profit_center =Product.undeleted_objects.filter(id=product).values('Profit_center')
+        # profit_center =Product.undeleted_objects.filter(id=product).values('Profit_center')
         # get cycle object with product_id and workdata_id 
-        cycles = Cycle.undeleted_objects.all().filter(product_id = product_copied, workdata_id=data.id, owner = 'officiel') 
+        # cycles = Cycle.undeleted_objects.all().filter(product_id = product_copied, workdata_id=data.id, owner = 'officiel') 
         # save cycle with new value of workdata_id 
-        for cycle in cycles:
-            custom_cycle= Cycle(work_day=cycle.work_day,division=cycle.division,profit_center=profit_center,smooth_family=cycle.smooth_family,cycle_time=cycle.cycle_time, workdata_id=work_data.id,product_id = product)
-            custom_cycle.save()  
+        # for cycle in cycles:
+        #     custom_cycle= Cycle(work_day=cycle.work_day,division=cycle.division,profit_center=profit_center,smooth_family=cycle.smooth_family,cycle_time=cycle.cycle_time, workdata_id=work_data.id,product_id = product)
+        #     custom_cycle.save()  
     return redirect("../calendar")
 
 #*********************Save uploads************************
@@ -1154,59 +1155,56 @@ def shopfloor(request):
     zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
     material_data=Material.undeleted_objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
-    
+
     #Convert to DataFrame
     df_zpp=pd.DataFrame(list(zpp_data))
     df_coois=pd.DataFrame(list(coois_data))
     df_material=pd.DataFrame(list(material_data))
     # rename df_material column 
     df_material=df_material.rename(columns={'product__program':'program','product__division__name':'division'})
-    
+
 
     #add column key for zpp (concatinate  material and data_element_planif and created_by  )
-    df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str) 
+    df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str)
     #add column key for coois (concatinate material, order, created_by )    
     df_coois['key']=df_coois['material'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
 
     #add column key for material (concatinate material, created_by )  
-    df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)+df_material['created_by'].astype(str) 
+    df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)+df_material['created_by'].astype(str)
     #add column key for coois (concatinate material,division,profit_centre, created_by )    
     df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['created_by'].astype(str)
-    
+
 
     #Convert df_zpp to dict
     df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
     df_zpp_dict_date_reordo=dict(zip(df_zpp.key, df_zpp.date_reordo))
-    
+
     #Merge ZPP and COOIS with keys
     df_coois['message']=df_coois['key'].map(df_zpp_dict_message)
     df_coois['date_reordo']=df_coois['key'].map(df_zpp_dict_date_reordo)
-    
+
     #convert df_material to dict
     df_material_dict_AllocatedTime= dict((zip(df_material.key,df_material.AllocatedTime)))
     df_material_dict_Leadtime= dict((zip(df_material.key,df_material.Leadtime)))
     df_material_dict_workstation= dict((zip(df_material.key,df_material.workstation)))
     df_material_dict_Allocated_Time_On_Workstation= dict((zip(df_material.key,df_material.Allocated_Time_On_Workstation)))
     df_material_dict_Smooth_Family= dict((zip(df_material.key,df_material.Smooth_Family)))
-    
-    
+
+
     #Merge coois and material with keys
     df_coois['AllocatedTime']=df_coois['key2'].map(df_material_dict_AllocatedTime)
     df_coois['Leadtime']=df_coois['key2'].map(df_material_dict_Leadtime)
     df_coois['workstation']=df_coois['key2'].map(df_material_dict_workstation)
     df_coois['Allocated_Time_On_Workstation']=df_coois['key2'].map(df_material_dict_Allocated_Time_On_Workstation)
     df_coois['Smooth_Family']=df_coois['key2'].map(df_material_dict_Smooth_Family)
-     
+
     # add conditions :
     # 1: for Ranking : equal date reordo if exist else equal date end plan
     df_coois['Ranking']=np.where((df_coois['date_reordo'].isna()),(pd.to_datetime(df_coois['date_end_plan'])),(pd.to_datetime(df_coois['date_reordo'])))
     # 2: for closed  : equal true where order_stat containes TCLO ou LIVR
     df_coois['closed']=np.where(df_coois['order_stat'].str.contains('TCLO|LIVR'),True,False)
-    records=df_coois.sort_values(['Smooth_Family','Ranking']) 
-    # print('***********************////////',records)
-    # records.to_csv('result.csv') 
+    records=df_coois.sort_values(['Smooth_Family','Ranking'])
     return render(request,'app/Shopfloor/Shopfloor.html',{'records': records} ) 
-
 
 #create shopfloor
 # get inputs value, calculate smoothing end date and save 
@@ -1214,7 +1212,6 @@ def create_shopfloor(request):
     
     if request.method=='POST':
         id = request.POST.getlist('index')
-
         # get inputs values
         division = request.POST.getlist('division')
         profit_centre = request.POST.getlist('profit_centre')
@@ -1278,15 +1275,14 @@ def create_shopfloor(request):
             'Remain_to_do':Remain_to_do, 
             'closed':closed,
             }
-  
         # convert data to dataframe 
         df=pd.DataFrame.from_dict(data)
-
         # convert freeze_end_date to datetime 
         df['Freeze_end_date'] = pd.to_datetime(df['Freeze_end_date'])
         # delete old objects of shopfloor and save new objects
         # Shopfloor.objects.all().delete()
-        
+       
+             
 
         # #Check if at least the first end date is present for each Smooth Family
         # df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
@@ -1308,11 +1304,21 @@ def create_shopfloor(request):
         del df['key_start_day']
         # delete index from df
         df=df.reset_index(drop=True)
-        #call function save shopfloor to save data
-        # df.sort_values(by=['Smooth_Family', 'Ranking'])
+
+         # *****************************************
+        # get version_data 
+        version_number = Shopfloor.objects.values('version').order_by('-version').first()
+        print(version_number)
+        # test if data is empty
+        if not version_number :
+            print('Emptyyy')
+            df['version'] = 1
+        else:
+            df['version'] = version_number['version']+1
+        df['shared']= 'True'
+        # *****************************************
         # df.to_csv('df.csv')
         save_shopfloor(df)
-
         messages.success(request,"Data saved successfully!") 
         return redirect(result)
         
@@ -1335,7 +1341,6 @@ def smoothing_calculate(df_data):
     #Add col freezed to know how row is freezed
     df_data['freezed']=np.where((df_data['Freeze_end_date'].notna()),'Freezed','not_freezed')
     df_data['key']=df_data['division'].astype(str)+df_data['profit_centre'].astype(str)+df_data['Smooth_Family'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
-    print(df_data['key'])
     df_data[['Freeze_end_date']] = df_data[['Freeze_end_date']].astype(object).where(df_data[['Freeze_end_date']].notnull(), None)
     df_data['smoothing_end_date']=df_data['Freeze_end_date']
     # df_data.to_csv('freeze.csv')
@@ -1347,7 +1352,7 @@ def smoothing_calculate(df_data):
         if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']== 'False'):
             df_data.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_data.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_data.loc[i,'division'],df_data.loc[i,'profit_centre'],df_data.loc[i,'Smooth_Family'])  
             # print('1',df_data.loc[i+1,'smoothing_end_date'])
-            df_data.loc[i+1,'smoothing_end_date'] = get_next_open_day(df_data.loc[i+1,'smoothing_end_date']+timedelta(minutes=df_data.loc[i,'smoothing_end_date'].time().minute))         
+            # df_data.loc[i+1,'smoothing_end_date'] = get_next_open_day(df_data.loc[i+1,'smoothing_end_date']+timedelta(minutes=df_data.loc[i,'smoothing_end_date'].time().minute))         
             # print('2',df_data.loc[i+1,'smoothing_end_date'])
 
     return df_data
@@ -1372,7 +1377,8 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
         print(cycle)        
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
-            return datetime(1900, 1, 1, 6) 
+        
+        return datetime(1900, 1, 1, 6) 
        
           
     #stop condition to avoid the infinite loop
@@ -1440,6 +1446,23 @@ def get_next_open_day(dt):
         start_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('startTime',flat=True).first()
         print('start_time',start_time)
         print(type(start_time))
+        if dt.date() not in holidays:
+            #Get the next day start end if not exist get current day end time
+            if start_time:
+                dt = datetime.combine(dt.date(),start_time)
+            else:
+                print('errorrrrrrrrrrrrrrrrrrrrr')
+                return datetime(1900, 1, 1, 6)
+                # print('error')
+            return dt  
+    
+
+    # get holidays from database 
+    # holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True)
+    while True:
+        # check if open date
+        dt = dt + timedelta(days=1)
+        start_time = WorkData.undeleted_objects.filter(date=dt.date()).values_list('startTime',flat=True).first()
         if dt.date() not in holidays:
             #Get the next day start end if not exist get current day end time
             if start_time:
@@ -1513,8 +1536,8 @@ def save_shopfloor(df):
                     'Remain_to_do',
                     'closed',
                     'smoothing_end_date',
-                    #  'version',
-                    #  'shared',
+                     'version',
+                     'shared',
                     ],
 
             null="",
@@ -1526,6 +1549,7 @@ def save_shopfloor(df):
 # def result diplay result of all shoploor data 
 def result(request):
     data=Shopfloor.objects.all().values().order_by('Smooth_Family','Ranking')
+    # print(data)
     if request.method == 'POST':
         # Download file 
         response = HttpResponse(content_type='text/csv')
@@ -1534,7 +1558,7 @@ def result(request):
         df_data=pd.DataFrame(list(data))
         df_data.to_csv(path_or_buf=response,index=False)
         return response
-
+    
     return render(request,'app/Shopfloor/result.html',{'records':data}) 
 
 
