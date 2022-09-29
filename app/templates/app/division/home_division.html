@@ -37,7 +37,7 @@
                             </button>
                         </div>-->
                             
-                        <table class="table table-bordered text-nowrap" >
+                        <table id="division" class="table table-bordered text-nowrap" >
                             <thead>
                                 <tr>
                                     
@@ -203,6 +203,25 @@
     $(this).find(".modal-body #id_description").val(description);
 
     });
+</script>
+
+<!--Data Table -->
+<script>
+    $(document).ready( function () {
+    $('#division').DataTable({
+      "paging": true,
+      "lengthChange":false,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": true,
+      "responsive": false,
+      scrollX :'500px',
+      "lengthChange": false,
+      "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
+    });
+    
+} );
 </script>
 
 {% endblock %}

@@ -20,8 +20,6 @@ class BaseModel(models.Model) :
          #Django will not create a database table for this model
          abstract = True 
 
-
-
 #creating a custom model manager to apply the filter 
 #automatically without using filter(is_delete=False) 
 

@@ -408,7 +408,6 @@ def delete_day_custom(request,division,product):  # sourcery skip: avoid-builtin
         obj.soft_delete()
         # redirect to calendar 
     return redirect("../customcalendar")
-    #return render(request,"app/calendar/custom_calendar.html",{'product':product,'holidays':holidays} )
 
 #********************Crud Product****************************
 # add new object(product)
@@ -468,7 +467,7 @@ def product(request ,division):
     data = Product.objects.filter(division__pk = division ).order_by('id')    
     return render(request, "app/product/product.html", {'data':data,'division':division,'form':form})
 
-#********************work Data****************************
+#********************work Data***********************************
 #create work data for calendar
 def work_data(request,division,product):
     work = WorkData.undeleted_objects.all().filter(product_id = product) 
@@ -639,9 +638,7 @@ def work_data(request,division,product):
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
                             cycle_data.save()  
                 return redirect("../calendar")       
-        
-    # return render(request,"app/calendar/calendar.html",{'product':product,'division':division, 'work':work, 'cycle_time':cycle_time})
-      
+              
 #********************custom work data****************************
 
 #create work data for custom calendar
