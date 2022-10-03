@@ -130,10 +130,19 @@
                          </table>   
                       </div>
                     </div>
+
+                    
                 </div>  
                 <!-- <input type="submit" class="btn btn:hover btn-color" value="Save" style="float: right;"> -->
                 <!-- <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" style="float: right;"> -->
-            
+                <form action="{% url 'sharing' %}" method="post">
+                    {% csrf_token %}
+                        <input type="hidden" value="{{division}}" name="division">
+                        <input type="hidden" value="{{profit_center}}" name="profit_center">
+                        <input type="hidden" value="{{planning}}" name="planning">
+                        <input type="hidden" value="{{version}}" name="version">
+                        <center><input type="submit"  value="Shared" class="btn btn:hover btn-primary custom"></center>
+                  </form>
         </div>
     </div>
 

@@ -1312,7 +1312,7 @@ def create_shopfloor(request):
             df['version'] = 1
         else:
             df['version'] = version_number['version']+1
-        df['shared']= 'True'
+        df['shared']= 'False'
         # df.to_csv('df_after_save.csv')
         save_shopfloor(df)
         messages.success(request,"Data saved successfully!") 
@@ -1561,18 +1561,70 @@ def save_shopfloor(df):
 
 # def result diplay result of all shoploor data 
 def result(request):
-    data=Shopfloor.objects.all().values().order_by('version','smoothing_end_date','closed','Smooth_Family','Ranking',)
+
+    division= profit_center= planning=version= None
+    if request.method == "POST":
+        division= request.POST.get('division')
+        profit_center= request.POST.get('profit_center')
+        planning= request.POST.get('planning')
+        version= request.POST.get('version')
+    data=Shopfloor.objects.all().order_by('version','smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=division,profit_centre=profit_center,designation=planning,version=version)
     # print(data)
-    if request.method == 'POST':
-        # Download file 
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=Smoothing_result.csv'
-        # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
-        df_data=pd.DataFrame(list(data))
-        df_data.to_csv(path_or_buf=response,index=False)
-        return response
+    # if request.method == 'POST':
+    #     # Download file 
+    #     response = HttpResponse(content_type='text/csv')
+    #     response['Content-Disposition'] = 'attachment; filename=Smoothing_result.csv'
+    #     # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+    #     df_data=pd.DataFrame(list(data))
+    #     df_data.to_csv(path_or_buf=response,index=False)
+    #     return response
+    return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
+
+def result_sharing(request):
+    division= profit_center= planning=version= None
+    if request.method == "POST":
+        division= request.POST.get('division')
+        profit_center= request.POST.get('profit_center')
+        planning= request.POST.get('planning')
+        version= request.POST.get('version')
+        print(division)
+        print(profit_center)
+        print(planning)
+        print(version)
+
+        data=Shopfloor.objects.all().filter(division=division,profit_centre=profit_center,designation=planning)
+        data.update(shared=False)
+        data=Shopfloor.objects.all().filter(division=division,profit_centre=profit_center,designation=planning,version=version)
+        data.update(shared=True)
+        # data.shared= True
+        # data.save()
+        # data.save(update_fields=["shared"]) 
+        print(data)
     
-    return render(request,'app/Shopfloor/result.html',{'records':data}) 
+    # return redirect("../result")
+    return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
+
+
+def filter(request):
+    divisions_list= Division.objects.all()
+    center_profit_list = Product.objects.all() 
+    planning_list= Product.objects.all()
+
+    division= profit_center= planning=versions= None
+
+    if request.method == "POST":
+        division= request.POST.get('division_name')
+        profit_center= request.POST.get('center_profit')
+        planning= request.POST.get('planning')
+
+        versions = Shopfloor.objects.values('version','shared').filter(division=division,profit_centre=profit_center,designation=planning).distinct().order_by('version')
+
+    return render( request,'app/Shopfloor/filter.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
+    'versions':versions,
+    'division':division,
+    'profit_center':profit_center,
+    'planning':planning
+    })
 
 
 #******************************Planning********************************   

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+
+{% block content %} 
+
+
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary card-outline">
+                      <div class="card-header ui-sortable-handle" >
+                        <h5 class="card-title" ><strong>Filter</strong></h5> 
+                    </div>
+                    <div class="card-body table-responsive p-0" style="height: 600px;">
+                      <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <form method="POST"  action="{% url 'filter' %}">
+                                    <!-- Security token by Django -->
+                                    {% csrf_token %}
+                                    <div class="input-group input-group-sm" >
+                                        <p>Divisions</p>
+                                        <select name="division_name" size="1" style="height: 40px;width:100px ;"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                            <!--list of product-->
+                                            {% for item in divisions_list %}
+                                            <option value="{{item.name}}" {% if division == item.name %} selected {% endif %}>{{item.name}}</option>
+                                            {% endfor %}
+                                            </select>
+                                            <p>Center profit</p>
+                                            <select name="center_profit" size="1" style="height: 40px;width:100px; "  class="custom-select form-control-border" id="exampleSelectBorder">
+                                                <!--list of product-->
+                                                {% for item in center_profit_list %}
+                                                <option value="{{item.Profit_center}}" {% if profit_center == item.Profit_center %} selected {% endif %}>{{item.Profit_center}}</option>
+                                                {% endfor %}
+                                                </select>
+                                                <p>Planning</p>
+                                                <select name="planning" size="1" style="height: 40px;width:100px; "  class="custom-select form-control-border" id="exampleSelectBorder">
+                                                    <!--list of product-->
+                                                    {% for item in planning_list %}
+                                                    <option value="{{item.planning}}" {% if planning == item.planning %} selected {% endif %}>{{item.planning}}</option>
+                                                    {% endfor %}
+                                                </select>    
+                                    </div>
+
+                                    <br>
+                                        
+                                        <button type="submit" class="btn btn-outline-primary">Apply</button>
+
+     
+                                </form> 
+                                <hr>
+
+                                <form action="{% url 'result' %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" value="{{division}}" name="division">
+                                    <input type="hidden" value="{{profit_center}}" name="profit_center">
+                                    <input type="hidden" value="{{planning}}" name="planning">
+                                    {% for version in versions %}
+                                    <input type="submit" value="{{version.version}}" name="version"> {{version.shared}}
+                                    {%empty%}
+                                    No data with selected filter
+                                    {% endfor %}
+
+                                </form>
+
+
+                            </div>
+                           
+                                    
+                            </div>
+                        </div>
+                        
+                      </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

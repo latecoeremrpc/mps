@@ -75,6 +75,12 @@ urlpatterns = [
     path('shopfloor/',views.shopfloor,name='shopfloor'),
     path('shopfloor/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
     path('shopfloor/result/',views.result,name='result'),
+    path('shopfloor/filter/',views.filter,name='filter'),
+    path('shopfloor/shared/',views.result_sharing,name='sharing'),
+
+    # path('shopfloor/version/',views.version,name='version'),
+
+
 
     
 
