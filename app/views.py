@@ -1561,7 +1561,7 @@ def save_shopfloor(df):
 
 # def result diplay result of all shoploor data 
 def result(request):
-    data=Shopfloor.objects.all().values().order_by('version','closed','Smooth_Family','Ranking',)
+    data=Shopfloor.objects.all().values().order_by('version','smoothing_end_date','closed','Smooth_Family','Ranking',)
     # print(data)
     if request.method == 'POST':
         # Download file 

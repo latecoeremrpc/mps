@@ -20,7 +20,7 @@
             <div class="col-12">
                 <div class="card card-primary card-outline">
 
-                      <div class="card-header ui-sortable-handle" >
+                    <div class="card-header ui-sortable-handle" >
                         <h5 class="card-title" ><strong> Calendar Configuration Treatment List</strong></h5>
                         <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -35,7 +35,7 @@
                       <div class="card-body">
                         <button class="btn btn-outline-primary" data-target="#create" data-toggle="modal"  style="margin-bottom: 10px;"> New <i class="fa-solid fa-plus"></i></button>
                         
-                        <table class="table table-bordered text-nowrap">
+                        <table id="treatment" class="table table-bordered table-head-fixed text-nowrap table-hover">
                             <thead >
                                 <tr>
                                     
@@ -44,7 +44,7 @@
                                     <th>Treatment Number</th>
                                     <th>End date</th>
                                     <th>State</th>
-                                    <th colspan="2">Actions</th>
+                                    <th >Actions</th>
                                     
                                 </tr>
                             </thead>
@@ -53,32 +53,38 @@
                                    
                                 {% for d in data %}
                                     <tr>
-                                        <td>{{ d.id}}</td>  
-                                        <td>{{ d.Version}}</td>
-                                        <td>{{ d.TreatementNumber}}</td>
-                                        <td>{{ d.EndDate}}</td>
-                                        {% if d.is_deleted%} 
-                                            <td style="color: red;">Deleted</td> 
-                                            {%else%} 
-                                            <td >Active</td> 
-                                            {%endif%}
-                                        <td>
-                                            {% if d.is_deleted%}  
-                                            <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-version="{{d.Version}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
-                                            {%else%}  
-                                            <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-version="{{d.Version}}" data-treatementnumber="{{d.TreatementNumber}}" data-enddate="{{d.EndDate}}" ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
-                                            <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-version="{{d.Version}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
-                                            {%endif%}
-                                        </td>
-                                    {%empty%}
-                                        <tr><td colspan="6"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td></tr> 
+                                            <td>{{ d.id}}</td>  
+                                            <td>{{ d.Version}}</td>
+                                            <td>{{ d.TreatementNumber}}</td>
+                                            <td>{{ d.EndDate}}</td>
+                                            <td>
+                                                {% if d.is_deleted%} 
+                                                <p style="color: red;">Deleted</p> 
+                                                {%else%} 
+                                                <p>Active</p>
+                                                {%endif%}
+                                            </td>
+                                            
+                                            <td>
+                                                {% if d.is_deleted%}  
+                                                <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-version="{{d.Version}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                                                {%else%}  
+                                                <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-version="{{d.Version}}" data-treatementnumber="{{d.TreatementNumber}}" data-enddate="{{d.EndDate}}" ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                                <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-version="{{d.Version}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                                {%endif%}
+                                            </td>
+                                        {%empty%}
+                                            <tr>
+                                                
+                                                <td colspan="6"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
+                                        </tr> 
                                     </tr>
                                 {% endfor %}            
                             </tbody>               
                         </table>
                       </div>
                       
-                     </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -212,5 +218,19 @@
 });
 
 </script>
+
+ <!--DataTables-->
+<script type="text/javascript" language="javascript">
+    jQuery(document).ready(function () {
+          $("#treatment").dataTable(
+          {"lengthChange":false,
+           "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
+           "responsive": false,
+        //    scrollX :'450px',
+        }
+          );
+          
+    });
+ </script>
 
 {% endblock %}

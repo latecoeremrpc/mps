@@ -37,16 +37,15 @@
                             </button>
                         </div>-->
                             
-                        <table  class="table table-bordered text-nowrap" >
+                        <table id="division" class="table table-bordered table-hover text-nowrap" >
                             <thead>
                                 <tr>
-                                    
-                                    <th>Id </th>
+                                    <th>Id</th>
                                     <th>Name division</th>
                                     <th>Description division</th>
                                     <th>Product</th>
                                     <th>State</th>
-                                    <th colspan="2">Actions</th>  
+                                    <th>Actions</th>  
                                 </tr>
                             </thead>
                             <tbody>
@@ -57,14 +56,13 @@
                                         <td>{{ d.description}}</td>
                                         <td><a href="{% url 'product' d.id %}" style="text-decoration: none;">Product</a></td> 
                                             {% if d.is_deleted%} 
-                                            <td style="color: red;">Deleted</td> 
+                                            <td style="color: rgb(240, 25, 25);">Deleted</td> 
                                             {%else%} 
                                             <td >Active</td> 
                                             {%endif%}
                                         <td>
                                             {% if d.is_deleted%}
                                             <button class="btn" data-target="#restore" data-toggle="modal" data-id="{{d.id}}" data-name="{{d.name}}" ><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
-
                                             {%else%}
                                                 <button class="btn" data-target="#update" data-id="{{d.id}}" data-name="{{d.name}}" data-description="{{d.description}}" data-toggle="modal"><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
                                                 <button class="btn" data-target="#delete" data-id="{{d.id}}" data-name="{{d.name}}" data-toggle="modal" ><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
@@ -169,12 +167,6 @@
 
 
 <!--******************************************************************************************************************************-->
-<!--Data Table -->
-<script>
-    
-   
-</script>
-   
 
 <!-- Delete Modal  -->
 <script>
@@ -212,9 +204,7 @@
     });
 </script>
 
-<script>
-    // var templateTable = $('#division').DataTable();
-</script>
+
 <!-- <script>
     $(document).ready( function () {
     $('#division').DataTable({
@@ -232,5 +222,17 @@
     
 } );
 </script> -->
+
+<script type="text/javascript" language="javascript">
+    jQuery(document).ready(function () {
+          $("#division").dataTable(
+          {"lengthChange":false,
+           "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
+           "responsive": false,
+        }
+          );
+          
+    });
+ </script>
 
 {% endblock %}

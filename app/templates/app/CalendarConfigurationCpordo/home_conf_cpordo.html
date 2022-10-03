@@ -34,7 +34,7 @@
                       <div class="card-body ">
                         <button class="btn btn-outline-primary" data-target="#create" data-toggle="modal" style="margin-bottom: 10px;"> New <i class="fa-solid fa-plus"></i> </button>
                         <br>
-                        <table class="table table-bordered text-nowrap">
+                        <table id="cpordo" class="table table-bordered text-nowrap">
                             <thead >
                                 <tr>
                                     
@@ -43,7 +43,7 @@
                                     <th>First Def</th>
                                     <th>Last Def</th>
                                     <th>State</th>
-                                    <th colspan="2">Actions</th>
+                                    <th>Actions</th>
                                     
                                 </tr>
                             </thead>
@@ -216,4 +216,18 @@
 });
 
 </script>
+
+<!--DataTables-->
+<script type="text/javascript" language="javascript">
+    jQuery(document).ready(function () {
+          $("#cpordo").dataTable(
+          {"lengthChange":false,
+           "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
+           "responsive": false,
+        }
+          );
+          
+    });
+ </script>
+
 {% endblock %}
