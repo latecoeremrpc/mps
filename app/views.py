@@ -1606,18 +1606,33 @@ def result_sharing(request):
 
 
 def filter(request):
-    divisions_list= Division.objects.all()
-    center_profit_list = Product.objects.all() 
-    planning_list= Product.objects.all()
+    divisions_list= Division.undeleted_objects.all()
+    center_profit_list = Product.undeleted_objects.all()
+    planning_list= Product.undeleted_objects.all()
+    # shopfoor_created_at_list =list( Shopfloor.objects.values_list('created_at',flat=True).distinct())
+    # for i in shopfoor_created_at_list:
+    #     created_year= i.year
+    #     created_week=i.isocalendar()[1]
+    #     created_at_year_week = f'{str(created_year)}-W{str(created_week)}'
+    #     print(created_at_year_week)
+    #     print(type(created_at_year_week))
 
-    division= profit_center= planning=versions= None
+
+    division= profit_center= planning=versions= date =None
 
     if request.method == "POST":
         division= request.POST.get('division_name')
         profit_center= request.POST.get('center_profit')
         planning= request.POST.get('planning')
-
-        versions = Shopfloor.objects.values('version','shared').filter(division=division,profit_centre=profit_center,designation=planning).distinct().order_by('version')
+        date= request.POST.get('week')
+        # print(date.split('-W')[0])
+        # print(date.split('-W')[1])
+        year=date.split('-W')[0]
+        week=date.split('-W')[1]
+        print(date[0])
+        print(date[1])
+        
+        versions = Shopfloor.objects.values('version','shared').filter(division=division,profit_centre=profit_center,designation=planning,created_at__week__gte=week, created_at__year=year).distinct().order_by('version')
 
     return render( request,'app/Shopfloor/filter.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
     'versions':versions,
