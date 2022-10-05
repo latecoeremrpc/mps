@@ -14,7 +14,7 @@
             <div class="row">
                 <div class="col-3">
                     <div class="card card-row" >
-                        <div class="card-header"style="background-color:#2a9d8f; color:white;">
+                        <div class="card-header"style="background-color: #2a9d8f; color:white;">
                             <h3 class="card-title">
                             Divisions
                             </h3>
@@ -37,13 +37,16 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <select name="center_profit" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                            <div class="select2-primary" >
+                            <select name="center_profit" size="1" id="center" class="select2 select2-hidden-accessible" multiple="" data-placeholder="* Multiple" data-dropdown-css-class="select2-primary"  data-select2-id="15" tabindex="-1" aria-hidden="true"  style="width: 100%;">
                                 <!--list of product-->
                                 {% for item in center_profit_list %}
-                                <option value="{{item.Profit_center}}" {% if profit_center == item.Profit_center %} selected {% endif %}>{{item.Profit_center}}</option>
+                                <option value="{{item.Profit_center}}" {% if item.Profit_center in profit_center%} selected {% endif %}>{{item.Profit_center}}</option>
                                 {% endfor %}
                             </select>
+                            </div>
                         </div>
+                        
                     </div>
                 </div>
                 <div class="col-3">
@@ -54,12 +57,14 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <select name="planning" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
-                                <!--list of product-->
-                                {% for item in planning_list %}
-                                <option value="{{item.planning}}" {% if planning == item.planning %} selected {% endif %}>{{item.planning}}</option>
-                                {% endfor %}
-                            </select> 
+                            <div class="select2-primary" >
+                                <select name="planning" size="1" class="select2 select2-hidden-accessible" multiple="" data-placeholder="* Multiple" data-dropdown-css-class="select2-primary"  data-select2-id="15" tabindex="-1" aria-hidden="true"  style="width: 100%;">
+                                    <!--list of product-->
+                                    {% for item in planning_list %}
+                                    <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %}>{{item.planning}}</option>
+                                    {% endfor %}
+                                </select> 
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -71,7 +76,7 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <input type="week" name="week" id="week" class="form-control" placeholder="2017-W01" required>
+                            <input type="week" name="week" id="week" class="form-control"  required>
 
                             <!-- <select name="week" size="1" class="custom-select form-control-border" id="exampleSelectBorder">
                                 <option value="exemple">Exemple</option>
@@ -82,7 +87,10 @@
             </div>
             <div class="row">
                 <div class="col-4 offset-4">
-                    <button type="submit" class="btn btn-outline-primary" style="width:100%;">Search</button>
+                    <button type="submit" class="btn btn-outline-primary" style="width:100%;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Search
+                    </button>
                 </div>
             </div>
         </form>
@@ -92,11 +100,19 @@
 <br>
 <hr>
 
+<!-- <div class="select2-primary" style="width: 80%;height: 90px;overflow-y: auto;">
+    <select name='profit_center'  class="select2 select2-hidden-accessible" multiple="" data-placeholder="Select a Profit center" data-dropdown-css-class="select2-primary" style="width: 100%;" data-select2-id="15" tabindex="-1" aria-hidden="true"> 
+        <option>test</option>
+        <option>marwa</option>
+        <option>noomene</option>
+
+    </select>
+</div> -->
 <div class="row">
     <center>
         <h3 >
             <i class="fas fa-code-branch"></i>
-            Versions available
+            Available versions 
         </h3>
     </center>
     <div class="col-12" style="display: flex;flex-wrap: nowrap;justify-content: space-around;">
@@ -105,8 +121,12 @@
                     <form action="{% url 'result' %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" value="{{division}}" name="division">
-                    <input type="hidden" value="{{profit_center}}" name="profit_center">
-                    <input type="hidden" value="{{planning}}" name="planning">
+                    {% for item  in profit_center %}
+                        <input type="hidden" value="{{item}}" name="profit_center">
+                    {% endfor %}
+                    {% for item  in planning %}
+                        <input type="hidden" value="{{item}}" name="planning">
+                    {% endfor %}
                         {% for version in versions %}
                             <a class="btn btn-app" style="width:90px;height: 100px;" >
                                 <button type="submit" value="{{version.version}}" name="version"  style="border: none;background-color: transparent;color: white;">   
@@ -129,6 +149,18 @@
     </div>
 </div>   
 
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+    
+</script> 
 
+<script>
+    $(document).ready(function() {
+        $('#center').select2();
+    });
+    
+</script> 
 
 {% endblock %}

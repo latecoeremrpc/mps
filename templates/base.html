@@ -73,6 +73,10 @@
     Chart.register(ChartDataLabels);
   </script>
 
+  <!-- Nice Select -->
+<link rel="stylesheet" href="{% static 'plugins/select2/css/select2.css' %}">
+<script src="{% static 'plugins/select2/js/select2.full.js' %}"></script> 
+
   <!-- DataGrid jspreadsheet -->
 
  
@@ -82,7 +86,8 @@
     <script src="{% static 'adminlte/dist/js/adminlte.min.js' %}"></script>
 </head>
 
-<body class="hold-transition sidebar-mini sidebar-collapse">
+<!--add sidebar-collapse to class for default collapse menu-->
+<body class="hold-transition sidebar-mini ">
  <div class="wrapper">
 
    <!-- Navbar -->
@@ -139,13 +144,19 @@
 
       <!-- Sidebar Menu -->
       <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" >
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
                <li class="nav-item">
                 <a href="{% url 'home' %}" class="nav-link">
                   <i class="nav-icon fas fa-house"></i>
                   <p>Home</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'filter' %}" class="nav-link">
+                  <i class="fa-solid fa-chart-simple nav-icon"></i>
+                  <p>Smoothing</p>
                 </a>
               </li>   
               <li class="nav-item">
@@ -189,13 +200,13 @@
                   <p>Shopfloor</p>
                 </a>
               </li>
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a href="{% url 'filter' %}" class="nav-link">
                   <i class="fa-solid fa-chart-simple nav-icon"></i>
                   <p>Smoothing</p>
                 </a>
               </li>
-            
+             -->
               
             </ul>
           </li>
@@ -243,7 +254,7 @@
     
         </strong>
       <div class="float-right d-none d-sm-inline-block">
-        <b>Version</b> 1.4.3
+        <b>Version</b> 1.4.30
         </div>
     </footer>
   </div>
