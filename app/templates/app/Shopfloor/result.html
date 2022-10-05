@@ -192,14 +192,13 @@ var myDataGrid =new Handsontable(placeholder, {
     $(document).ready( function () {
     $('#smoothing').DataTable({
       "paging": true,
-      "lengthChange":false,
+      "lengthChange":true,
       "searching": true,
       "ordering": true,
       "info": true,
       "autoWidth": true,
       "responsive": false,
       scrollX :'500px',
-      "lengthChange": false,
       "lengthMenu": [[8, 20, 30, -1], [8, 20, 30, "All"]],
       "scrollCollapse": true,
     // "dom": '<"search"f>i'
@@ -212,7 +211,6 @@ var myDataGrid =new Handsontable(placeholder, {
          {extend: 'csvHtml5', className: 'btn btn-light btn-sm btn-rounded'},
          { extend: 'excelHtml5', className: 'btn btn-light btn-sm btn-rounded' },
          { extend: 'pdfHtml5', className: 'btn btn-light btn-sm btn-rounded',orientation: 'landscape', pageSize: '4A0', },
-         { extend: 'print', className: 'btn btn-light btn-sm btn-rounded'},
          { extend: 'colvis', className: 'btn btn-light btn-sm btn-rounded' ,popoverTitle: 'Visibility control',collectionLayout: 'two-column',},
        
          

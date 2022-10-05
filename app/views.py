@@ -1588,20 +1588,11 @@ def result_sharing(request):
         profit_center= request.POST.getlist('profit_center')
         planning= request.POST.getlist('planning')
         version= request.POST.get('version')
-        # print(division)
-        # print(profit_center)
-        # print(planning)
-        # print(version)
-
+        
         data=Shopfloor.objects.all().filter(division=division,profit_centre__in=profit_center,designation__in=planning)
         data.update(shared=False)
         data=Shopfloor.objects.all().filter(division=division,profit_centre__in=profit_center,designation__in=planning,version=version)
         data.update(shared=True)
-        # data.shared= True
-        # data.save()
-        # data.save(update_fields=["shared"]) 
-        # print(data)
-    
     # return redirect("../result")
     return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
 
@@ -1626,14 +1617,7 @@ def filter(request):
         profit_center= request.POST.getlist('center_profit')
         planning= request.POST.getlist('planning')
         date= request.POST.get('week')
-        print('***********************')
-        print(profit_center)
-        print(type(profit_center))
 
-        print(profit_center,planning)
-        print(type(planning))
-        # print(date.split('-W')[0])
-        # print(date.split('-W')[1])
         year=date.split('-W')[0]
         week=date.split('-W')[1]
         versions = Shopfloor.objects.values('version','shared').filter(division=division,profit_centre__in= profit_center,designation__in=planning,created_at__week__gte=week, created_at__year=year).distinct().order_by('version')

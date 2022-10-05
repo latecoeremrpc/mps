@@ -76,7 +76,7 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <input type="week" name="week" id="week" class="form-control"  required>
+                            <input type="week" name="week" id="week" class="form-control"  value="{% now 'Y' %}-W{% now 'W' %}" required>
 
                             <!-- <select name="week" size="1" class="custom-select form-control-border" id="exampleSelectBorder">
                                 <option value="exemple">Exemple</option>
