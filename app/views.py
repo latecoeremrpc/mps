@@ -1565,11 +1565,16 @@ def result(request):
     division= profit_center= planning=version= None
     if request.method == "POST":
         division= request.POST.get('division')
-        profit_center= request.POST.getlist('profit_center')
-        planning= request.POST.getlist('planning')
+        profit_center= request.POST.get('profit_center')
+        planning= request.POST.get('planning')
         version= request.POST.get('version')
-        
-    data=Shopfloor.objects.all().order_by('version','smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=division,profit_centre__in=profit_center,designation__in=planning,version=version)
+        print(division)
+        print(profit_center)
+        print(planning)
+        print(version)
+
+
+    data=Shopfloor.objects.all().order_by('version','smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=division,profit_centre=profit_center,designation=planning,version=version)
     # print(data)
     # if request.method == 'POST':
     #     # Download file 
@@ -1585,13 +1590,13 @@ def result_sharing(request):
     division= profit_center= planning=version= None
     if request.method == "POST":
         division= request.POST.get('division')
-        profit_center= request.POST.getlist('profit_center')
-        planning= request.POST.getlist('planning')
+        profit_center= request.POST.get('profit_center')
+        planning= request.POST.get('planning')
         version= request.POST.get('version')
         
-        data=Shopfloor.objects.all().filter(division=division,profit_centre__in=profit_center,designation__in=planning)
+        data=Shopfloor.objects.all().filter(division=division,profit_centre=profit_center,designation=planning)
         data.update(shared=False)
-        data=Shopfloor.objects.all().filter(division=division,profit_centre__in=profit_center,designation__in=planning,version=version)
+        data=Shopfloor.objects.all().filter(division=division,profit_centre=profit_center,designation=planning,version=version)
         data.update(shared=True)
     # return redirect("../result")
     return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
@@ -1601,32 +1606,35 @@ def filter(request):
     divisions_list= Division.undeleted_objects.values('name').distinct()
     center_profit_list = Product.undeleted_objects.values('Profit_center').distinct()
     planning_list= Product.undeleted_objects.values('planning').distinct()
-    # shopfoor_created_at_list =list( Shopfloor.objects.values_list('created_at',flat=True).distinct())
-    # for i in shopfoor_created_at_list:
-    #     created_year= i.year
-    #     created_week=i.isocalendar()[1]
-    #     created_at_year_week = f'{str(created_year)}-W{str(created_week)}'
-    #     print(created_at_year_week)
-    #     print(type(created_at_year_week))
+    created_at_list =list( Shopfloor.objects.values_list('created_at',flat=True).distinct())
+    print("created_at_list",created_at_list)
+    for i in created_at_list:
+        created_year= i.year
+        created_week=i.isocalendar()[1]
+        created_at_year_week = f'{str(created_year)}-W{str(created_week)}'
+        print('interval of created_at:',created_at_year_week)
+        
+        print(type(created_at_year_week))
 
 
     division= profit_center= planning=versions= date =None
 
     if request.method == "POST":
         division= request.POST.get('division_name')
-        profit_center= request.POST.getlist('center_profit')
-        planning= request.POST.getlist('planning')
+        profit_center= request.POST.get('center_profit')
+        planning= request.POST.get('planning')
         date= request.POST.get('week')
 
         year=date.split('-W')[0]
         week=date.split('-W')[1]
-        versions = Shopfloor.objects.values('version','shared').filter(division=division,profit_centre__in= profit_center,designation__in=planning,created_at__week__gte=week, created_at__year=year).distinct().order_by('version')
+        versions = Shopfloor.objects.values('version','shared').filter(division=division,profit_centre= profit_center,designation=planning,created_at__week__gte=week, created_at__year=year).distinct().order_by('version')
         
     return render( request,'app/Shopfloor/filter.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
     'versions':versions,
     'division':division,
     'profit_center':profit_center,
-    'planning':planning
+    'planning':planning,
+    'created_at_year_week':created_at_year_week,
     })
 
 

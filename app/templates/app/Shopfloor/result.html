@@ -130,20 +130,14 @@
                          </table>   
                       </div>
                     </div>
-
-                    
                 </div>  
                 <!-- <input type="submit" class="btn btn:hover btn-color" value="Save" style="float: right;"> -->
                 <!-- <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" style="float: right;"> -->
                 <form action="{% url 'sharing' %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" value="{{division}}" name="division">
-                    {% for item  in profit_center %}
-                        <input type="hidden" value="{{item}}" name="profit_center">
-                    {% endfor %}
-                    {% for item  in planning %}
-                        <input type="hidden" value="{{item}}" name="planning">
-                    {% endfor %}
+                        <input type="hidden" value="{{profit_center}}" name="profit_center">
+                        <input type="hidden" value="{{planning}}" name="planning">
                         <input type="hidden" value="{{version}}" name="version">
                         <!-- <input type="hidden" value="{{date}}" name="date">  -->
 

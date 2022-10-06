@@ -21,7 +21,6 @@
                         </div>
                         <div class="card-body">
                             <select name="division_name" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
-                                <!--list of product-->
                                 {% for item in divisions_list %}
                                 <option value="{{item.name}}" {% if division == item.name %} selected {% endif %}>{{item.name}}</option>
                                 {% endfor %}
@@ -37,14 +36,11 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <div class="select2-primary" >
-                            <select name="center_profit" size="1" id="center" class="select2 select2-hidden-accessible" multiple="" data-placeholder="* Multiple" data-dropdown-css-class="select2-primary"  data-select2-id="15" tabindex="-1" aria-hidden="true"  style="width: 100%;">
-                                <!--list of product-->
+                            <select name="center_profit" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
                                 {% for item in center_profit_list %}
                                 <option value="{{item.Profit_center}}" {% if item.Profit_center in profit_center%} selected {% endif %}>{{item.Profit_center}}</option>
                                 {% endfor %}
                             </select>
-                            </div>
                         </div>
                         
                     </div>
@@ -56,15 +52,20 @@
                             Planning
                             </h3>
                         </div>
-                        <div class="card-body">
+                        <!-- <div class="card-body">
                             <div class="select2-primary" >
                                 <select name="planning" size="1" class="select2 select2-hidden-accessible" multiple="" data-placeholder="* Multiple" data-dropdown-css-class="select2-primary"  data-select2-id="15" tabindex="-1" aria-hidden="true"  style="width: 100%;">
-                                    <!--list of product-->
                                     {% for item in planning_list %}
                                     <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %}>{{item.planning}}</option>
                                     {% endfor %}
                                 </select> 
-                            </div>
+                            </div> -->
+                            <div class="card-body">
+                                    <select name="planning" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                        {% for item in planning_list %}
+                                        <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %}>{{item.planning}}</option>
+                                        {% endfor %}
+                                    </select> 
                         </div>
                     </div>
                 </div>
@@ -76,7 +77,7 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <input type="week" name="week" id="week" class="form-control"  value="{% now 'Y' %}-W{% now 'W' %}" required>
+                            <input type="week" name="week" id="week" class="form-control" min="{{created_at_year_week}}" max="{{created_at_year_week}}" value="{{created_at_year_week}}" required>
 
                             <!-- <select name="week" size="1" class="custom-select form-control-border" id="exampleSelectBorder">
                                 <option value="exemple">Exemple</option>
@@ -121,12 +122,9 @@
                     <form action="{% url 'result' %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" value="{{division}}" name="division">
-                    {% for item  in profit_center %}
-                        <input type="hidden" value="{{item}}" name="profit_center">
-                    {% endfor %}
-                    {% for item  in planning %}
-                        <input type="hidden" value="{{item}}" name="planning">
-                    {% endfor %}
+                        <input type="hidden" value="{{profit_center}}" name="profit_center">
+                        <input type="hidden" value="{{planning}}" name="planning">
+                    
                         {% for version in versions %}
                             <a class="btn btn-app" style="width:90px;height: 100px;" >
                                 <button type="submit" value="{{version.version}}" name="version"  style="border: none;background-color: transparent;color: white;">   
