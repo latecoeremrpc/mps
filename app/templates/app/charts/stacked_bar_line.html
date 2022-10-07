@@ -19,77 +19,93 @@
                     <script>
                         var xValues_week_count = [{% for index, data in week_count.iterrows %}  '{{data.year_week_programm_demand}}', {% endfor %}];
                         var data_week_count = [{% for index, data in week_count.iterrows %} {{data.id}}, {% endfor %}];
-                        var xValues_demonstrated_capacity = [{% for index, data in week_demonstrated_capacity_count.iterrows %}  '{{data.year_week_end_date}}', {% endfor %}];
-                        var data_demonstrated_capacity = [{% for index, data in week_demonstrated_capacity_count.iterrows %} {{data.id}}, {% endfor %}];
-                        var xValues_production_plan = [{% for index, data in week_production_plan_count.iterrows %}  '{{data.year_week_production_plan}}', {% endfor %}];
-                        var data_production_plan = [{% for index, data in week_production_plan_count.iterrows %} {{data.id}}, {% endfor %}];
+                        // var xValues_demonstrated_capacity = [{% for index, data in week_demonstrated_capacity_count.iterrows %}  '{{data.year_week_end_date}}', {% endfor %}];
+                        // var data_demonstrated_capacity = [{% for index, data in week_demonstrated_capacity_count.iterrows %} {{data.id}}, {% endfor %}];
+                        // var xValues_production_plan = [{% for index, data in week_production_plan_count.iterrows %}  '{{data.year_week_production_plan}}', {% endfor %}];
+                        // var data_production_plan = [{% for index, data in week_production_plan_count.iterrows %} {{data.id}}, {% endfor %}];
 
                         var barChartData = {
-                            labels: xValues_demonstrated_capacity, xValues_production_plan,xValues_week_count,
-                            datasets: [{
-                            data:data_week_count ,
-                            type: 'line',
-                            label: 'QTE Program demand',
-                            fill: false,
-                            backgroundColor: "#28a745",
-                            borderColor: "#28a745",
-                            borderCapStyle: 'butt',
-                            borderDash: [],
-                            borderDashOffset: 0.0,
-                            borderJoinStyle: 'miter',
-                            lineTension: 0.3,
-                            pointBackgroundColor: "#28a745",
-                            pointBorderColor: "#28a745",
+                            // labels: xValues_demonstrated_capacity, xValues_production_plan,xValues_week_count,
+                            labels: xValues_week_count,
+
+                            datasets: [
+                            //     {
+                            // data:data_week_count ,
+                            // type: 'line',
+                            // label: 'QTE Program demand',
+                            // fill: false,
+                            // backgroundColor: "#0077b6",
+                            // borderColor: "#0077b6",
+                            // borderCapStyle: 'butt',
+                            // borderDash: [],
+                            // borderDashOffset: 0.0,
+                            // borderJoinStyle: 'miter',
+                            // lineTension: 0.3,
+                            // pointBackgroundColor: "#0077b6",
+                            // pointBorderColor: "#0077b6",
+                            // pointBorderWidth: 1,
+                            // pointHoverRadius: 5,
+                            // pointHoverBackgroundColor: "#0077b6",
+                            // pointHoverBorderColor: "#0077b6",
+                            // pointHoverBorderWidth: 2,
+                            // pointRadius: 4,
+                            // pointHitRadius: 10
+                            // }, 
+                            
+                            // {
+                            // data: data_demonstrated_capacity ,
+                            // type: 'line',
+                            // label: 'QTE Demonstrated capacity',
+                            // fill: false,
+                            // backgroundColor: "#6c757d",
+                            // borderColor: "#6c757d",
+                            // borderCapStyle: 'butt',
+                            // borderDash: [2, 2],
+                            // borderDashOffset: 0.0,
+                            // borderJoinStyle: 'miter',
+                            // ineTension: .3,
+                            // pointBackgroundColor: "#6c757d",
+                            // pointBorderColor: "#6c757d",
+                            // pointBorderWidth: 1,
+                            // pointHoverRadius: 5,
+                            // pointHoverBackgroundColor: "#6c757d",
+                            // pointHoverBorderColor: "#6c757d",
+                            // pointHoverBorderWidth: 2,
+                            // pointRadius: 4,
+                            // pointHitRadius: 10
+                            // },
+                            {
+                            label: 'QTE WO',
+                            backgroundColor: "#023e8a",
+                            borderColor: "#023e8a",
+                            data:data_week_count,
+                            pointBackgroundColor: "#023e8a",
+                            pointBorderColor: "#023e8a",
                             pointBorderWidth: 1,
                             pointHoverRadius: 5,
-                            pointHoverBackgroundColor: "#28a745",
-                            pointHoverBorderColor: "#28a745",
+                            pointHoverBackgroundColor: "#023e8a",
+                            pointHoverBorderColor: "#023e8a",
                             pointHoverBorderWidth: 2,
                             pointRadius: 4,
-                            pointHitRadius: 10
-                            }, {
-                            data: data_demonstrated_capacity ,
-                            type: 'line',
-                            label: 'QTE Demonstrated capacity',
-                            fill: false,
-                            backgroundColor: "#6c757d",
-                            borderColor: "#6c757d",
-                            borderCapStyle: 'butt',
-                            borderDash: [2, 2],
-                            borderDashOffset: 0.0,
-                            borderJoinStyle: 'miter',
-                            ineTension: .3,
-                            pointBackgroundColor: "#6c757d",
-                            pointBorderColor: "#6c757d",
-                            pointBorderWidth: 1,
-                            pointHoverRadius: 5,
-                            pointHoverBackgroundColor: "#6c757d",
-                            pointHoverBorderColor: "#6c757d",
-                            pointHoverBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHitRadius: 10
-                            },
-                             {
-                            label: 'QTE Production Plan',
-                            backgroundColor: "#00008B",
-                            borderColor: "#00008B",
-                            data:data_production_plan,
-                            pointBackgroundColor: "#007bff",
-                            pointBorderColor: "#007bff",
-                            pointBorderWidth: 1,
-                            pointHoverRadius: 5,
-                            pointHoverBackgroundColor: "#007bff",
-                            pointHoverBorderColor: "#007bff",
-                            pointHoverBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHitRadius: 10
+                            pointHitRadius: 10,
+                            scaleFontColor: "#FFFFFF"
                             },
 
                             {  
-                            label: 'Test',
-                            backgroundColor: "#6495ED",
-                            // yAxisID: "bar-y-axis",
-                            data: data_production_plan,
+                            label: 'QTE PLO',
+                            backgroundColor: "#a2d2ff",
+                            borderColor: "#a2d2ff",
+                            // data:data_week_count,
+                            pointBackgroundColor: "#a2d2ff",
+                            pointBorderColor: "#a2d2ff",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "#a2d2ff",
+                            pointHoverBorderColor: "#a2d2ff",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHitRadius: 10,
+                            
                             }
                         ]
                         };

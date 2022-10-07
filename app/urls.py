@@ -85,7 +85,7 @@ urlpatterns = [
     
 
     # urls for planning 
-    path('shopfloor/planning/',views.planning,name='planning'), 
+    path('shopfloor/planning/',views.filter_planning,name='planning'), 
     path('shopfloor/datatable/',views.data_table,name='datatable'), 
      
     

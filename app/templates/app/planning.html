@@ -1,87 +1,100 @@
 {% extends 'base.html' %}
 {% block content %} 
-<div class="col-12">
+<div class="content">
+    <div class="container-fluid">
+        <!--message alert -->
+        {% if messages %}
+            {% for message in messages %}
+                {%include 'app/alerts/alert.html'%}
+            {% endfor %}
+        {% endif %}
+        <form method="POST"  action="{% url 'planning' %}">
+            <!-- Security token by Django -->
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-4">
+                    <div class="card card-row" >
+                        <div class="card-header"style="background-color: #2a9d8f; color:white;">
+                            <h3 class="card-title">
+                            Divisions
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <select name="division_name" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                {% for item in divisions_list %}
+                                <option value="{{item.name}}" {% if division == item.name %} selected {% endif %}>{{item.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card card-row card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                            Profit Center
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <select name="center_profit" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                {% for item in center_profit_list %}
+                                <option value="{{item.Profit_center}}" {% if item.Profit_center in profit_center%} selected {% endif %}>{{item.Profit_center}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card card-row card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                            Planning
+                            </h3>
+                        </div>
+                            <div class="card-body">
+                                    <select name="planning" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                        {% for item in planning_list %}
+                                        <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %}>{{item.planning}}</option>
+                                        {% endfor %}
+                                    </select> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4 offset-4">
+                    <button type="submit" class="btn btn-outline-primary" style="width:100%;">
+                        <i class="fa-solid fa-check"></i>
+                       Apply
+                    </button>
+                
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+<br>
+<hr>
+
+
+<!-- <div class="col-12">
     <div class="info-box">
         <span class="info-box-icon bg-info elevation-1"><i class="fa-regular fa-compass"></i></span>
         <div class="info-box-content">
             <span class="info-box-text">Demand vs. Production</span>
-            <!-- <span class="info-box-number">
-            10
-            <small>%</small>
-            </span> -->
        </div>
     </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        {% include 'app/charts/stacked_bar_line.html' %}
-    </div>
-</div> 
-
-
-
-<div>
-    <div class="row">
-        <div class="col-6">
-            {% include 'app/charts/week_count.html' %}
-        </div>
-        <div class="col-6">
-            {% include 'app/charts/week_demonstrated_capacity_count.html' %}
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12">
-            {% include 'app/charts/week_production_plan.html' %}
-        </div>
-    </div> 
-</div>
-
-<div class="col-12">
-    <div class="info-box">
-        <span class="info-box-icon bg-danger elevation-1"><i class="fa-solid fa-cart-flatbed"></i></span>
-        <div class="info-box-content">
-            <span class="info-box-text">Logistic Stock</span>
-            <!-- <span class="info-box-number">
-            10
-            <small>%</small>
-            </span> -->
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        {% include 'app/charts/stock_count_per_week.html' %}
-    </div>
-</div> 
-
-<div class="col-12">
-    <div class="info-box">
-        <span class="info-box-icon bg-success elevation-1"><i class="fa-solid fa-truck-ramp-box"></i></span>
-        <div class="info-box-content">
-            <span class="info-box-text">Workload / Capacity </span>
-            <!-- <span class="info-box-number">
-            10
-            <small>%</small>
-            </span> -->
-       </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-6">
-        {% include 'app/charts/workload.html' %}
-    </div>
-    <div class="col-6">
-        {% include 'app/charts/capacity.html' %}
-    </div>
-</div>
-
-
-
-<!-- <div>
-    <h3>Logistic stock</h3>
-    
 </div> -->
+
+<div class="row">
+    <div class="col-12">
+        {% include 'app/charts/demand_prod_planning.html' %}
+    </div>
+</div> 
+
+
 
 
 
