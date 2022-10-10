@@ -1599,6 +1599,10 @@ def filter_planning(request):
     division= profit_center= planning=df_data =None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
+    demand_prod_planning.month_count=None
+    demand_prod_planning.month_count_axis_x=None
+
+
     
     if request.method == "POST":
         division= request.POST.get('division_name')
@@ -1620,52 +1624,43 @@ def filter_planning(request):
         demand_prod_planning(df_data)
         # except:
         #     print("An exception occurred")    
-
+    # df_data.to_csv('test.csv')
     return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
     'records':df_data,
     'week_count':demand_prod_planning.week_count,
     'week_count_axis_x':demand_prod_planning.week_count_axis_x,
+    'month_count':demand_prod_planning.month_count,
+    'month_count_axis_x':demand_prod_planning.month_count_axis_x,
     })
 
 
 
 def demand_prod_planning(df_data):
-# Program demand count per week
-    #Get week from date_end_plan if date_reordo is null or Get week from date_reordo
-    df_data['week_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
-    df_data['year_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.year),(pd.to_datetime(df_data['date_reordo']).dt.year)).astype(int)
-    # df_data.sort_values(by=['year_programm_demand','week_programm_demand'],inplace= True)
-    df_data['year_week_programm_demand']=df_data['year_programm_demand'].astype(str)+'-'+'W'+df_data['week_programm_demand'].astype(str)
-    df_data['week_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
-    # df_data.to_csv('result.csv')
+# nomber of OF and OP per wek 
     
-    # OF
-
-    # df_data['week_programm_demand_Of']=np.where((df_data['order_type']=='YP04')&(df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
-    # df_data['year_programm_demand_Of']=np.where((df_data['order_type']=='YP04')&(df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.year),(pd.to_datetime(df_data['date_reordo']).dt.year)).astype(int)
-    # df_data['year_week_programm_demand_OF']=df_data['year_programm_demand_Of'].astype(str)+'-'+'W'+df_data['week_programm_demand_Of'].astype(str)
-    
-
-
     df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     df_data['date_week']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
+    df_data['date_month']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.month),(pd.to_datetime(df_data['date_reordo']).dt.month)).astype(int)
     df_data['date_year']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.year),(pd.to_datetime(df_data['date_reordo']).dt.year)).astype(int)
     df_data['date_year_week']=df_data['date_year'].astype(str)+'-'+'W'+df_data['date_week'].astype(str)
+    df_data['date_year_month']=df_data['date_year'].astype(str)+'-'+'M'+df_data['date_month'].astype(str)
     df_data['order_nature']=np.where((df_data['order_type'].str.startswith('YP')),('OF'),('OP'))
-    # week_count=df_data.groupby(['date_year_week','order_nature'])['id'].count().reset_index()
-    week_count=df_data.groupby(['date_year_week','order_nature'])['id'].count().unstack().fillna(0).stack().reset_index()
-    week_count_axis_x=week_count['date_year_week'].unique()
-    print(week_count_axis_x)
-    print(week_count)
-    # df_data.to_csv('result.csv')
 
-    #Program demand count per week
-    # week_count=df_data.groupby('year_week_programm_demand')['id'].count().reset_index()
-    
+    df_data['order_nature_closed']=df_data['order_nature'].astype('str')+df_data['closed'].astype('str')
+
+    week_count=df_data.groupby(['date_year_week','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
+    week_count_axis_x=week_count['date_year_week'].unique()
+
+
    
-    # week_count.to_csv('week_count.csv')
+    month_count=df_data.groupby(['date_year_month','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
+    month_count_axis_x=month_count['date_year_month'].unique()
+    
     demand_prod_planning.week_count=week_count
     demand_prod_planning.week_count_axis_x=week_count_axis_x
+    demand_prod_planning.month_count=month_count
+    demand_prod_planning.month_count_axis_x=month_count_axis_x
+
 
 
 

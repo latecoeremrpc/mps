@@ -1,0 +1,242 @@
+
+<div class="card-body">
+    {%if records.iterrows%}
+    <div style="height: 400px" >
+        <canvas id="month"></canvas>
+        <script>
+            var barChartData = {
+                labels: [{% for months in month_count_axis_x %} '{{months}}', {% endfor %}],
+
+
+                datasets: [
+                //     {
+                // data:data_week_count ,
+                // type: 'line',
+                // label: 'QTE Program demand',
+                // fill: false,
+                // backgroundColor: "#0077b6",
+                // borderColor: "#0077b6",
+                // borderCapStyle: 'butt',
+                // borderDash: [],
+                // borderDashOffset: 0.0,
+                // borderJoinStyle: 'miter',
+                // lineTension: 0.3,
+                // pointBackgroundColor: "#0077b6",
+                // pointBorderColor: "#0077b6",
+                // pointBorderWidth: 1,
+                // pointHoverRadius: 5,
+                // pointHoverBackgroundColor: "#0077b6",
+                // pointHoverBorderColor: "#0077b6",
+                // pointHoverBorderWidth: 2,
+                // pointRadius: 4,
+                // pointHitRadius: 10
+                // }, 
+                
+                // {
+                // data: data_demonstrated_capacity ,
+                // type: 'line',
+                // label: 'QTE Demonstrated capacity',
+                // fill: false,
+                // backgroundColor: "#6c757d",
+                // borderColor: "#6c757d",
+                // borderCapStyle: 'butt',
+                // borderDash: [2, 2],
+                // borderDashOffset: 0.0,
+                // borderJoinStyle: 'miter',
+                // ineTension: .3,
+                // pointBackgroundColor: "#6c757d",
+                // pointBorderColor: "#6c757d",
+                // pointBorderWidth: 1,
+                // pointHoverRadius: 5,
+                // pointHoverBackgroundColor: "#6c757d",
+                // pointHoverBorderColor: "#6c757d",
+                // pointHoverBorderWidth: 2,
+                // pointRadius: 4,
+                // pointHitRadius: 10
+                // },
+                
+                // {
+                // label: 'QTE WO',
+                // backgroundColor: "#023e8a",
+                // borderColor: "#023e8a",
+                // data:data_week_count_of,
+                // pointBackgroundColor: "#023e8a",
+                // pointBorderColor: "#023e8a",
+                // pointBorderWidth: 1,
+                // pointHoverRadius: 5,
+                // pointHoverBackgroundColor: "#023e8a",
+                // pointHoverBorderColor: "#023e8a",
+                // pointHoverBorderWidth: 2,
+                // pointRadius: 4,
+                // pointHitRadius: 10,
+                // scaleFontColor: "#FFFFFF"
+                // },
+
+
+                // {
+                // label: 'QTE PLO',
+                // backgroundColor: "#a2d2ff",
+                // borderColor: "#a2d2ff",
+                // data:data_week_count_op,
+                // pointBackgroundColor: "#a2d2ff",
+                // pointBorderColor: "#a2d2ff",
+                // pointBorderWidth: 1,
+                // pointHoverRadius: 5,
+                // pointHoverBackgroundColor: "#a2d2ff",
+                // pointHoverBorderColor: "#a2d2ff",
+                // pointHoverBorderWidth: 2,
+                // pointRadius: 4,
+                // pointHitRadius: 10,
+                // scaleFontColor: "#FFFFFF"
+                // },
+                {
+                
+                    label: 'QTE WO',
+                    data:[                             
+                        {% for index, data in month_count.iterrows %} 
+                            {%if data.order_nature_closed == 'OFFalse' %} 
+                                {{data.0}},
+                        {%endif%}
+                        {% endfor %}
+
+                    ],
+
+                    backgroundColor: "#023e8a",
+                    borderColor: "#023e8a",    
+                    pointBackgroundColor: "#023e8a",
+                    pointBorderColor: "#023e8a",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "#023e8a",
+                    pointHoverBorderColor: "#023e8a",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHitRadius: 10,
+                    scaleFontColor: "#FFFFFF"
+                    },
+                    
+                    {
+                    label: 'QTE PLO',
+                    data:[                             
+                        {% for index, data in month_count.iterrows %} 
+                            {%if data.order_nature_closed == 'OPFalse' %} 
+                                {{data.0}},
+                            {%endif%}
+                        
+                        {% endfor %} ],
+                            
+                    backgroundColor: "#0096c7",
+                    borderColor: "#0096c7",    
+                    pointBackgroundColor: "#0096c7",
+                    pointBorderColor: "#0096c7",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "#0096c7",
+                    pointHoverBorderColor: "#0096c7",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHitRadius: 10,
+                    scaleFontColor: "#FFFFFF"
+                    },
+                    {
+                    label: 'QTE closed',
+                    data:[                             
+                        {% for index, data in month_count.iterrows %} 
+                            {%if data.order_nature_closed == 'OFTrue' %} 
+                                {{data.0}},
+                            {%endif%}
+                        
+                        {% endfor %} ],
+                    backgroundColor: "#adb5bd",
+                    borderColor: "#a2d2ff",    
+                    pointBackgroundColor: "#a2d2ff",
+                    pointBorderColor: "#a2d2ff",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "#a2d2ff",
+                    pointHoverBorderColor: "#a2d2ff",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHitRadius: 10,
+                    scaleFontColor: "#FFFFFF"
+                    },
+
+            ]
+            };
+            
+                const month = new Chart("month", {
+                
+                type: 'bar',
+                data: barChartData,
+                options: {
+                    legend: {
+                        labels: {
+                            fontColor: 'white'
+                        }
+                    },
+                    plugins: {
+                            datalabels: {
+                                // anchor: 'end',
+                                clamp: true,
+                                color: 'white',
+
+                                // Hidden value if == 0 
+                                formatter: function(value, index, values) {
+                                    if(value >0 ){
+                                        value = value.toString();
+                                        value = value.split(/(?=(?:...)*$)/);
+                                        value = value.join(',');
+                                        return value;
+                                    }else{
+                                        value = "";
+                                        return value;
+                                    }
+                                }
+                                
+                            },
+                            legend: {
+                            display: true,
+                            position:'top',
+                            align:'middle',
+                            labels: {
+                            usePointStyle: true,
+                            boxWidth: 6,
+                            },
+                            },
+
+                            title: {
+                                display: false,
+                                text: "this is title"
+                            },
+                            
+                        },
+                    //  title: {
+                    // display: true,
+                    // text: "Chart.js "
+                    // },
+                    tooltips: {
+                    mode: 'label'
+                    },
+                    responsive: true,
+                    maintainAspectRatio:false, 
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            type: 'linear',
+                            grace: '5%',
+                        }
+                        }
+                }
+                });
+
+            
+        </script>  
+    </div>
+    {%else%}
+    No data with selected filter 
+    {%endif%}
+</div>
+       

@@ -1,30 +1,15 @@
-<div class="card card-primary card-outline">
-    <div class="card-header">
-      <h3 class="card-title">
-        <i class="far fa-chart-bar"></i>
-       Demand | Production 
-        </h3>
-        <div class="card-tools"> 
-            <ul class="list-group list-group-horizontal" style="height: 35px;">
-                <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
-                <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
-                    <i class="fas fa-minus"></i></button></li>
-                <li class="list-group-item" style="padding:8px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
-            </ul>  
-        </div> 
-        </div>
+
             <div class="card-body">
                 {%if records.iterrows%}
                 <div style="height: 400px" >
-                    <canvas id="test" ></canvas>
+                    <canvas id="week" ></canvas>
                     <script>
                         var xValues_week_count = [{% for index, data in week_count.iterrows %}  '{{data.date_year_week}}', {% endfor %}];
                         var data_week_count_of = [ {% for index, data in week_count.iterrows %}{%if data.order_nature == 'OF' %}  {{data.id}} , {%endif%}{% endfor %}];
                         var data_week_count_op = [ {% for index, data in week_count.iterrows %}{%if data.order_nature == 'OP' %}  {{data.id}} , {%endif%}{% endfor %}];
                         
-                        var barChartData = {
+                        var demand_prod_planning_week_data = {
                             labels: [{% for weeks in week_count_axis_x %} '{{weeks}}', {% endfor %}],
-
                             datasets: [
                             //     {
                             // data:data_week_count ,
@@ -107,15 +92,17 @@
                             // scaleFontColor: "#FFFFFF"
                             // },
                             {
+                            
                                 label: 'QTE WO',
-                                backgroundColor: "#023e8a",
-                                borderColor: "#023e8a",
                                 data:[                             
                                     {% for index, data in week_count.iterrows %} 
-                                        {%if data.order_nature == 'OF' %} 
+                                        {%if data.order_nature_closed == 'OFFalse' %} 
                                             {{data.0}},
-                                        {%endif%}
-                                    {% endfor %} ],
+                                    {%endif%}
+                                    {% endfor %}
+                                ],
+                                backgroundColor: "#023e8a",
+                                borderColor: "#023e8a",    
                                 pointBackgroundColor: "#023e8a",
                                 pointBorderColor: "#023e8a",
                                 pointBorderWidth: 1,
@@ -127,16 +114,41 @@
                                 pointHitRadius: 10,
                                 scaleFontColor: "#FFFFFF"
                                 },
+                                
                                 {
                                 label: 'QTE PLO',
-                                backgroundColor: "#a2d2ff",
-                                borderColor: "#a2d2ff",
                                 data:[                             
                                     {% for index, data in week_count.iterrows %} 
-                                        {%if data.order_nature == 'OP' %} 
+                                        {%if data.order_nature_closed == 'OPFalse' %} 
                                             {{data.0}},
                                         {%endif%}
+                                    
                                     {% endfor %} ],
+                                      
+                                backgroundColor: "#0096c7",
+                                borderColor: "#0096c7",    
+                                pointBackgroundColor: "#0096c7",
+                                pointBorderColor: "#0096c7",
+                                pointBorderWidth: 1,
+                                pointHoverRadius: 5,
+                                pointHoverBackgroundColor: "#0096c7",
+                                pointHoverBorderColor: "#0096c7",
+                                pointHoverBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHitRadius: 10,
+                                scaleFontColor: "#FFFFFF"
+                                },
+                                {
+                                label: 'QTE closed',
+                                data:[                             
+                                    {% for index, data in week_count.iterrows %} 
+                                        {%if data.order_nature_closed == 'OFTrue' %} 
+                                            {{data.0}},
+                                        {%endif%}
+                                    
+                                    {% endfor %} ],
+                                backgroundColor: "#adb5bd",
+                                borderColor: "#a2d2ff",    
                                 pointBackgroundColor: "#a2d2ff",
                                 pointBorderColor: "#a2d2ff",
                                 pointBorderWidth: 1,
@@ -149,19 +161,15 @@
                                 scaleFontColor: "#FFFFFF"
                                 },
 
-
-
-
                         ]
                         };
                         
 
-                        window.onload = function() {
-                            var ctx = document.getElementById("test").getContext("2d");
-                            window.myBar = new Chart(ctx, {
+                        const week = new Chart("week", {
+
                             
                             type: 'bar',
-                            data: barChartData,
+                            data: demand_prod_planning_week_data,
                             options: {
                                 legend: {
                                     labels: {
@@ -173,6 +181,19 @@
                                             // anchor: 'end',
                                             clamp: true,
                                             color: 'white',
+
+                                            // Hidden value if == 0 
+                                            formatter: function(value, index, values) {
+                                                if(value >0 ){
+                                                    value = value.toString();
+                                                    value = value.split(/(?=(?:...)*$)/);
+                                                    value = value.join(',');
+                                                    return value;
+                                                }else{
+                                                    value = "";
+                                                    return value;
+                                                }
+                                            }
                                             
                                         },
                                         legend: {
@@ -205,12 +226,13 @@
                                         stacked: true,
                                     },
                                     y: {
-                                        stacked: true
+                                        stacked: true,
+                                        type: 'linear',
+                                        grace: '5%',
                                     }
                                     }
                             }
                             });
-                        };
                         
                     </script>  
                 </div>
@@ -218,26 +240,4 @@
                 No data with selected filter 
                 {%endif%}
             </div>
-        <div class="card-footer clearfix">
-    </div>
-</div> 
-
-<!--Program demand  -->
-<div class="modal" id="test_stocked" >
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">						
-                <h4 class="modal-title">Informations</h4>
-            </div>
-            <div class="modal-body">	
-
-            </div>
-            <div class="modal-footer">
-                <input type="button" href="" class="btn btn-secondary" data-dismiss="modal" value="Cancel">
-                <!-- <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>   -->
-            </div>
-        </div>
-    </div>
-</div>
-
-
+        

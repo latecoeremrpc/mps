@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %} 
-<div class="content">
+<div class="content" id="container">
     <div class="container-fluid">
         <!--message alert -->
         {% if messages %}
@@ -61,6 +61,24 @@
                         </div>
                     </div>
                 </div>
+<!-- 
+                <div class="col-3">
+                    <div class="card card-row">
+                        <div class="card-header" style="background-color:#0077b6; color:white;">
+                            <h3 class="card-title">
+                           Week Or Month
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <select name="week" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                <option >Week</option> 
+                                <option >Month</option> 
+                                 
+                               
+                            </select> 
+                        </div>
+                    </div>
+                </div> -->
             </div>
             <div class="row">
                 <div class="col-4 offset-4">
@@ -88,14 +106,82 @@
     </div>
 </div> -->
 
-<div class="row">
+
+<div  class="row">
     <div class="col-12">
-        {% include 'app/charts/demand_prod_planning.html' %}
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="far fa-chart-bar"></i>
+                    Demand | Production
+                </h3>
+                <div class="card-tools"> 
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <button onclick="myFunction()" id="switch_month_week" style="background-color: white;border:1px solid rgba(0,0,0,.125);">Month</button>
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
+                            <i class="fas fa-minus"></i></button></li>
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
+                        
+
+                    </ul>  
+                </div> 
+                </div>
+                <div id="demand_prod_planning_week" style="display:block ;" >
+                    {% include 'app/charts/demand_prod_planning_week.html' %}
+                </div>
+                <div id="demand_prod_planning_month" style="display:none ;" >
+                    {% include 'app/charts/demand_prod_planning_month.html' %}
+
+                </div>
+                <div class="card-footer clearfix">
+                </div>
+        </div> 
     </div>
 </div> 
 
 
+    
+<!--Program demand  -->
+<div class="modal" id="test_stocked" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">						
+                <h4 class="modal-title">Informations</h4>
+            </div>
+            <div class="modal-body">	
+
+            </div>
+            <div class="modal-footer">
+                <input type="button" href="" class="btn btn-secondary" data-dismiss="modal" value="Cancel">
+                <!-- <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>   -->
+            </div>
+        </div>
+    </div>
+</div>
 
 
+                  
+<script>
+    function myFunction() {
+      var week = document.getElementById("demand_prod_planning_week");
+      var month = document.getElementById("demand_prod_planning_month");
+      var btn = document.getElementById("switch_month_week");
+      
+      if (week.style.display === "block") {
+        week.style.display = "none";
+        month.style.display = "block";
+        btn.textContent='Week';
+      }  
+      else {
+        week.style.display = "block";
+        month.style.display = "none";
+        btn.textContent='Month';
+
+
+      }
+
+    }
+    </script>
 
 {% endblock content%}
