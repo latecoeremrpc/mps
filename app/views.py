@@ -11,7 +11,7 @@ import psycopg2, pandas as pd
 import numpy as np
 from django.contrib import messages
 from app.decorators import allowed_users
-
+import random
 
 
 
@@ -1596,11 +1596,17 @@ def filter_planning(request):
     center_profit_list = Product.undeleted_objects.values('Profit_center').distinct().order_by('Profit_center')
     planning_list= Product.undeleted_objects.values('planning').distinct().order_by('planning')
     
-    division= profit_center= planning=df_data =None
+    division= profit_center= planning=df_data=df_cycle=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
     demand_prod_planning.month_count_axis_x=None
+    cycle_time_kpi.cycle_count=None
+    cycle_time_kpi.week_cycle_count_axis_x=None
+    cycle_time_kpi.smooth_family=None
+    cycle_time_kpi.smooth_family_month=None
+    cycle_time_kpi.cycle_count_month=None
+    cycle_time_kpi.month_cycle_count_axis_x=None
 
 
     
@@ -1612,31 +1618,50 @@ def filter_planning(request):
         #Get data
         # try:
         data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning)
+        division_id=Division.objects.all().filter(name=division).values('pk').first()
+        print(division_id)
+        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center= profit_center)
+        # cycle_data=Cycle.objects.all()
         if not data:
             messages.error(request,"No data with selected filter!") 
 
             return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
     
             })
-        #Convert to DF
-        print(data)
+       
+        
         df_data=pd.DataFrame(data.values())
+        df_cycle=pd.DataFrame(cycle_data.values())
+        print(df_cycle)
         demand_prod_planning(df_data)
+        if cycle_data:
+            cycle_time_kpi(df_cycle)
+        
         # except:
         #     print("An exception occurred")    
     # df_data.to_csv('test.csv')
     return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
+    'division':division,
+    'profit_center':profit_center,
+    'planning':planning,
     'records':df_data,
+    'df_cycle':df_cycle,
     'week_count':demand_prod_planning.week_count,
     'week_count_axis_x':demand_prod_planning.week_count_axis_x,
     'month_count':demand_prod_planning.month_count,
     'month_count_axis_x':demand_prod_planning.month_count_axis_x,
+    'cycle_count':cycle_time_kpi.cycle_count,
+    'week_cycle_count_axis_x':cycle_time_kpi.week_cycle_count_axis_x,
+    'smooth_family': cycle_time_kpi.smooth_family,
+    'cycle_count_month':cycle_time_kpi.cycle_count_month,
+    'month_cycle_count_axis_x':cycle_time_kpi.month_cycle_count_axis_x,
+    'smooth_family_month':cycle_time_kpi.smooth_family_month,
     })
 
 
 
+# calculate nomber of OF and OP per wek 
 def demand_prod_planning(df_data):
-# nomber of OF and OP per wek 
     
     df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     df_data['date_week']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
@@ -1651,7 +1676,6 @@ def demand_prod_planning(df_data):
     week_count=df_data.groupby(['date_year_week','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
     week_count_axis_x=week_count['date_year_week'].unique()
 
-
    
     month_count=df_data.groupby(['date_year_month','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
     month_count_axis_x=month_count['date_year_month'].unique()
@@ -1661,6 +1685,46 @@ def demand_prod_planning(df_data):
     demand_prod_planning.month_count=month_count
     demand_prod_planning.month_count_axis_x=month_count_axis_x
 
+
+
+# Kpi cycle time per ssmooth family
+def cycle_time_kpi(df_data):
+
+    df_data['work_day_week']=pd.to_datetime(df_data['work_day']).dt.week
+    df_data['work_day_month']=pd.to_datetime(df_data['work_day']).dt.month
+    df_data['work_day_year']=pd.to_datetime(df_data['work_day']).dt.year
+    df_data['work_year_week']=df_data['work_day_year'].astype(str)+'-'+'W'+df_data['work_day_week'].astype(str)
+    df_data['work_year_month']=df_data['work_day_year'].astype(str)+'-'+'M'+df_data['work_day_month'].astype(str)
+
+    
+    cycle_count= df_data.groupby(['work_year_week','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    week_cycle_count_axis_x=cycle_count['work_year_week'].unique()
+    cycle_count_month= df_data.groupby(['work_year_month','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    month_cycle_count_axis_x=cycle_count_month['work_year_month'].unique()
+    smooth_family= cycle_count['smooth_family'].unique()
+    smooth_family_month= cycle_count_month['smooth_family'].unique()
+    
+
+    ### for week  
+    # list of colors
+    colors_list=['#34a0a4','#023e8a','#e9c46a','#ffafcc','#2a9d8f','#e5989b','#e56b6f','#9e2a2b']
+    # get colors for len smooth_family
+    colors = [colors_list[color] for color in range(len(list(smooth_family)))]
+    # dict of smooth_family(keys) and color (values)
+    cycle_time_kpi.smooth_family=dict(zip(list(smooth_family),colors))
+    cycle_time_kpi.cycle_count=cycle_count
+    cycle_time_kpi.week_cycle_count_axis_x=week_cycle_count_axis_x
+   
+    ### for month
+
+    colores_list_month=['#34a0a4','#023e8a','#e9c46a','#ffafcc','#2a9d8f','#e5989b','#e56b6f','#9e2a2b']
+    # get colors for len smooth_family_month
+    colors_month = [colores_list_month[color] for color in range(len(list(smooth_family_month)))]
+    # dict of smooth_family_month(keys) and color (values)
+    cycle_time_kpi.smooth_family_month=dict(zip(list(smooth_family_month),colors_month))
+    cycle_time_kpi.cycle_count_month=cycle_count_month
+    cycle_time_kpi.month_cycle_count_axis_x=month_cycle_count_axis_x
+    
 
 
 
