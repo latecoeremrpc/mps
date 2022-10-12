@@ -63,7 +63,7 @@
                             <div class="card-body">
                                     <select name="planning" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
                                         {% for item in planning_list %}
-                                        <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %}>{{item.planning}}</option>
+                                        <option value="{{item.planning}}" {% if item.planning in planning %} selected {% endif %}>{{item.planning}}</option>
                                         {% endfor %}
                                     </select> 
                         </div>
@@ -80,7 +80,7 @@
                             <!-- <input type="week" name="week" id="week" class="form-control"  max="{{created_at_year_week}}"  required> -->
                             <select name="week" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
                                 {%for date in dates %}
-                                <option value="{{date.created_at__year}},{{date.created_at__week}}">{{date.created_at__year}},W{{date.created_at__week}}</option> 
+                                <option value="{{date.created_at__year}},{{date.created_at__week}}" {% if date.created_at__year and date.created_at__week %} selected {% endif %}>{{date.created_at__year}},W{{date.created_at__week}}</option> 
                                 {%endfor%}
                             </select> 
                         </div>

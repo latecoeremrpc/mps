@@ -1534,7 +1534,7 @@ def filter(request):
         profit_center= request.POST.get('center_profit')
         planning= request.POST.get('planning')
         date= request.POST.get('week')
-        print(date)
+        
 
         year=date.split(',')[0]
         week=date.split(',')[1]
@@ -1544,6 +1544,7 @@ def filter(request):
     return render( request,'app/Shopfloor/filter.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
     'versions':versions,
     'division':division,
+    'date':date,
     'profit_center':profit_center,
     'planning':planning,
     'dates':dates
@@ -1588,7 +1589,6 @@ def result_sharing(request):
     return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
 
 
-
 #******************************Planning********************************   
 # filter panning result
 def filter_planning(request):
@@ -1611,7 +1611,7 @@ def filter_planning(request):
     production_plan_kpi.date_production_month=None
 
 
-    
+
     if request.method == "POST":
         division= request.POST.get('division_name')
         profit_center= request.POST.get('center_profit')
@@ -1704,7 +1704,6 @@ def demand_prod_planning(df_data):
     demand_prod_planning.month_count_axis_x=month_count_axis_x
 
 
-
 # Kpi cycle time per smooth family (week and month)
 def cycle_time_kpi(df_data):
     # work_day_week
@@ -1774,6 +1773,8 @@ def production_plan_kpi(df_data):
     
     date_production_week=df_data.groupby(['date_production_year_week'])['id'].count().reset_index()
     date_production_month=df_data.groupby(['date_production_year_month'])['id'].count().reset_index()
+
+    df_data.to_csv('result.csv')
    
     
 
