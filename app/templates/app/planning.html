@@ -122,8 +122,6 @@
                         <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
                             <i class="fas fa-minus"></i></button></li>
                         <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
-                        
-
                     </ul>  
                 </div> 
                 </div>
@@ -160,7 +158,7 @@
     </div>
 </div>
 
-
+<!--Cycle time -->
 <div  class="row">
     <div class="col-12">
         <div class="card card-primary card-outline">
@@ -171,7 +169,7 @@
                 </h3>
                 <div class="card-tools"> 
                     <ul class="list-group list-group-horizontal" style="height: 35px;">
-                        <button onclick="myFunction_Month()" id="switch_month_week_cycle" style="background-color: white;border:1px solid rgba(0,0,0,.125);">Month</button>
+                        <button onclick="myFunction_cycle()" id="switch_month_week_cycle" style="background-color: white;border:1px solid rgba(0,0,0,.125);">Month</button>
                         <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
                         <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
                             <i class="fas fa-minus"></i></button></li>
@@ -193,6 +191,38 @@
     </div>
 </div> 
 
+<!-- Production plan-->
+<div  class="row">
+    <div class="col-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="far fa-chart-bar"></i>
+                   Production Plan
+                </h3>
+                <div class="card-tools"> 
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <button onclick="myFunction_production()" id="switch_month_week_production" style="background-color: white;border:1px solid rgba(0,0,0,.125);">Month</button>
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
+                            <i class="fas fa-minus"></i></button></li>
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
+                        
+                    </ul>  
+                </div> 
+                </div>
+                <div id="production_plan_week" style="display:block ;" >
+                    {% include 'app/charts/week_production_plan.html' %}
+                </div>
+                <div id="production_plan_month" style="display:none ;" >
+                    {% include 'app/charts/month_production_plan.html' %}
+
+                </div>
+                <div class="card-footer clearfix">
+                </div>
+        </div> 
+    </div>
+</div> 
 
 <!-- Script for Ddemand production graph  -->
 <script>
@@ -218,10 +248,30 @@
     </script>
 <!-- Script for cycle time graph -->
 <script>
-    function myFunction_Month() {
+    function myFunction_cycle() {
       var week = document.getElementById("cycle_kpi_week");
       var month = document.getElementById("cycle_kpi_month");
       var btn = document.getElementById("switch_month_week_cycle");
+      
+      if (week.style.display === "block") {
+        week.style.display = "none";
+        month.style.display = "block";
+        btn.textContent='Week';
+      }  
+      else {
+        week.style.display = "block";
+        month.style.display = "none";
+        btn.textContent='Month';
+      }
+    }
+    </script>
+
+    <!-- Script for production plan graph -->
+<script>
+    function myFunction_production() {
+      var week = document.getElementById("production_plan_week");
+      var month = document.getElementById("production_plan_month");
+      var btn = document.getElementById("switch_month_week_production");
       
       if (week.style.display === "block") {
         week.style.display = "none";

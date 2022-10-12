@@ -1573,7 +1573,7 @@ def result(request):
     return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
 
 def result_sharing(request):
-    division= profit_center= planning=version= None
+    division= profit_center= planning=version=data= None
     if request.method == "POST":
         division= request.POST.get('division')
         profit_center= request.POST.get('profit_center')
@@ -1607,6 +1607,8 @@ def filter_planning(request):
     cycle_time_kpi.smooth_family_month=None
     cycle_time_kpi.cycle_count_month=None
     cycle_time_kpi.month_cycle_count_axis_x=None
+    production_plan_kpi.date_production_week=None
+    production_plan_kpi.date_production_month=None
 
 
     
@@ -1616,11 +1618,9 @@ def filter_planning(request):
         planning= request.POST.get('planning')
 
         #Get data
-        # try:
         data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning)
         division_id=Division.objects.all().filter(name=division).values('pk').first()
         cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center= profit_center)
-        # cycle_data=Cycle.objects.all()
         if not data:
             messages.error(request,"No data with selected filter!") 
 
@@ -1631,14 +1631,14 @@ def filter_planning(request):
         
         df_data=pd.DataFrame(data.values())
         df_cycle=pd.DataFrame(cycle_data.values())
-        print(df_cycle)
+        # call function demand_prod_planning
         demand_prod_planning(df_data)
+        # call function demand_prod_planning
+        production_plan_kpi(df_data)
         if cycle_data:
+            # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle)
         
-        # except:
-        #     print("An exception occurred")    
-    # df_data.to_csv('test.csv')
     return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
     'division':division,
     'profit_center':profit_center,
@@ -1655,11 +1655,13 @@ def filter_planning(request):
     'cycle_count_month':cycle_time_kpi.cycle_count_month,
     'month_cycle_count_axis_x':cycle_time_kpi.month_cycle_count_axis_x,
     'smooth_family_month':cycle_time_kpi.smooth_family_month,
+    'date_production_week':production_plan_kpi.date_production_week,
+    'date_production_month':production_plan_kpi.date_production_month,
     })
 
 
 
-# calculate nomber of OF and OP per wek 
+# calculate nomber of OF and OP ( wek and month)
 def demand_prod_planning(df_data):
     # date
     df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
@@ -1703,7 +1705,7 @@ def demand_prod_planning(df_data):
 
 
 
-# Kpi cycle time per ssmooth family
+# Kpi cycle time per smooth family (week and month)
 def cycle_time_kpi(df_data):
     # work_day_week
     df_data['work_day_week']=pd.to_datetime(df_data['work_day']).dt.week
@@ -1754,6 +1756,30 @@ def cycle_time_kpi(df_data):
     cycle_time_kpi.month_cycle_count_axis_x=month_cycle_count_axis_x
     
 
+# calculate production plan (Freeze_end_date or smoothing_end_date) (week and month)
+def production_plan_kpi(df_data):
+    # date
+    df_data['date_production']=np.where((df_data['Freeze_end_date'].isna()),(df_data['smoothing_end_date']),(df_data['Freeze_end_date']))
+    # week of date date_production
+    # df_data['dat_production_week']=np.where( (df_data['Freeze_end_date'].isna()),(pd.to_datetime(df_data['smoothing_end_date']).dt.week),(pd.to_datetime(df_data['Freeze_end_date']).dt.week)).astype(int)
+    df_data['date_production_week']=np.where( (df_data['date_production'].isna()),(0),(pd.to_datetime(df_data['date_production']).dt.week)).astype(int)
+    # month of date_production
+    df_data['date_production_month']=np.where( (df_data['date_production'].isna()),(0),(pd.to_datetime(df_data['date_production']).dt.month)).astype(int)
+    # year of date_production
+    df_data['date_production_year']=np.where( (df_data['date_production'].isna()),(0),(pd.to_datetime(df_data['date_production']).dt.year)).astype(int)
+    # concatenate year and week
+    df_data['date_production_year_week']=df_data['date_production_year'].astype(str)+'-'+'W'+df_data['date_production_week'].astype(str)
+    # concatenate year and month
+    df_data['date_production_year_month']=df_data['date_production_year'].astype(str)+'-'+'M'+df_data['date_production_month'].astype(str)
+    
+    date_production_week=df_data.groupby(['date_production_year_week'])['id'].count().reset_index()
+    date_production_month=df_data.groupby(['date_production_year_month'])['id'].count().reset_index()
+   
+    
+
+    production_plan_kpi.date_production_week =date_production_week
+    production_plan_kpi.date_production_month =date_production_month
+    
 
 
 
