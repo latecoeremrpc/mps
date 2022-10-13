@@ -1595,8 +1595,12 @@ def filter_planning(request):
     divisions_list= Division.undeleted_objects.values('name').distinct().order_by('name')
     center_profit_list = Product.undeleted_objects.values('Profit_center').distinct().order_by('Profit_center')
     planning_list= Product.undeleted_objects.values('planning').distinct().order_by('planning')
+    smooth_family_list=Material.undeleted_objects.values('Smooth_Family').distinct().order_by('Smooth_Family')
+    material_list=Material.undeleted_objects.values('material').distinct().order_by('material')
+    print(material_list)
     
-    division= profit_center= planning=df_data=df_cycle=None
+
+    division= profit_center= planning=df_data=df_cycle=smooth_family_selected=material_selected=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
@@ -1616,19 +1620,23 @@ def filter_planning(request):
         division= request.POST.get('division_name')
         profit_center= request.POST.get('center_profit')
         planning= request.POST.get('planning')
-
+        smooth_family_selected = request.POST.get('smooth_family')
+        material_selected= request.POST.get('material')
+        
         #Get data
-        data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning)
+        data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning,Smooth_Family=smooth_family_selected,material=material_selected)
+        print(data)
         division_id=Division.objects.all().filter(name=division).values('pk').first()
-        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center= profit_center)
+        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center = profit_center)
         if not data:
             messages.error(request,"No data with selected filter!") 
-
             return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
+            'smooth_family_list':smooth_family_list,
+            'material_list':material_list,
+
     
             })
        
-        
         df_data=pd.DataFrame(data.values())
         df_cycle=pd.DataFrame(cycle_data.values())
         # call function demand_prod_planning
@@ -1639,12 +1647,14 @@ def filter_planning(request):
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle)
         
-    return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
+    return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,'smooth_family_list':smooth_family_list,'material_list':material_list,
     'division':division,
     'profit_center':profit_center,
     'planning':planning,
     'records':df_data,
     'df_cycle':df_cycle,
+    'smooth_family_selected':smooth_family_selected,
+    'material_selected':material_selected,
     'week_count':demand_prod_planning.week_count,
     'week_count_axis_x':demand_prod_planning.week_count_axis_x,
     'month_count':demand_prod_planning.month_count,

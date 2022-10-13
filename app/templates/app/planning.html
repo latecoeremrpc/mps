@@ -12,7 +12,7 @@
             <!-- Security token by Django -->
             {% csrf_token %}
             <div class="row">
-                <div class="col-4">
+                <div class="col-2">
                     <div class="card card-row" >
                         <div class="card-header"style="background-color: #2a9d8f; color:white;">
                             <h3 class="card-title">
@@ -28,7 +28,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-4">
+                <div class="col-2">
                     <div class="card card-row card-info">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -45,7 +45,7 @@
                         
                     </div>
                 </div>
-                <div class="col-4">
+                <div class="col-2">
                     <div class="card card-row card-primary">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -55,34 +55,64 @@
                             <div class="card-body">
                                     <select name="planning" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
                                         {% for item in planning_list %}
-                                        <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %}>{{item.planning}}</option>
+                                        <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %} > {{item.planning}}</option>
                                         {% endfor %}
                                     </select> 
                         </div>
                     </div>
                 </div>
-<!-- 
-                <div class="col-3">
+
+                <div class="col-2">
                     <div class="card card-row">
-                        <div class="card-header" style="background-color:#0077b6; color:white;">
+                        <div class="card-header" style="background-color:#83c5be; color:white;">
                             <h3 class="card-title">
-                           Week Or Month
+                           Materials
                             </h3>
-                        </div>
+                        </div>                           
                         <div class="card-body">
-                            <select name="week" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
-                                <option >Week</option> 
-                                <option >Month</option> 
-                                 
-                               
+                            <select name="material" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                {%for item in material_list  %}
+                                <option value ="{{item.material}}" {% if item.material in material_selected  %} selected {% endif %}>{{item.material}}</option> 
+                                {%endfor%}
                             </select> 
                         </div>
                     </div>
-                </div> -->
+                </div>
+     
+
+                <div class="col-2">
+                    <div class="card card-row">
+                        <div class="card-header" style="background-color:#0077b6; color:white;">
+                            <h3 class="card-title">
+                           Smooth Family
+                            </h3>
+                        </div>                           
+                        <div class="card-body">
+                            <select name="smooth_family" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                {%for item in smooth_family_list %}
+                                <option value ="{{item.Smooth_Family}}"{% if item.Smooth_Family in smooth_family_selected  %} selected {% endif %}>{{item.Smooth_Family}}</option> 
+                                {%endfor%}
+                            </select> 
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <div class="card card-row">
+                        <div class="card-header" style="background-color:#62b6cb; color:white;">
+                            <h3 class="card-title">
+                           Date
+                            </h3>
+                        </div>                           
+                        <div class="card-body">
+                            <select name="date" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                
+                            </select> 
+                        </div>
+                    </div>
+                </div>
             </div>
 
-
-               
             </button>
 
             <div class="row">
@@ -96,20 +126,7 @@
             </div>
         </form>
         <!-- Switch Month Week button  -->
-        <button onclick="myFunction()" id="switch_month_week" style="border: 1px solid rgba(0,0,0,.125);
-            position: fixed;
-            z-index: 9999;
-            right: 50px;
-            bottom: 50px;
-            width: 60px;
-            height: 60px;
-            text-align: center;
-            line-height: 50px;
-            border-radius: 50%;
-            background-color: #E91E63;
-            color: #FFFFFF;
-            font-size: 19px;
-            ">
+        <button onclick="myFunction()" id="switch_month_week"  class= "switch_week_month">
                 <i  class="fa-solid fa-repeat"></i>
                 <b id="text_switch">M</b>
         </button>
@@ -140,6 +157,7 @@
                 </h3>
                 <div class="card-tools"> 
                     <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
                         <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
                             <i class="fas fa-minus"></i></button></li>
                         <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
@@ -190,6 +208,7 @@
                 </h3>
                 <div class="card-tools"> 
                     <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
                         <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
                             <i class="fas fa-minus"></i></button></li>
                         <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>

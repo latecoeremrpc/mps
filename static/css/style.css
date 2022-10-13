@@ -34,6 +34,21 @@
   text-align: center;
 }
 
+.switch_week_month {
+  border: 1px solid rgba(0,0,0,.125);
+  position: fixed;
+  z-index: 9999;
+  right: 50px;
+  bottom: 50px;
+  width: 60px;
+  height: 60px;
+  text-align: center;
+  line-height: 50px;
+  border-radius: 50%;
+  background-color: #E91E63;
+  color: #FFFFFF;
+  font-size: 19px;
+}
 
   
 
