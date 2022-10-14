@@ -1602,7 +1602,7 @@ def filter_planning(request):
     material_list=Material.undeleted_objects.values('material').distinct().order_by('material')
     
 
-    division= profit_center= planning=df_data=df_cycle=smooth_family_selected=material_selected= from_date= to_date=date_from=None
+    division= profit_center= planning=df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
@@ -1627,11 +1627,16 @@ def filter_planning(request):
         from_date= request.POST.get('from')
         to_date= request.POST.get('to')
 
+        date_from = datetime.strptime(from_date,'%Y-%m-%d')
+        date_to = datetime.strptime(to_date,'%Y-%m-%d')
+
         #Get data
         data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning,Smooth_Family__in=smooth_family_selected,material__in=material_selected)
         division_id=Division.undeleted_objects.all().filter(name=division).values('pk').first()
-        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected)
-        
+        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected,owner='officiel')
+        work_days=WorkData.undeleted_objects.values('date').filter(product__division=division_id['pk'],product__Profit_center =profit_center,owner='officiel').distinct()
+        print(work_days)
+       
         if not data:
             messages.error(request,"No data with selected filter!") 
             return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
@@ -1641,25 +1646,17 @@ def filter_planning(request):
 
         df_data=pd.DataFrame(data.values())
         df_cycle=pd.DataFrame(cycle_data.values())
+        df_work_days=pd.DataFrame(work_days.values())
 
         # date
         df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
-        # get dataframe between two dates
-        if from_date and to_date :
-            date_from = datetime.strptime(from_date,'%Y-%m-%d')
-            date_to = datetime.strptime(to_date,'%Y-%m-%d')
-            date_interval_df_data = (df_data['date'] > date_from.date()) & (df_data['date'] <= date_to.date())
-            df_data = df_data.loc[date_interval_df_data]
-            # get dataframe between two dates
-            date_interval_df_cycle = (df_cycle['work_day'] > date_from.date()) & (df_cycle['work_day'] <= date_to.date())
-            df_cycle = df_cycle.loc[date_interval_df_cycle]
         # call function demand_prod_planning
-        demand_prod_planning(df_data,df_cycle,date_from)
+        demand_prod_planning(df_data,df_work_days,date_from,date_to)
         # call function demand_prod_planning
         production_plan_kpi(df_data)
         if cycle_data:
             # call function cycle_time_kpi 
-            cycle_time_kpi(df_cycle)
+            cycle_time_kpi(df_cycle,date_from,date_to)
         
 
     return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,'smooth_family_list':smooth_family_list,'material_list':material_list,
@@ -1668,9 +1665,11 @@ def filter_planning(request):
     'planning':planning,
     'records':df_data,
     'df_cycle':df_cycle,
+    'df_work_days':df_work_days,
     'from_date':from_date,
     'to_date':to_date,
     'date_from':date_from,
+    'date_to':date_to,
     'smooth_family_selected':smooth_family_selected,
     'material_selected':material_selected,
     'week_count':demand_prod_planning.week_count,
@@ -1690,37 +1689,38 @@ def filter_planning(request):
 
 
 # calculate nomber of OF and OP ( wek and month)
-def demand_prod_planning(df_data,df_cycle,date_from):
-    
-    
+def demand_prod_planning(df_data,df_work_days,date_from,date_to):
+
+    # get df between two dates
+    df_data_demand_prod_interval=df_data[(df_data['date'] > date_from.date()) & (df_data['date'] <= date_to.date())]
     # week of date
-    df_data['date_week']=pd.to_datetime(df_data['date']).dt.week
+    df_data_demand_prod_interval['date_week']=pd.to_datetime(df_data_demand_prod_interval['date']).dt.week
     # month of date
-    df_data['date_month']=pd.to_datetime(df_data['date']).dt.month
+    df_data_demand_prod_interval['date_month']=pd.to_datetime(df_data_demand_prod_interval['date']).dt.month
     # year of date
-    df_data['date_year']=pd.to_datetime(df_data['date']).dt.year
+    df_data_demand_prod_interval['date_year']=pd.to_datetime(df_data_demand_prod_interval['date']).dt.year
     # concatenate year and week
-    df_data['date_year_week']=df_data['date_year'].astype(str)+'-'+'W'+df_data['date_week'].astype(str)
+    df_data_demand_prod_interval['date_year_week']=df_data_demand_prod_interval['date_year'].astype(str)+'-'+'W'+df_data_demand_prod_interval['date_week'].astype(str)
     # concatenate year and month
-    df_data['date_year_month']=df_data['date_year'].astype(str)+'-'+'M'+df_data['date_month'].astype(str)
+    df_data_demand_prod_interval['date_year_month']=df_data_demand_prod_interval['date_year'].astype(str)+'-'+'M'+df_data_demand_prod_interval['date_month'].astype(str)
     # new column contains OF or OP
-    df_data['order_nature']=np.where((df_data['order_type'].str.startswith('YP')),('OF'),('OP'))
+    df_data_demand_prod_interval['order_nature']=np.where((df_data_demand_prod_interval['order_type'].str.startswith('YP')),('OF'),('OP'))
     # new column contains closed and order nature to display closed 
-    df_data['order_nature_closed']=df_data['order_nature'].astype('str')+df_data['closed'].astype('str')
+    df_data_demand_prod_interval['order_nature_closed']=df_data_demand_prod_interval['order_nature'].astype('str')+df_data_demand_prod_interval['closed'].astype('str')
     # use unstack and stack to get duplicate data (for chart js)
-    week_count=df_data.groupby(['date_year_week','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
+
+    week_count=df_data_demand_prod_interval.groupby(['date_year_week','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
     # get year from date_year_week 
     week_count['year']=week_count['date_year_week'].str.split('-W').str[0].astype(int)
     # get week from date_year_week 
     week_count['week']=week_count['date_year_week'].str.split('-W').str[1].astype(int)
     # sort values with year week (to get orderd values(year, week))
     week_count=week_count.sort_values(by=['year','week']).reset_index()
-    # get unique date_year_week (because value date_year_week duplicate )
+    # get unique date_year_week (because value date_year_week duplicate)
     week_count_axis_x=week_count['date_year_week'].unique()
-
     
     ### month
-    month_count=df_data.groupby(['date_year_month','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
+    month_count=df_data_demand_prod_interval.groupby(['date_year_month','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
     month_count['year']=month_count['date_year_month'].str.split('-M').str[0].astype(int)
     month_count['week']=month_count['date_year_month'].str.split('-M').str[1].astype(int)
     month_count=month_count.sort_values(by=['year','week']).reset_index()
@@ -1731,51 +1731,42 @@ def demand_prod_planning(df_data,df_cycle,date_from):
     demand_prod_planning.month_count=month_count
     demand_prod_planning.month_count_axis_x=month_count_axis_x
 
-
-    print(week_count)
-    
     # calcul Demonstrated capacity (week and month)
-
-    df_data.to_csv('df_data.csv')
-    print(date_from)
-    if date_from:
-        previous_month = date_from - relativedelta(months=1)
-        print(previous_month)
-        date_interval_df_data = (df_data['date'] > previous_month.date()) & (df_data['date'] <= date_from.date())
-        df = df_data.loc[date_interval_df_data]
-        df.to_csv('df.csv')
-
-    # week_demonstrated_count= df_data.groupby(['date_year_week','status'])['id'].count().reset_index()
+    #  calcul sum of closed in previous_month
+    previous_month = date_from - relativedelta(months=1)
+    df_prev_month=df_data[(df_data['date'] > previous_month.date()) & (df_data['date'] <= date_from.date())]
+    df_prev_month_closed=df_prev_month[df_prev_month['closed']==True]
+    previous_month_closed_count=df_prev_month_closed.shape[0]
     
-
-    # df_data.to_csv('status.csv')
+    #calcul number of work_days in previous_month
+    work_days_in_previous_month =df_prev_month['date'].isin(df_work_days['date']) 
+    work_days_in_previous_month_count =work_days_in_previous_month.shape[0]
     
-        # date_interval_df_data = (df_data['date'] > previous_month.date()) & (df_data['date'] <= date_from.date())
-        # df = df_data.loc[date_interval_df_data]
-        
-        
+    # calcul number of work_days in period(week or month)
+    # 
 
-    
     
 
 
 
 
 # Kpi cycle time per smooth family (week and month)
-def cycle_time_kpi(df_data):
+def cycle_time_kpi(df_data,date_from,date_to):
+
+    df_cycle_time_interval = df_data[(df_data['work_day'] > date_from.date()) & (df_data['work_day'] <= date_to.date())]
     # work_day_week
-    df_data['work_day_week']=pd.to_datetime(df_data['work_day']).dt.week
+    df_cycle_time_interval['work_day_week']=pd.to_datetime(df_cycle_time_interval['work_day']).dt.week
     # work_day_month
-    df_data['work_day_month']=pd.to_datetime(df_data['work_day']).dt.month
+    df_cycle_time_interval['work_day_month']=pd.to_datetime(df_cycle_time_interval['work_day']).dt.month
     # work_day_year
-    df_data['work_day_year']=pd.to_datetime(df_data['work_day']).dt.year
+    df_cycle_time_interval['work_day_year']=pd.to_datetime(df_cycle_time_interval['work_day']).dt.year
     # concatenate year and week
-    df_data['work_year_week']=df_data['work_day_year'].astype(str)+'-'+'W'+df_data['work_day_week'].astype(str)
+    df_cycle_time_interval['work_year_week']=df_cycle_time_interval['work_day_year'].astype(str)+'-'+'W'+df_cycle_time_interval['work_day_week'].astype(str)
     # concatenate year and month
-    df_data['work_year_month']=df_data['work_day_year'].astype(str)+'-'+'M'+df_data['work_day_month'].astype(str)
+    df_cycle_time_interval['work_year_month']=df_cycle_time_interval['work_day_year'].astype(str)+'-'+'M'+df_cycle_time_interval['work_day_month'].astype(str)
 
     
-    cycle_count= df_data.groupby(['work_year_week','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    cycle_count= df_cycle_time_interval.groupby(['work_year_week','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
     cycle_count['year']=cycle_count['work_year_week'].str.split('-W').str[0].astype(int)
     cycle_count['week']=cycle_count['work_year_week'].str.split('-W').str[1].astype(int)
     cycle_count=cycle_count.sort_values(by=['year','week']).reset_index() 
@@ -1783,7 +1774,7 @@ def cycle_time_kpi(df_data):
     smooth_family= cycle_count['smooth_family'].unique()
     
 
-    cycle_count_month= df_data.groupby(['work_year_month','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    cycle_count_month= df_cycle_time_interval.groupby(['work_year_month','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
     cycle_count_month['year']=cycle_count_month['work_year_month'].str.split('-M').str[0].astype(int)
     cycle_count_month['week']=cycle_count_month['work_year_month'].str.split('-M').str[1].astype(int)
     cycle_count_month=cycle_count_month.sort_values(by=['year','week']).reset_index()
