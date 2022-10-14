@@ -1,3 +1,5 @@
+from asyncio import to_thread
+from distutils.command.install_egg_info import to_filename
 from itertools import cycle, groupby
 from operator import index
 from queue import Empty
@@ -12,6 +14,7 @@ import numpy as np
 from django.contrib import messages
 from app.decorators import allowed_users
 import random
+from dateutil.relativedelta import relativedelta
 
 
 
@@ -1597,10 +1600,9 @@ def filter_planning(request):
     planning_list= Product.undeleted_objects.values('planning').distinct().order_by('planning')
     smooth_family_list=Material.undeleted_objects.values('Smooth_Family').distinct().order_by('Smooth_Family')
     material_list=Material.undeleted_objects.values('material').distinct().order_by('material')
-    print(material_list)
     
 
-    division= profit_center= planning=df_data=df_cycle=smooth_family_selected=material_selected=None
+    division= profit_center= planning=df_data=df_cycle=smooth_family_selected=material_selected= from_date= to_date=date_from=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
@@ -1620,39 +1622,55 @@ def filter_planning(request):
         division= request.POST.get('division_name')
         profit_center= request.POST.get('center_profit')
         planning= request.POST.get('planning')
-        smooth_family_selected = request.POST.get('smooth_family')
-        material_selected= request.POST.get('material')
-        
+        smooth_family_selected = request.POST.getlist('smooth_family')
+        material_selected= request.POST.getlist('material')
+        from_date= request.POST.get('from')
+        to_date= request.POST.get('to')
+
         #Get data
-        data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning,Smooth_Family=smooth_family_selected,material=material_selected)
-        print(data)
-        division_id=Division.objects.all().filter(name=division).values('pk').first()
-        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center = profit_center)
+        data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning,Smooth_Family__in=smooth_family_selected,material__in=material_selected)
+        division_id=Division.undeleted_objects.all().filter(name=division).values('pk').first()
+        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected)
+        
         if not data:
             messages.error(request,"No data with selected filter!") 
             return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
             'smooth_family_list':smooth_family_list,
             'material_list':material_list,
-
-    
             })
-       
+
         df_data=pd.DataFrame(data.values())
         df_cycle=pd.DataFrame(cycle_data.values())
+
+        # date
+        df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
+        # get dataframe between two dates
+        if from_date and to_date :
+            date_from = datetime.strptime(from_date,'%Y-%m-%d')
+            date_to = datetime.strptime(to_date,'%Y-%m-%d')
+            date_interval_df_data = (df_data['date'] > date_from.date()) & (df_data['date'] <= date_to.date())
+            df_data = df_data.loc[date_interval_df_data]
+            # get dataframe between two dates
+            date_interval_df_cycle = (df_cycle['work_day'] > date_from.date()) & (df_cycle['work_day'] <= date_to.date())
+            df_cycle = df_cycle.loc[date_interval_df_cycle]
         # call function demand_prod_planning
-        demand_prod_planning(df_data)
+        demand_prod_planning(df_data,df_cycle,date_from)
         # call function demand_prod_planning
         production_plan_kpi(df_data)
         if cycle_data:
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle)
         
+
     return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,'smooth_family_list':smooth_family_list,'material_list':material_list,
     'division':division,
     'profit_center':profit_center,
     'planning':planning,
     'records':df_data,
     'df_cycle':df_cycle,
+    'from_date':from_date,
+    'to_date':to_date,
+    'date_from':date_from,
     'smooth_family_selected':smooth_family_selected,
     'material_selected':material_selected,
     'week_count':demand_prod_planning.week_count,
@@ -1672,15 +1690,15 @@ def filter_planning(request):
 
 
 # calculate nomber of OF and OP ( wek and month)
-def demand_prod_planning(df_data):
-    # date
-    df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
+def demand_prod_planning(df_data,df_cycle,date_from):
+    
+    
     # week of date
-    df_data['date_week']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
+    df_data['date_week']=pd.to_datetime(df_data['date']).dt.week
     # month of date
-    df_data['date_month']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.month),(pd.to_datetime(df_data['date_reordo']).dt.month)).astype(int)
+    df_data['date_month']=pd.to_datetime(df_data['date']).dt.month
     # year of date
-    df_data['date_year']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.year),(pd.to_datetime(df_data['date_reordo']).dt.year)).astype(int)
+    df_data['date_year']=pd.to_datetime(df_data['date']).dt.year
     # concatenate year and week
     df_data['date_year_week']=df_data['date_year'].astype(str)+'-'+'W'+df_data['date_week'].astype(str)
     # concatenate year and month
@@ -1712,6 +1730,35 @@ def demand_prod_planning(df_data):
     demand_prod_planning.week_count_axis_x=week_count_axis_x
     demand_prod_planning.month_count=month_count
     demand_prod_planning.month_count_axis_x=month_count_axis_x
+
+
+    print(week_count)
+    
+    # calcul Demonstrated capacity (week and month)
+
+    df_data.to_csv('df_data.csv')
+    print(date_from)
+    if date_from:
+        previous_month = date_from - relativedelta(months=1)
+        print(previous_month)
+        date_interval_df_data = (df_data['date'] > previous_month.date()) & (df_data['date'] <= date_from.date())
+        df = df_data.loc[date_interval_df_data]
+        df.to_csv('df.csv')
+
+    # week_demonstrated_count= df_data.groupby(['date_year_week','status'])['id'].count().reset_index()
+    
+
+    # df_data.to_csv('status.csv')
+    
+        # date_interval_df_data = (df_data['date'] > previous_month.date()) & (df_data['date'] <= date_from.date())
+        # df = df_data.loc[date_interval_df_data]
+        
+        
+
+    
+    
+
+
 
 
 # Kpi cycle time per smooth family (week and month)
@@ -1765,6 +1812,7 @@ def cycle_time_kpi(df_data):
     cycle_time_kpi.month_cycle_count_axis_x=month_cycle_count_axis_x
     
 
+
 # calculate production plan (Freeze_end_date or smoothing_end_date) (week and month)
 def production_plan_kpi(df_data):
     # date
@@ -1784,7 +1832,7 @@ def production_plan_kpi(df_data):
     date_production_week=df_data.groupby(['date_production_year_week'])['id'].count().reset_index()
     date_production_month=df_data.groupby(['date_production_year_month'])['id'].count().reset_index()
 
-    df_data.to_csv('result.csv')
+   
    
     
 

@@ -20,7 +20,7 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <select name="division_name" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                            <select name="division_name" size="1"  class="custom-select form-control-border" id="exampleSelectBorder" required>
                                 {% for item in divisions_list %}
                                 <option value="{{item.name}}" {% if division == item.name %} selected {% endif %}>{{item.name}}</option>
                                 {% endfor %}
@@ -36,7 +36,7 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <select name="center_profit" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                            <select name="center_profit" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder" required>
                                 {% for item in center_profit_list %}
                                 <option value="{{item.Profit_center}}" {% if item.Profit_center in profit_center%} selected {% endif %}>{{item.Profit_center}}</option>
                                 {% endfor %}
