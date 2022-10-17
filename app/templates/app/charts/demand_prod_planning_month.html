@@ -1,35 +1,27 @@
 <div class="card-body">
     {%if records.iterrows%}
     <div style="height: 400px" >
-        <canvas id="month"></canvas>
+        <canvas id="month"></canvas> 
         <script>
+            var data_work_days_count_month = [{% for index, data in work_days_count_month.iterrows %} {{data.result}}.toFixed(2), {% endfor %}];
             var barChartData = {
                 labels: [{% for months in month_count_axis_x %} '{{months}}', {% endfor %}],
 
 
                 datasets: [
-                //     {
-                // data:data_week_count ,
-                // type: 'line',
-                // label: 'QTE Program demand',
-                // fill: false,
-                // backgroundColor: "#0077b6",
-                // borderColor: "#0077b6",
-                // borderCapStyle: 'butt',
-                // borderDash: [],
-                // borderDashOffset: 0.0,
-                // borderJoinStyle: 'miter',
-                // lineTension: 0.3,
-                // pointBackgroundColor: "#0077b6",
-                // pointBorderColor: "#0077b6",
-                // pointBorderWidth: 1,
-                // pointHoverRadius: 5,
-                // pointHoverBackgroundColor: "#0077b6",
-                // pointHoverBorderColor: "#0077b6",
-                // pointHoverBorderWidth: 2,
-                // pointRadius: 4,
-                // pointHitRadius: 10
-                // }, 
+                {
+                    data: data_work_days_count_month ,
+                    type: 'line',
+                    label: 'QTE Demonstrated capacity ',
+                    backgroundColor: "#E91E63",
+                    borderColor: "#E91E63",
+                    borderCapStyle: 'butt',
+                    borderDash: [2, 2],
+                    borderDashOffset: 0.0,
+                    borderJoinStyle: 'miter',
+                    ineTension: .3,
+                    
+                }, 
                 
                 // {
                 // data: data_demonstrated_capacity ,

@@ -1615,6 +1615,8 @@ def filter_planning(request):
     cycle_time_kpi.month_cycle_count_axis_x=None
     production_plan_kpi.date_production_week=None
     production_plan_kpi.date_production_month=None
+    demand_prod_planning.work_days_count =None
+    demand_prod_planning.work_days_count_month=None
 
 
 
@@ -1684,6 +1686,8 @@ def filter_planning(request):
     'smooth_family_month':cycle_time_kpi.smooth_family_month,
     'date_production_week':production_plan_kpi.date_production_week,
     'date_production_month':production_plan_kpi.date_production_month,
+    'work_days_count_week': demand_prod_planning.work_days_count,
+    'work_days_count_month':demand_prod_planning.work_days_count_month,
     })
 
 
@@ -1719,6 +1723,7 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     # get unique date_year_week (because value date_year_week duplicate)
     week_count_axis_x=week_count['date_year_week'].unique()
     
+
     ### month
     month_count=df_data_demand_prod_interval.groupby(['date_year_month','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
     month_count['year']=month_count['date_year_month'].str.split('-M').str[0].astype(int)
@@ -1731,19 +1736,44 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     demand_prod_planning.month_count=month_count
     demand_prod_planning.month_count_axis_x=month_count_axis_x
 
+    
+
     # calcul Demonstrated capacity (week and month)
-    #  calcul sum of closed in previous_month
+    # get previous_month
     previous_month = date_from - relativedelta(months=1)
-    df_prev_month=df_data[(df_data['date'] > previous_month.date()) & (df_data['date'] <= date_from.date())]
+    df_prev_month = df_data[(df_data['date'] > previous_month.date()) & (df_data['date'] <= date_from.date())]
+
+    #  calcul sum of closed in previous_month
     df_prev_month_closed=df_prev_month[df_prev_month['closed']==True]
     previous_month_closed_count=df_prev_month_closed.shape[0]
-    
+
     #calcul number of work_days in previous_month
-    work_days_in_previous_month =df_prev_month['date'].isin(df_work_days['date']) 
-    work_days_in_previous_month_count =work_days_in_previous_month.shape[0]
+    delta = date_from - previous_month
+    days = [previous_month + timedelta(days=i) for i in range(delta.days + 1)]
+    df_dates_prev_month=pd.DataFrame(days , columns = ['dates'])
+    work_days_in_previous_month = df_dates_prev_month[df_dates_prev_month['dates'].isin(df_work_days['date']) == True]
+    work_days_in_previous_month_count = work_days_in_previous_month.count()
     
     # calcul number of work_days in period(week or month)
-    # 
+    df_work_days['date_week']=pd.to_datetime(df_work_days['date']).dt.week
+    df_work_days['date_year']=pd.to_datetime(df_work_days['date']).dt.year
+    work_days_count=df_work_days.groupby(['date_week','date_year'])['id'].count().reset_index()
+    work_days_count['date_year_week']= work_days_count['date_year'].astype(str)+'-'+'W'+work_days_count['date_week'].astype(str)
+    work_days_count = work_days_count[work_days_count['date_year_week'].isin(week_count_axis_x)]
+    work_days_count['result'] = work_days_count['id'] * (previous_month_closed_count / work_days_in_previous_month_count['dates'])
+    
+
+    # calcul number of work_days in period(week or month)
+    df_work_days['date_month']=pd.to_datetime(df_work_days['date']).dt.month
+    work_days_count_month=df_work_days.groupby(['date_month','date_year'])['id'].count().reset_index()
+    work_days_count_month['date_year_month']= work_days_count_month['date_year'].astype(str)+'-'+'M'+work_days_count_month['date_month'].astype(str)
+    work_days_count_month = work_days_count_month[work_days_count_month['date_year_month'].isin(month_count_axis_x)]
+    work_days_count_month['result'] = work_days_count_month['id'] * (previous_month_closed_count / work_days_in_previous_month_count['dates'])
+     
+
+
+    demand_prod_planning.work_days_count=work_days_count
+    demand_prod_planning.work_days_count_month=work_days_count_month
 
     
 
@@ -1830,9 +1860,6 @@ def production_plan_kpi(df_data):
     production_plan_kpi.date_production_week =date_production_week
     production_plan_kpi.date_production_month =date_production_month
     
-
-
-
 
 # def planning(df_data):
 #     # Program demand count per week
