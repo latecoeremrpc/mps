@@ -1637,8 +1637,7 @@ def filter_planning(request):
         division_id=Division.undeleted_objects.all().filter(name=division).values('pk').first()
         cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected,owner='officiel')
         work_days=WorkData.undeleted_objects.values('date').filter(product__division=division_id['pk'],product__Profit_center =profit_center,owner='officiel').distinct()
-        print(work_days)
-       
+        
         if not data:
             messages.error(request,"No data with selected filter!") 
             return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
@@ -1746,30 +1745,37 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     #  calcul sum of closed in previous_month
     df_prev_month_closed=df_prev_month[df_prev_month['closed']==True]
     previous_month_closed_count=df_prev_month_closed.shape[0]
+    print('work_days_in_previous_month_count:',previous_month_closed_count)
 
     #calcul number of work_days in previous_month
-    delta = date_from - previous_month
-    days = [previous_month + timedelta(days=i) for i in range(delta.days + 1)]
-    df_dates_prev_month=pd.DataFrame(days , columns = ['dates'])
-    work_days_in_previous_month = df_dates_prev_month[df_dates_prev_month['dates'].isin(df_work_days['date']) == True]
-    work_days_in_previous_month_count = work_days_in_previous_month.count()
+    work_days_in_previous_month = df_work_days[(df_work_days['date'] >= previous_month.date()) & (df_work_days['date'] <= date_from.date())]
+    work_days_in_previous_month_count = work_days_in_previous_month.shape[0]
     
-    # calcul number of work_days in period(week or month)
+    
+    # calcul number of work_days in period(week)
     df_work_days['date_week']=pd.to_datetime(df_work_days['date']).dt.week
     df_work_days['date_year']=pd.to_datetime(df_work_days['date']).dt.year
     work_days_count=df_work_days.groupby(['date_week','date_year'])['id'].count().reset_index()
     work_days_count['date_year_week']= work_days_count['date_year'].astype(str)+'-'+'W'+work_days_count['date_week'].astype(str)
     work_days_count = work_days_count[work_days_count['date_year_week'].isin(week_count_axis_x)]
-    work_days_count['result'] = work_days_count['id'] * (previous_month_closed_count / work_days_in_previous_month_count['dates'])
-    
+    # test if work_days_in_previous_month_count == 0
+    if work_days_in_previous_month_count == 0:
+        work_days_count['result_demonstrated_capacity'] = 0
+        print(work_days_count)
+    else:
+        work_days_count['result_demonstrated_capacity'] = work_days_count['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
 
-    # calcul number of work_days in period(week or month)
+
+    # calcul number of work_days in period(month)
     df_work_days['date_month']=pd.to_datetime(df_work_days['date']).dt.month
     work_days_count_month=df_work_days.groupby(['date_month','date_year'])['id'].count().reset_index()
     work_days_count_month['date_year_month']= work_days_count_month['date_year'].astype(str)+'-'+'M'+work_days_count_month['date_month'].astype(str)
     work_days_count_month = work_days_count_month[work_days_count_month['date_year_month'].isin(month_count_axis_x)]
-    work_days_count_month['result'] = work_days_count_month['id'] * (previous_month_closed_count / work_days_in_previous_month_count['dates'])
-     
+    if work_days_in_previous_month_count == 0 :
+        work_days_count_month['result_demonstrated_capacity'] = 0
+    else:
+        work_days_count_month['result_demonstrated_capacity'] = work_days_count_month['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
+
 
 
     demand_prod_planning.work_days_count=work_days_count
