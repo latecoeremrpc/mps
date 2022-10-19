@@ -15,20 +15,20 @@
         <!--return back-->
         <div style='margin-bottom:10px'>
             <a href="{%url 'product' division  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
-            </div>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary card-outline">
-                      <div class="card-header ui-sortable-handle" >
+                    <div class="card-header ui-sortable-handle" >
                         <h5 class="card-title" ><strong>List of calendar configuration cpOrdo </strong></h5>
                         <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                        <i class="fas fa-times"></i>
-                        </button>
-                      </div>
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body table-responsive p-0" style="height: 600px;" >
                       <div class="card-body ">
@@ -78,7 +78,7 @@
                             </tbody>              
                         </table>
                       </div>
-                     </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,48 +88,48 @@
 <!--create Calendar Configuration CpOrdo modal-->
 <div class="modal" id="create">
     <div class="modal-dialog">
-    <div class="modal-content">
-        <form method="POST" action="{% url 'createconfigCpordo' division product %}">
-        <!-- Security token -->
-        {% csrf_token %}
-       <div class="modal-header">						
-       <h4 class="modal-title">Create New Calendar Configuration CpOrdo</h4>
-       </div>
-       <div class="modal-body">
-            <!-- Using the formset crispy -->
-            {{ form|crispy }}
-       </div>
-        
-          <div class="modal-footer">
-          <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-          <input type="submit" class="btn btn:hover btn-primary" value="Save">
-          </div>
-     </form>
-    </div>
+        <div class="modal-content">
+            <form method="POST" action="{% url 'createconfigCpordo' division product %}">
+                <!-- Security token -->
+                    {% csrf_token %}
+                <div class="modal-header">						
+                    <h4 class="modal-title">Create New Calendar Configuration CpOrdo</h4>
+                </div>
+                <div class="modal-body">
+                        <!-- Using the formset crispy -->
+                        {{ form|crispy }}
+                </div>
+                
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                    <input type="submit" class="btn btn:hover btn-primary" value="Save">
+                </div>
+            </form>
+        </div>
     </div>
   </div>
 
    <!--Update Calendar Configuration CpOrdo modal-->
 <div class="modal" id="update" >
     <div class="modal-dialog">
-    <div class="modal-content">
-        <form method="POST" action ="{%url 'updateconfigCpordo' division %}"> 
-            <!-- Security token by Django -->
-            {% csrf_token %}
-        <div class="modal-header">						
-            <h4 class="modal-title">Edit Calendar Configuration CpOrdo</h4>
+        <div class="modal-content">
+            <form method="POST" action ="{%url 'updateconfigCpordo' division %}"> 
+                <!-- Security token by Django -->
+                {% csrf_token %}
+                <div class="modal-header">						
+                    <h4 class="modal-title">Edit Calendar Configuration CpOrdo</h4>
+                </div>
+                <div class="modal-body">    
+                        <!-- form with crispy -->
+                        {{ form|crispy }}
+                        <input type="hidden" id="id" name="id" value="">
+                </div>
+                <div class="modal-footer">
+                    <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
+                    <input type="submit" class="btn btn:hover btn-primary" value="update">
+                </div>
+            </form>
         </div>
-        <div class="modal-body">    
-                 <!-- form with crispy -->
-                 {{ form|crispy }}
-                 <input type="hidden" id="id" name="id" value="">
-        </div>
-            <div class="modal-footer">
-                <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
-                <input type="submit" class="btn btn:hover btn-primary" value="update">
-            </div>
-        </form>
-    </div>
     </div>
   </div>
 
@@ -137,34 +137,34 @@
 <!--delete Calendar Configuration CpOrdo modal-->
 <div class="modal" id="delete" >
     <div class="modal-dialog">
-    <div class="modal-content">
-    <div class="modal-header">						
-        <h4 class="modal-title">Delete Calendar Configuration CpOrdo</h4>
-    </div>
-    <div class="modal-body">					
-    </div>
-    <div class="modal-footer">
-        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
-        <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>  
-    </div>
-    </div>
+        <div class="modal-content">
+            <div class="modal-header">						
+                <h4 class="modal-title">Delete Calendar Configuration CpOrdo</h4>
+            </div>
+            <div class="modal-body">					
+            </div>
+            <div class="modal-footer">
+                <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>  
+            </div>
+        </div>
     </div>
 </div>
 
 <!--restore Calendar Configuration CpOrdo modal-->
 <div class="modal" id="restore" >
     <div class="modal-dialog ">
-    <div class="modal-content">
-    <div class="modal-header">						
-        <h4 class="modal-title">Restore Calendar Configuration CpOrdo</h4>
-    </div>
-    <div class="modal-body">					
-    </div>
-    <div class="modal-footer">
-        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
-        <a href="" id='link' class="btn btn-danger" value="Delete">Restore</a>  
-    </div>
-    </div>
+        <div class="modal-content">
+            <div class="modal-header">						
+                <h4 class="modal-title">Restore Calendar Configuration CpOrdo</h4>
+            </div>
+            <div class="modal-body">					
+            </div>
+            <div class="modal-footer">
+                <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <a href="" id='link' class="btn btn-danger" value="Delete">Restore</a>  
+            </div>
+        </div>
     </div>
 </div>
 
@@ -228,6 +228,6 @@
           );
           
     });
- </script>
+</script>
 
 {% endblock %}

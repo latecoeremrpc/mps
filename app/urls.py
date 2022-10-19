@@ -19,9 +19,8 @@ urlpatterns = [
     path('division/<division>/product/updatematerial',views.update_material,name='updatematerial'),
     path('division/<division>/product/<id>/deletematerial',views.delete_material,name='deletematerial'),
     path('division/<division>/product/<id>/restoremateriale',views.restore_material,name='restoremateriale'),
-    #Get Global Materials
-    path('materials/',views.read_material,name='materials'),
-   
+    
+
     #urls for Calendar
     path('division/<division>/product/<product>/calendar/',views.calendar,name='calendar'),
     path('division/<division>/product/<product>/createcalendar/',views.create_calendar,name='createcalendar'),
@@ -45,10 +44,10 @@ urlpatterns = [
     path('division/<id>/deleteproduct',views.delete_product,name='deleteproduct'),
     path('division/<id>/restoreproduct',views.restore_product,name='restoreproduct'),
 
-    #urls for work data
+    #url for work data
     path('division/<division>/product/<product>/workdata/',views.work_data,name='workdata'),
     
-    #urls for custom work data
+    #url for custom work data
     path('division/<division>/product/<product>/customwork/',views.custom_work,name='customwork'),
     
     #urls for CRUD CalendarConfigurationTraitement
@@ -78,15 +77,8 @@ urlpatterns = [
     path('shopfloor/filter/',views.filter,name='filter'),
     path('shopfloor/shared/',views.result_sharing,name='sharing'),
 
-    # path('shopfloor/version/',views.version,name='version'),
-
-
-
-    
-
     # urls for planning 
     path('shopfloor/planning/',views.filter_planning,name='planning'), 
-    path('shopfloor/datatable/',views.data_table,name='datatable'), 
      
     
      

@@ -4,7 +4,7 @@
         <canvas id="month_cycle_count"></canvas>
         <script>
             var xValues = [{% for months in month_cycle_count_axis_x %} '{{months}}', {% endfor %}];
-            var data = [{% for index, data in cycle_count_month.iterrows %} {{data.0}}.toFixed(2), {% endfor %}];
+            var data = [{% for index, data in cycle_count_month.iterrows %} {{data.0|floatformat:2}}, {% endfor %}];
 
 
             

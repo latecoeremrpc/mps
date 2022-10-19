@@ -5,7 +5,7 @@
 
         <script>
             var xValues = [{% for weeks in week_cycle_count_axis_x %} '{{weeks}}', {% endfor %}];
-            var data = [{% for index, data in cycle_count.iterrows %} {{data.0}}.toFixed(2), {% endfor %}];
+            var data = [{% for index, data in cycle_count.iterrows %} {{data.0|floatformat:2}}, {% endfor %}];
 
 
             
@@ -35,7 +35,7 @@
                 options: {
                     plugins: {
                             datalabels: {
-                                // anchor: 'end',
+                                anchor: 'end',
                                 clamp: true,
                                 color: 'black',
                                 

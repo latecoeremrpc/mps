@@ -3,7 +3,7 @@
     <div style="height: 400px" >
         <canvas id="month"></canvas> 
         <script>
-            var data_work_days_count_month = [{% for index, data in work_days_count_month.iterrows %} {{data.result_demonstrated_capacity}}, {% endfor %}];
+            var data_work_days_count_month = [{% for index, data in work_days_count_month.iterrows %} {{data.result_demonstrated_capacity|floatformat:2}}, {% endfor %}];
             var barChartData = {
                 labels: [{% for months in month_count_axis_x %} '{{months}}', {% endfor %}],
 
@@ -167,9 +167,10 @@
                     },
                     plugins: {
                             datalabels: {
-                                // anchor: 'end',
+                                anchor: 'center',
                                 clamp: true,
-                                color: 'white',
+                                color: 'black',
+                                align:'end',
 
                                 // Hidden value if == 0 
                                 formatter: function(value, index, values) {

@@ -10,7 +10,6 @@ from django.db import models
 
 #BasedModel
 class BaseModel(models.Model) :
-    #created_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)   
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_by= models.CharField(max_length= 30, default='Marwa')
@@ -27,7 +26,6 @@ class BaseModel(models.Model) :
 class SoftDeleteManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
-
 
 
 #SoftDeleteModel

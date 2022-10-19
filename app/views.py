@@ -101,14 +101,6 @@ def create_material(request,division,product):
     return redirect(f'../{product}/material/')
 
 
-# read all objects(Material)
-def read_material(request):
-    # undeleted_objects object of soft delete manager
-    data = Material.objects.all().order_by('id')    
-    return render(request, "app/material/materials.html", {'data':data})
-
-
-#update object(Material) by id
 def update_material(request,division):
     #get id
     id = id = request.POST.get('id')
@@ -155,16 +147,13 @@ def material(request ,division, product):
     data = Material.objects.filter(product__pk = product ).order_by('id')    
     return render(request, "app/material/material.html", {'data':data,'division':division,'product':product,'form':form})
 
-
 #******************** calendar****************************
+
 def calendar(request,division,product):
     #get smooth family from product
     smooth_family= Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
-    # print('**********')
-    print(smooth_family)
     # get cycle objects
     cycle=Cycle.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
-    #material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     # get product object to display in calendar
     products_data= Product.undeleted_objects.all()
     # get all work data objects to display in Calendar
@@ -172,7 +161,6 @@ def calendar(request,division,product):
     # get all holiday objects to display in Calendar
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
     # get cycle ifo and workdata infos to display in Calendar
-    #workdata=WorkData.objects.values('cycle__cycle_time','cycle__id','id','startTime','endTime','date','FTEhourByDay','ExtraHour','Absenteeism_ratio','Unproductiveness_ratio','Efficienty_ratio').filter(product_id = product, owner = 'officiel') 
     return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'smooth_family': smooth_family,'cycle': cycle})
 
 
@@ -249,7 +237,6 @@ def create_calendar(request,division,product):
 
 # delete day (holiday or workdata and cycle)
 def delete_day(request,division,product): 
-    #holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product)
     if request.method =="POST"  and 'delete' in request.POST:
         # get id value from form
         id = request.POST.get('date_id')
@@ -268,9 +255,8 @@ def delete_day(request,division,product):
         obj.soft_delete()
         # redirect to calendar 
     return redirect("../calendar")
-    #return render(request,"app/calendar/calendar.html",{'product':product} )
     
-#********************Custom calendar****************************
+#********************Custom calendar**********************
 
 #duplicate calendar : 
 # delete old data( holidayscalendar, workdata, cycle) and get data from calendar and save new data
@@ -305,7 +291,6 @@ def duplicate_calendar(request,division,product):
     #call function create new work data object 
     custom_work(request,division,product)
     return redirect("../customcalendar")
-    #return render(request,"app/calendar/custom_calendar.html", {'product':product,'holidays':custom_holidays})
 
 #custom calendar
 def custom_calendar(request,division,product):
@@ -393,8 +378,7 @@ def create_custom_calendar(request,division,product):
 
 
 # delete day (holiday or work) for custom
-def delete_day_custom(request,division,product):  # sourcery skip: avoid-builtin-shadow
-    #holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product)
+def delete_day_custom(request,division,product):  
     if request.method =="POST"  and 'delete-custom' in request.POST:
         # get id value from form
         id = request.POST.get('date_id')
@@ -472,6 +456,7 @@ def product(request ,division):
     return render(request, "app/product/product.html", {'data':data,'division':division,'form':form})
 
 #********************work Data***********************************
+
 #create work data for calendar
 def work_data(request,division,product):
     work = WorkData.undeleted_objects.all().filter(product_id = product) 
@@ -567,6 +552,7 @@ def work_data(request,division,product):
                     data = WorkData(date=startDate,startTime=startTime,endTime=endTime,FTEhourByDay=fte,ExtraHour=extraHours,Absenteeism_ratio=AbsenteeismRatio,Unproductiveness_ratio=UnproductivenessRatio, Efficienty_ratio=EfficientyRatio,product_id =product)
                     data.save()
                     #Save into Cycle table
+                    # loop two list smooth_family and cycle_time
                     for i,j in zip(smooth_family,cycle_time):
                         cycle_type_input = request.POST.get('cycle-type-'+i)
                         if cycle_type_input == 'Days':
@@ -976,7 +962,7 @@ def copy_calendar(request,division,product):
     return redirect("../calendar")
 
 #*********************Save uploads************************
-#upload files
+#upload files (for upload zpp and coois)
 def upload_files(request):  
 
     return render(request,'app/files/file.html')  
@@ -1018,7 +1004,7 @@ def save_zpp(request):
     return redirect("./upload")     
     
     
-#********************************Upload COOIS************************************
+#***********************Upload COOIS**********************
 
 def import_coois(file,conn):
     #read file with pandas
@@ -1081,7 +1067,7 @@ def import_coois(file,conn):
         )
     conn.commit()
 
-#********************************Upload ZPP_MD_STOCK*****************************
+#*********************Upload ZPP_MD_STOCK*****************
 
 def import_zpp(file,conn):
     #read file with pandas
@@ -1145,7 +1131,7 @@ def import_zpp(file,conn):
         )
     conn.commit()
 
-#*************************Shopfloor and smoothing**********************
+#******************Shopfloor and smoothing****************
 
 # @allowed_users(allowed_roles=["Planificateur"])
 # merge between coois and zpp and material
@@ -1157,13 +1143,12 @@ def shopfloor(request):
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
     material_data=Material.undeleted_objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
 
-    #Convert to DataFrame
+    #Convert data to DataFrame
     df_zpp=pd.DataFrame(list(zpp_data))
     df_coois=pd.DataFrame(list(coois_data))
     df_material=pd.DataFrame(list(material_data))
     # rename df_material column 
     df_material=df_material.rename(columns={'product__program':'program','product__division__name':'division'})
-
 
     #add column key for zpp (concatinate  material and data_element_planif and created_by  )
     df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str)
@@ -1174,7 +1159,6 @@ def shopfloor(request):
     df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)+df_material['created_by'].astype(str)
     #add column key for coois (concatinate material,division,profit_centre, created_by )    
     df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['created_by'].astype(str)
-
 
     #Convert df_zpp to dict
     df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
@@ -1280,15 +1264,6 @@ def create_shopfloor(request):
         df=pd.DataFrame.from_dict(data)
         # convert freeze_end_date to datetime 
         df['Freeze_end_date'] = pd.to_datetime(df['Freeze_end_date'])
-        # delete old objects of shopfloor and save new objects
-        # Shopfloor.objects.all().delete()
-        # df.to_csv('df_before_calcul.csv')
-        # print(df)
-             
-
-        # #Check if at least the first end date is present for each Smooth Family
-        # df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()
-        # print(data)
         df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()        
         # print('#'*50)
         # print(df_for_check)
@@ -1316,7 +1291,7 @@ def create_shopfloor(request):
         else:
             df['version'] = version_number['version']+1
         df['shared']= 'False'
-        # df.to_csv('df_after_save.csv')
+
         save_shopfloor(df)
         messages.success(request,"Data saved successfully!") 
         return redirect(filter)
@@ -1344,33 +1319,22 @@ def smoothing_calculate(df_data):
     df_data['smoothing_end_date']=df_data['Freeze_end_date']
     # df_data.to_csv('freeze.csv')
     df_data.insert(0,'key_start_day','')
-    # *********************
     df_closed_false= df_data[df_data['closed']=='False']
-    # df_closed_false=df_closed_false.reset_index()
-    # del df_closed_false['index']
-    print(df_closed_false)
+    
 
     df_closed_false = df_closed_false.sort_values(['Smooth_Family','Ranking']).reset_index()
     del df_closed_false['index']
-    print(df_closed_false)
     df_closed_false.to_csv('df_closed_false.csv')
     df_closed_true = df_data[df_data['closed'] =='True']
     df_closed_true=df_closed_true.reset_index()
     del df_closed_true['index']
-    # df_closed_true.to_csv('df_closed_true.csv') 
-    # *********************
+    
     for i in range(len(df_closed_false)-1):
-        # test if not freezed and not closed calcul smoothing
-        # if (df_data.loc[i+1,'freezed']=='not_freezed') and (df_data.loc[i+1,'closed']=='False'):
-
         if (df_closed_false.loc[i+1,'freezed']=='not_freezed'):
             df_closed_false.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_closed_false.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_closed_false.loc[i,'division'],df_closed_false.loc[i,'profit_centre'],df_closed_false.loc[i,'Smooth_Family'])
-    df_closed_false.to_csv('df_after_smoothing.csv')
     df_data = pd.concat([df_closed_true, df_closed_false])
-    # df_closed_false.to_csv('df_closed_false.csv')
-    # df_data.to_csv('df_concat.csv')
+   
     return df_data
-    
     
 
 #calcul smooth end date(Recursive Function) to use in smoothing_calculate
@@ -1389,7 +1353,6 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
         for key,value in table:
             if key_date == key:
                 cycle=value
-        print('cycle: ')
         print(cycle)     
     #when cycle not found  in table return date(1900,1,1)    
     except Exception:
@@ -1448,7 +1411,6 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
     new_date=add_hours(prev_date, cycle)
     return   smooth_date_calcul(new_date,table,division,profit_center,Smooth_Family,cycle,current_date)
 
-  
 # save shoploor to use in create_shopfloor
 def save_shopfloor(df):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
@@ -1466,8 +1428,6 @@ def save_shopfloor(df):
     # Using the StringIO method to set
     # as file object
     shopfloor = StringIO()
-
-    # df.to_csv('dfSaveShopfloor.csv',index=False)
 
     #convert file to csv
     shopfloor.write(df.to_csv(index=False , header=None,sep=';'))
@@ -1521,7 +1481,6 @@ def save_shopfloor(df):
             sep=";",
         )
     conn.commit()
-
 
 # filter by division, profit_center and panning, week to get versions
 def filter(request):
@@ -1592,7 +1551,7 @@ def result_sharing(request):
     return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
 
 
-#******************************Planning********************************   
+#****************************Planning*****************************  
 # filter panning result
 def filter_planning(request):
     divisions_list= Division.undeleted_objects.values('name').distinct().order_by('name')
@@ -1637,7 +1596,7 @@ def filter_planning(request):
         division_id=Division.undeleted_objects.all().filter(name=division).values('pk').first()
         cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected,owner='officiel')
         work_days=WorkData.undeleted_objects.values('date').filter(product__division=division_id['pk'],product__Profit_center =profit_center,owner='officiel').distinct()
-        
+        zpp =Zpp.objects.all().filter()
         if not data:
             messages.error(request,"No data with selected filter!") 
             return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
@@ -1654,7 +1613,7 @@ def filter_planning(request):
         # call function demand_prod_planning
         demand_prod_planning(df_data,df_work_days,date_from,date_to)
         # call function demand_prod_planning
-        production_plan_kpi(df_data)
+        production_plan_kpi(df_data,date_from,date_to)
         if cycle_data:
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle,date_from,date_to)
@@ -1688,7 +1647,6 @@ def filter_planning(request):
     'work_days_count_week': demand_prod_planning.work_days_count,
     'work_days_count_month':demand_prod_planning.work_days_count_month,
     })
-
 
 
 # calculate nomber of OF and OP ( wek and month)
@@ -1758,32 +1716,26 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     work_days_count=df_work_days.groupby(['date_week','date_year'])['id'].count().reset_index()
     work_days_count['date_year_week']= work_days_count['date_year'].astype(str)+'-'+'W'+work_days_count['date_week'].astype(str)
     work_days_count = work_days_count[work_days_count['date_year_week'].isin(week_count_axis_x)]
-    # test if work_days_in_previous_month_count == 0
-    if work_days_in_previous_month_count == 0:
-        work_days_count['result_demonstrated_capacity'] = 0
-        print(work_days_count)
-    else:
-        work_days_count['result_demonstrated_capacity'] = work_days_count['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
-
+    
 
     # calcul number of work_days in period(month)
     df_work_days['date_month']=pd.to_datetime(df_work_days['date']).dt.month
     work_days_count_month=df_work_days.groupby(['date_month','date_year'])['id'].count().reset_index()
     work_days_count_month['date_year_month']= work_days_count_month['date_year'].astype(str)+'-'+'M'+work_days_count_month['date_month'].astype(str)
     work_days_count_month = work_days_count_month[work_days_count_month['date_year_month'].isin(month_count_axis_x)]
+    
+    
+    # test if work_days_in_previous_month_count == 0
     if work_days_in_previous_month_count == 0 :
+        work_days_count['result_demonstrated_capacity'] = 0
         work_days_count_month['result_demonstrated_capacity'] = 0
     else:
+        work_days_count['result_demonstrated_capacity'] = work_days_count['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
         work_days_count_month['result_demonstrated_capacity'] = work_days_count_month['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
-
 
 
     demand_prod_planning.work_days_count=work_days_count
     demand_prod_planning.work_days_count_month=work_days_count_month
-
-    
-
-
 
 
 # Kpi cycle time per smooth family (week and month)
@@ -1839,94 +1791,32 @@ def cycle_time_kpi(df_data,date_from,date_to):
     cycle_time_kpi.month_cycle_count_axis_x=month_cycle_count_axis_x
     
 
-
 # calculate production plan (Freeze_end_date or smoothing_end_date) (week and month)
-def production_plan_kpi(df_data):
+def production_plan_kpi(df_data,date_from,date_to):
+    # get df between two dates
+    df_production_plan_kpi_interval=df_data[(df_data['date'] > date_from.date()) & (df_data['date'] <= date_to.date())]
     # date
-    df_data['date_production']=np.where((df_data['Freeze_end_date'].isna()),(df_data['smoothing_end_date']),(df_data['Freeze_end_date']))
+    df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['Freeze_end_date'].isna()),(df_production_plan_kpi_interval['smoothing_end_date']),(df_production_plan_kpi_interval['Freeze_end_date']))
+    # replace the nan values of date_production column with date_end_plan values
+    df_production_plan_kpi_interval.date_production.fillna(df_production_plan_kpi_interval.date_end_plan, inplace=True)
     # week of date date_production
-    # df_data['dat_production_week']=np.where( (df_data['Freeze_end_date'].isna()),(pd.to_datetime(df_data['smoothing_end_date']).dt.week),(pd.to_datetime(df_data['Freeze_end_date']).dt.week)).astype(int)
-    df_data['date_production_week']=np.where( (df_data['date_production'].isna()),(0),(pd.to_datetime(df_data['date_production']).dt.week)).astype(int)
+    df_production_plan_kpi_interval['date_production_week']=pd.to_datetime(df_production_plan_kpi_interval['date_production']).dt.week
     # month of date_production
-    df_data['date_production_month']=np.where( (df_data['date_production'].isna()),(0),(pd.to_datetime(df_data['date_production']).dt.month)).astype(int)
+    df_production_plan_kpi_interval['date_production_month']=pd.to_datetime(df_production_plan_kpi_interval['date_production']).dt.month
     # year of date_production
-    df_data['date_production_year']=np.where( (df_data['date_production'].isna()),(0),(pd.to_datetime(df_data['date_production']).dt.year)).astype(int)
+    df_production_plan_kpi_interval['date_production_year']=pd.to_datetime(df_production_plan_kpi_interval['date_production']).dt.year
     # concatenate year and week
-    df_data['date_production_year_week']=df_data['date_production_year'].astype(str)+'-'+'W'+df_data['date_production_week'].astype(str)
+    df_production_plan_kpi_interval['date_production_year_week']=df_production_plan_kpi_interval['date_production_year'].astype(str)+'-'+'W'+df_production_plan_kpi_interval['date_production_week'].astype(str)
     # concatenate year and month
-    df_data['date_production_year_month']=df_data['date_production_year'].astype(str)+'-'+'M'+df_data['date_production_month'].astype(str)
+    df_production_plan_kpi_interval['date_production_year_month']=df_production_plan_kpi_interval['date_production_year'].astype(str)+'-'+'M'+df_production_plan_kpi_interval['date_production_month'].astype(str)
     
-    date_production_week=df_data.groupby(['date_production_year_week'])['id'].count().reset_index()
-    date_production_month=df_data.groupby(['date_production_year_month'])['id'].count().reset_index()
+
+    date_production_week=df_production_plan_kpi_interval.groupby(['date_production_year_week'])['id'].count().reset_index()
+    date_production_month=df_production_plan_kpi_interval.groupby(['date_production_year_month'])['id'].count().reset_index()
 
    
-   
-    
 
     production_plan_kpi.date_production_week =date_production_week
     production_plan_kpi.date_production_month =date_production_month
-    
 
-# def planning(df_data):
-#     # Program demand count per week
-#     #Get week from date_end_plan if date_reordo is null or Get week from date_reordo
-#     df_data['week_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
-#     df_data['year_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.year),(pd.to_datetime(df_data['date_reordo']).dt.year)).astype(int)
-#     df_data.sort_values(by=['year_programm_demand','week_programm_demand'],inplace= True)
-#     df_data['year_week_programm_demand']=df_data['year_programm_demand'].astype(str)+'-'+'W'+df_data['week_programm_demand'].astype(str)
-#     df_data['week_programm_demand']=np.where((df_data['date_reordo'].isna()),(pd.to_datetime(df_data['date_end_plan']).dt.week),(pd.to_datetime(df_data['date_reordo']).dt.week)).astype(int)
-    
-#     #Program demand count per week
-#     week_count=df_data.groupby('year_week_programm_demand')['id'].count().reset_index()
-#     week_count['week_programm_demand']= df_data['week_programm_demand']
-#     week_count['year_programm_demand']= df_data['year_programm_demand']
-#     week_count.sort_values(by=['year_programm_demand','week_programm_demand'],inplace= True)
-#     week_count['date_reordo']= df_data['date_reordo']
-#     week_count['date_end_plan']= df_data['date_end_plan']
-#     week_count['order_type']= df_data['order_type']
-    
-#     # week_count.to_csv('test1.csv')
-#     # *********************************************************************************************************
-    
-    
-#     #Demonstrated_capacity count per week
-#     df_status=df_data[df_data['order_stat'].str.contains('TCLO|LIVR')]
-#     df_status['year_week_end_date']=(pd.to_datetime(df_data['date_end_plan']).dt.year).astype(str)+'-'+'W'+(pd.to_datetime(df_data['date_end_plan']).dt.week).astype(str)
-#     week_demonstrated_capacity_count=df_status.groupby('year_week_end_date')['id'].count().reset_index()
-#     # week_demonstrated_capacity_count.to_csv('test2.csv')
-    
-#     #*********************************************************************************************************** 
-    
-#     # Production Plan count per week
-#     # whene closed false
-#     df_data_open =df_data[df_data['closed'] ==False]
-#     # df_data_open.to_csv('open1.csv')    
-#     # Get week from smoothing end date if freeze end date is null or Get week from freeze end date
-#     df_data_open['week_production_plan']=np.where((df_data_open['Freeze_end_date'].isna()),(pd.to_datetime(df_data_open['smoothing_end_date']).dt.week),(pd.to_datetime(df_data_open['Freeze_end_date']).dt.week)).astype(int)
-#     # df_data_open['week_production_plan']=np.where((df_data_open['Freeze_end_date'].isna()),df_data_open['smoothing_end_date'],False)
-#     df_data_open['year_production_plan']=np.where((df_data_open['Freeze_end_date'].isna()),(pd.to_datetime(df_data_open['smoothing_end_date']).dt.year),(pd.to_datetime(df_data_open['Freeze_end_date']).dt.year)).astype(int)
-#     df_data_open['year_week_production_plan']=df_data_open['year_production_plan'].astype(str)+'-'+'W'+df_data_open['week_production_plan'].astype(str) 
-#     week_production_plan_count=df_data_open.groupby('year_week_production_plan')['id'].count().reset_index()
-#     # week_production_plan_count.to_csv('test3.csv')
-    
-#     # ************************************************************************************************************
-    
-#     # Stock count per week
-#     # get data 
-#     zpp_stock =Zpp.objects.values('qte_available')
-#     df_zpp_stock =pd.DataFrame(zpp_stock.values('qte_available'))
-
-#     df_zpp_stock['year_week_programm_demand']=week_count['year_week_programm_demand']
-#     df_zpp_stock['week_programm_demand_count']=week_count['id']
-#     df_zpp_stock['year_week_production_plan']=week_production_plan_count['year_week_production_plan']
-#     df_zpp_stock['week_production_plan_count']=week_production_plan_count['id']
-#     # df_zpp_stock.to_csv('test4.csv')
-#     return df_data
-#     # df_zpp_stock['logistic_stock ']=( df_zpp_stock['qte_available'] + week_production_plan_count['id'].count() - week_production_plan_count['count'].count()) 
-#     return render(request,'app/planning.html',{'records':df_data,'week_count':week_count,'week_demonstrated_capacity_count':week_demonstrated_capacity_count,'week_production_plan_count':week_production_plan_count})
-
-
-#Test for web excel jquery
-def data_table(request):
-    return render(request,'app/Shopfloor/datatable.html') 
-
+ 

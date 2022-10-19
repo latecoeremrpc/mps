@@ -8,27 +8,27 @@
         <!--return back-->
         <div style='margin-bottom:10px'>
             <a href="{%url 'calendar' division  product  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
-            </div>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary card-outline">
                     <div class="card-header ui-sortable-handle" >
                         <h5 class="card-title" ><strong>Custom Calendar</strong></h5>
                         <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                        <i class="fas fa-times"></i>
-                        </button>
-                      </div>
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
 
-                      <div class="card-body">
-                          <!--display calendar-->
+                    <div class="card-body">
+                        <!--display calendar-->
                         <div class="calendar"></div>
-                      </div>
-                      <div class="card-footer clearfix"></div>
+                    </div>
+                    <div class="card-footer clearfix"></div>
                 </div> 
             </div>
         </div>
@@ -40,220 +40,201 @@
 <!--Delete Modal-->
 <div class="modal fade" id="delete-modal">
     <div class="modal-dialog">
-    <div class="modal-content">
+        <div class="modal-content">
 
-       <form action="{% url 'deletedaycustom' division product%}" method='POST'>
-         <!-- Security token -->
-            {% csrf_token %}
-          <div class="modal-header">
-              <h5 class="modal-title">Delete</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-              </button>
-          </div>
-          <div class="modal-body">
-            <!--input for id-->
-            <input type="hidden" name="date_id" class="form-control">
-            <!--input for name-->
-            <input type="hidden" name="date_type" class="form-control">
-            <!--create input for cycle_id-->
-            <div id="deleteCycle"></div>
+        <form action="{% url 'deletedaycustom' division product%}" method='POST'>
+            <!-- Security token -->
+                {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title">Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--input for id-->
+                <input type="hidden" name="date_id" class="form-control">
+                <!--input for name-->
+                <input type="hidden" name="date_type" class="form-control">
+                <!--create input for cycle_id-->
+                <div id="deleteCycle"></div>
 
-            <p>Are you sure you want to delete these Records?</p>
-          </div>
-  
-          <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-danger"  name ='delete-custom' >Delete</button>
-          </div>
-       </form>
-      </div>  
-  </div>
+                <p>Are you sure you want to delete these Records?</p>
+            </div>
+    
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger"  name ='delete-custom' >Delete</button>
+            </div>
+        </form>
+        </div>  
+    </div>
 </div>
-  
+ 
+
 <!--Save  and update custom Modal -->
 <div class="modal fade" id="event-modal">
     <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Product Planification</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Product Planification</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
+            <br>
+            <div class="button r" id="button-1">
+                <input type="checkbox" class="checkbox" id="checkForm" onclick="checkForm()" />
+                <div class="knobs"></div>
+                <div class="layer"></div>
+            </div>
         <br>
-        <div class="button r" id="button-1">
-          <input type="checkbox" class="checkbox" id="checkForm" onclick="checkForm()" />
-          <div class="knobs"></div>
-          <div class="layer"></div>
-        </div>
-    <br>
-       <form action="{%url 'createcustomcalendar' division product %}" method='POST'id="daysOff" style="display: none;">
-         <!-- Security token -->
-        {% csrf_token %}
-          
-          <div class="modal-body">
-            <center><h6 class="col-sm-4 control-label calendar-text " style="color:var(--bs-red);">Holiday</h6></center>
-            <hr>
-              <input type="hidden" name="event-index">
-              <form class="form-horizontal">
+        <form action="{%url 'createcustomcalendar' division product %}" method='POST'id="daysOff" style="display: none;">
+            <!-- Security token -->
+            {% csrf_token %}
+            <div class="modal-body">
+                <center><h6 class="col-sm-4 control-label calendar-text " style="color:var(--bs-red);">Holiday</h6></center>
+                <hr>
+                <input type="hidden" name="event-index">
+                <form class="form-horizontal">
+                    <div class="form-group row">
+                        <label for="event-name" class="col-sm-4 control-label">Owner</label>
+                        <div class="col-sm-8">
+                        <input id="owner" name="owner" type="text" class="form-control"><br>
+                        </div>
+                    </div>   
                 <div class="form-group row">
-                    <label for="event-name" class="col-sm-4 control-label">Owner</label>
+                    <label for="event-name" class="col-sm-4 control-label">Name</label>
                     <div class="col-sm-8">
-                    <input id="owner" name="owner" type="text" class="form-control"><br>
+                        <input id="event-name" name="event-name" type="text" class="form-control"><br>
                     </div>
-                </div>   
-              <div class="form-group row">
-                  <label for="event-name" class="col-sm-4 control-label">Name</label>
-                  <div class="col-sm-8">
-                  <input id="event-name" name="event-name" type="text" class="form-control"><br>
-                  </div>
-              </div>
-              <div class="form-group row"></div>
-              <div class="form-group row">
-                  <label for="min-date" class="col-sm-4 control-label">Dates</label>
-                  <div class="col-sm-8">
-                  <div class="input-group input-daterange" data-provide="datepicker">
-                      <input id="min-date" name="event-start-date" type="text" class="form-control">
-                      <div class="input-group-prepend input-group-append">
-                          <div class="input-group-text">to</div>
-                      </div>
-                      <input name="event-end-date" type="text" class="form-control">
-                  </div>
-                  </div>
-              </div>
-      
-          </div>
-  
-          <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-primary" id="save-event" name ='save-event'>Save</button>
-          </div>
-       </form>
-
-    <!--work hours form -->
-       <form action="{% url 'customwork' division product%}" method='POST' id="daysOn">
-        <!-- Security token -->
-        {% csrf_token %}
-         
-        <div class="modal-body">
-            <center><h6 class="col-sm-4 control-label calendar-text" style="color:var(--info);">Work Day</h6></center>
-            <hr>
-             <input type="hidden" name="event-index">
-             <form class="form-horizontal">
+                </div>
+                <div class="form-group row"></div>
                 <div class="form-group row">
-                    <label for="event-name" class="col-sm-4 control-label">Owner</label>
+                    <label for="min-date" class="col-sm-4 control-label">Dates</label>
                     <div class="col-sm-8">
-                    <input id="owner" name="owner" type="text" class="form-control"><br>
+                        <div class="input-group input-daterange" data-provide="datepicker">
+                            <input id="min-date" name="event-start-date" type="text" class="form-control">
+                            <div class="input-group-prepend input-group-append">
+                                <div class="input-group-text">to</div>
+                            </div>
+                            <input name="event-end-date" type="text" class="form-control">
+                        </div>
                     </div>
-                </div>    
-             <div class="form-group row">
-                <label for="start-time" class="col-sm-4 control-label">Start Time</label>
-                 <div class="col-sm-8">
-                    <input id="start-time" name="start-time" type="time" class="form-control" step="1" required=""><br>
-                 </div>
-             </div>
-             <div class="form-group row">
-                <label for="end-time" class="col-sm-4 control-label">End Time</label>
-                 <div class="col-sm-8">
-                    <input id="end-time" name="end-time" type="time" class="form-control" step="1" required=""><br>
-                 </div>
-             </div>
-             <div class="form-group row">
-                <label for="fte" class="col-sm-4 control-label">FTE hour by day</label>
-                <div class="col-sm-8">
-                <input id="fte" name="fte" type="number" class="form-control" required="" step="0.01" >
-                </div>     
-                 </div>
-                  
-                <div class="form-group row">
-                <label for="extra-hours" class="col-sm-4 control-label">Extra hour</label>
-                <div class="col-sm-8">
-                <input id="extra-hours" name="extra-hours" type="number" class="form-control" required="" step="0.01" >
-                </div>     
-                </div>  
-                
-                <div class="form-group row">
-                <label for="Absenteeism-ratio" class="col-sm-4 control-label">Absenteeism ratio</label>
-                <div class="col-sm-8">
-                <input id="Absenteeism-ratio" name="Absenteeism-ratio" type="number" class="form-control" required=""step="0.01">
-                </div>     
-                </div>  
-                
-                <div class="form-group row">
-                <label for="Unproductiveness-ratio" class="col-sm-4 control-label">Unproductiveness ratio</label>
-                <div class="col-sm-8">
-                <input id="Unproductiveness-ratio" name="Unproductiveness-ratio" type="number" class="form-control" required="" step="0.01" >
-                </div>     
-                </div>  
-                
-                <div class="form-group row">
-                    <label for="Efficienty-ratio" class="col-sm-4 control-label">Efficienty ratio</label>
-                    <div class="col-sm-8">
-                    <input id="Efficienty-ratio" name="Efficienty-ratio" type="number" class="form-control" required=""step="0.01">
-                    </div>     
-                </div> 
-
-                <div class="form-group row">
-                    <table class="table table-bordered text-nowrap table-sm">
-                     <thead >
-                        <tr>
-                            <th><label for="smooth_family" class="col-sm-4 control-label">Smooth Family</label></th>
-                            <th><label for="cycle-time" class="col-sm-4 control-label">Cycle time</label></th>
-                            <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
+                </div>
+            </div>
     
-                        </tr>
-                     </thead> 
-                        <tbody id="inputContainer">
-                        <!-- {% for d in material_data %}
-                        <tr>
-                         <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{d.Smooth_Family}}" readonly="readonly"> </td> 
-                        <td class="form-row">
-                            <div class="inline-radio-input col-sm-8" > 
-                            <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" class="form-control" required="">
-                        </td>
-                        <td>
-                            <input style="margin:10px ;" type="radio" id="hour" name="cycle-type-{{d.Smooth_Family}}" value="Hours">
-                            <label style="margin:10px ;" for="hour">Hours</label>
-                            <input style="margin:10px ;" type="radio" id="day" name="cycle-type-{{d.Smooth_Family}}" value="Days">
-                            <label style="margin:10px ;" for="day">Days</label><br>
-                            </div> 
-                        </td>
-                    </tr>
-                    {%endfor%} -->
-                </tbody> 
-                </table>     
-            </div> 
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="save-event" name ='save-event'>Save</button>
+            </div>
+        </form>
 
-             <div class="form-group row">
-                 <label for="min-date" class="col-sm-4 control-label">Dates</label>
-                 <div class="col-sm-8">
-                 <div class="input-group input-daterange" data-provide="datepicker">
-                     <input id="min-date" name="event-start-date" type="text" class="form-control">
-                     <div class="input-group-prepend input-group-append">
-                         <div class="input-group-text">to</div>
-                     </div>
-                     <input name="event-end-date" type="text" class="form-control">
-                 </div>
-                 </div>
-             </div>
-     
-         </div>
- 
-         <div class="modal-footer">
-             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-             <button type="submit" class="btn btn-primary" id="save" name ='save'>Save</button>
-         </div>
-      </form>
+        <!--work hours form -->
+        <form action="{% url 'customwork' division product%}" method='POST' id="daysOn">
+            <!-- Security token -->
+            {% csrf_token %}
+            <div class="modal-body">
+                <center><h6 class="col-sm-4 control-label calendar-text" style="color:var(--info);">Work Day</h6></center>
+                <hr>
+                <input type="hidden" name="event-index">
+                <form class="form-horizontal">
+                    <div class="form-group row">
+                        <label for="event-name" class="col-sm-4 control-label">Owner</label>
+                        <div class="col-sm-8">
+                        <input id="owner" name="owner" type="text" class="form-control"><br>
+                        </div>
+                    </div>    
+                <div class="form-group row">
+                    <label for="start-time" class="col-sm-4 control-label">Start Time</label>
+                    <div class="col-sm-8">
+                        <input id="start-time" name="start-time" type="time" class="form-control" step="1" required=""><br>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="end-time" class="col-sm-4 control-label">End Time</label>
+                    <div class="col-sm-8">
+                        <input id="end-time" name="end-time" type="time" class="form-control" step="1" required=""><br>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="fte" class="col-sm-4 control-label">FTE hour by day</label>
+                    <div class="col-sm-8">
+                    <input id="fte" name="fte" type="number" class="form-control" required="" step="0.01" >
+                    </div>     
+                </div>
+                    
+                    <div class="form-group row">
+                        <label for="extra-hours" class="col-sm-4 control-label">Extra hour</label>
+                        <div class="col-sm-8">
+                            <input id="extra-hours" name="extra-hours" type="number" class="form-control" required="" step="0.01" >
+                        </div>     
+                    </div>  
+                    
+                    <div class="form-group row">
+                        <label for="Absenteeism-ratio" class="col-sm-4 control-label">Absenteeism ratio</label>
+                        <div class="col-sm-8">
+                            <input id="Absenteeism-ratio" name="Absenteeism-ratio" type="number" class="form-control" required=""step="0.01">
+                        </div>     
+                    </div>  
+                    
+                    <div class="form-group row">
+                        <label for="Unproductiveness-ratio" class="col-sm-4 control-label">Unproductiveness ratio</label>
+                        <div class="col-sm-8">
+                            <input id="Unproductiveness-ratio" name="Unproductiveness-ratio" type="number" class="form-control" required="" step="0.01" >
+                        </div>     
+                    </div>  
+                    
+                    <div class="form-group row">
+                        <label for="Efficienty-ratio" class="col-sm-4 control-label">Efficienty ratio</label>
+                        <div class="col-sm-8">
+                            <input id="Efficienty-ratio" name="Efficienty-ratio" type="number" class="form-control" required=""step="0.01">
+                        </div>     
+                    </div> 
 
-      </div>  
-  </div>
+                    <div class="form-group row">
+                        <table class="table table-bordered text-nowrap table-sm">
+                            <thead >
+                                <tr>
+                                    <th><label for="smooth_family" class="col-sm-4 control-label">Smooth Family</label></th>
+                                    <th><label for="cycle-time" class="col-sm-4 control-label">Cycle time</label></th>
+                                    <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
+            
+                                </tr>
+                            </thead> 
+                            <tbody id="inputContainer">
+                                <!--the content of tbody defined with js-->
+                            </tbody> 
+                        </table>     
+                    </div> 
+
+                <div class="form-group row">
+                    <label for="min-date" class="col-sm-4 control-label">Dates</label>
+                    <div class="col-sm-8">
+                        <div class="input-group input-daterange" data-provide="datepicker">
+                            <input id="min-date" name="event-start-date" type="text" class="form-control">
+                            <div class="input-group-prepend input-group-append">
+                                <div class="input-group-text">to</div>
+                            </div>
+                            <input name="event-end-date" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="save" name ='save'>Save</button>
+            </div>
+        </form>
+
+        </div>  
+    </div>
 </div>
 
 
-
-  
+ <!--Scripts for custom calendar--> 
 <script>
     let calendar = null;
 
@@ -599,7 +580,7 @@ $(function() {
 });
 
      
- </script>
+</script>
 
 
 

@@ -7,7 +7,7 @@
                         var xValues_week_count = [{% for index, data in week_count.iterrows %}  '{{data.date_year_week}}', {% endfor %}];
                         var data_week_count_of = [ {% for index, data in week_count.iterrows %}{%if data.order_nature == 'OF' %}  {{data.id}} , {%endif%}{% endfor %}];
                         var data_week_count_op = [ {% for index, data in week_count.iterrows %}{%if data.order_nature == 'OP' %}  {{data.id}} , {%endif%}{% endfor %}];
-                        var data_work_days_count_week = [{% for index, data in work_days_count_week.iterrows %} {{data.result_demonstrated_capacity}}, {% endfor %}];
+                        var data_work_days_count_week = [{% for index, data in work_days_count_week.iterrows %} {{data.result_demonstrated_capacity|floatformat:2}}, {% endfor %}];
                         
                         var demand_prod_planning_week_data = {
                             labels: [{% for weeks in week_count_axis_x %} '{{weeks}}', {% endfor %}],
@@ -170,9 +170,10 @@
                                 },
                                 plugins: {
                                         datalabels: {
-                                            // anchor: 'end',
+                                            anchor: 'center',
                                             clamp: true,
-                                            color: 'white',
+                                            color: 'black',
+                                            align:'end',
 
                                             // Hidden value if == 0 
                                             formatter: function(value, index, values) {
