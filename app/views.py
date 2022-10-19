@@ -296,7 +296,6 @@ def duplicate_calendar(request,division,product):
 def custom_calendar(request,division,product):
     #get smooth family
     smooth_family= Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
-    print('**************',smooth_family)
     #  get cycle data objects
     cycle= Cycle.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
     # material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
@@ -922,8 +921,10 @@ def config_cpordo(request,division ,product):
 #********************** Home*****************************
 
 def home_page(request):
+    divisions = Division.undeleted_objects.values('name')
     
-    return render(request,'app/home/index.html')
+    
+    return render(request,'app/home/index.html', {'divisions':divisions})
 
 #*******************copy calendar*************************
 def copy_calendar(request,division,product):

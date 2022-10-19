@@ -1,7 +1,157 @@
 {% extends 'base.html' %}
-
+{% load static %}
+{% load crispy_forms_filters %}
 
 {% block content %} 
+
+<div class="col-12"> 
+    <div class="callout callout-info">
+    <h5> Divisions</h5><br>
+    {%for division in divisions%}
+    <button class="btn  btn-outline-primary" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;" >{{division.name}}</button>
+    {%endfor%}
+    </div>
+</div>
+
+
+
+
+
+
+<!--create Division modal-->
+<div class="modal" id="create">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action = "{% url 'create' %}">
+            <!-- Security token -->
+            {% csrf_token %}
+        <div class="modal-header">						
+        <h4 class="modal-title">Create New Division</h4>
+        </div>
+        <div class="modal-body">
+            <!-- Using the formset with crispy -->
+            {{ form|crispy}}
+       </div>
+        
+          <div class="modal-footer">
+          <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+          <input type="submit" class="btn btn:hover btn-primary" value="Save">
+          </div>
+     </form>
+    </div>
+    </div>
+  </div>
+
+<!--Update Division modal-->
+<div class="modal" id="update" >
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <form method="POST" action ="{%url 'update'%}"> 
+            <!-- Security token by Django -->
+            {% csrf_token %}
+        <div class="modal-header">						
+            <h4 class="modal-title">Edit Division</h4>
+        </div>
+        <div class="modal-body">    
+                 <!-- formset with crispy -->
+                 {{ form|crispy}}
+                 <input type="hidden" id="id" name="id" value="">
+        </div>
+            <div class="modal-footer">
+                <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
+                <input type="submit" class="btn btn:hover btn-primary" value="update">
+            </div>
+        </form>
+    </div>
+    </div>
+  </div>
+
+
+<!--delete Division modal-->
+<div class="modal" id="delete" >
+    <div class="modal-dialog ">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Delete Division</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+<!--restore Division modal-->
+<div class="modal" id="restore" >
+    <div class="modal-dialog ">
+    <div class="modal-content">
+    <div class="modal-header">						
+        <h4 class="modal-title">Restore Division</h4>
+    </div>
+    <div class="modal-body">					
+    </div>
+    <div class="modal-footer">
+        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
+        <a href="" id='link' class="btn btn-danger" value="Delete">Restore</a>  
+    </div>
+    </div>
+    </div>
+</div>
+
+
+<!--******************************************************************************************************************************-->
+
+<!-- Delete Modal  -->
+<script>
+    $('#delete').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var name = $(event.relatedTarget).data('name');
+    $(this).find(".modal-body").text('Are you sure you want to delete these division: '+name +'?');
+    document.getElementById("targetlink").href="/app/division/"+id+"/delete";
+
+    });
+</script>
+
+
+<!-- restore Modal  -->
+<script>
+    $('#restore').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var name = $(event.relatedTarget).data('name');
+    $(this).find(".modal-body").text('Are you sure you want to restore these division: '+name +'?');
+    document.getElementById("link").href="/app/division/"+id+"/restore";
+    });
+</script>
+
+
+<!-- Edit Modal -->
+<script>
+    $('#update').on('show.bs.modal', function (event) {
+    var id = $(event.relatedTarget).data('id');
+    var name = $(event.relatedTarget).data('name');
+    var description = $(event.relatedTarget).data('description');
+    $(this).find(".modal-body #id").val(id);
+    $(this).find(".modal-body #id_name").val(name);
+    $(this).find(".modal-body #id_description").val(description);
+
+    });
+</script>
+
+
+<script type="text/javascript" language="javascript">
+    jQuery(document).ready(function () {
+          $("#division").dataTable(
+          {"lengthChange":false,
+           "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
+           "responsive": false,
+        }
+          );
+          
+    });
+ </script>
 
 
 {% endblock %}

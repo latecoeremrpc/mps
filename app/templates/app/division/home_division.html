@@ -41,8 +41,8 @@
                             <thead>
                                 <tr>
                                     <th>Id</th>
-                                    <th>Name division</th>
-                                    <th>Description division</th>
+                                    <th>Division</th>
+                                    <th>Name</th>
                                     <th>Product</th>
                                     <th>State</th>
                                     <th>Actions</th>  
@@ -54,7 +54,7 @@
                                         <td>{{ d.id}}</td>   
                                         <td>{{ d.name}}</td>
                                         <td>{{ d.description}}</td>
-                                        <td><a href="{% url 'product' d.id %}" style="text-decoration: none;">Product</a></td> 
+                                        <td><center><a class="btn data_btn" href="{% url 'product' d.id %}">Product</a></center></td> 
                                             {% if d.is_deleted%} 
                                             <td style="color: rgb(240, 25, 25);">Deleted</td> 
                                             {%else%} 

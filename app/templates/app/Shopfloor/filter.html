@@ -129,15 +129,14 @@
                         {% for version in versions %}
                             <a class="btn btn-app" style="width:90px;height: 100px;" >
                                 <button type="submit" value="{{version.version}}" name="version"  style="border: none;background-color: transparent;color: white;">   
-
-                                {%if version.shared == True %}
-                                <span class="badge"style="font-size:14px;background-color:#2a9d8f;" >{{version.version}}
-                                {% else %} 
-                                <span class="badge" style="font-size:14px;background-color: #ccc; color: black;">{{version.version}}
-                                {%endif%}    
-                                </span>
+                                        {%if version.shared == True %}
+                                        <span class="badge"style="font-size:14px;background-color:#2a9d8f;" >{{version.version}}
+                                        {% else %} 
+                                        <span class="badge" style="font-size:14px;background-color: #ccc; color: black;">{{version.version}}
+                                        {%endif%}    
+                                        </span>
                                         <i class="fas fa-code-branch" style="font-size:40px;color: black;"></i>
-                                    </button>
+                                </button>
                                         {%if version.shared == True %} Shared {% else %} Unshared{%endif%} 
                             </a>
                         {%empty%}

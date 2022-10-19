@@ -50,6 +50,18 @@
   font-size: 19px;
 }
 
+
+.data_btn{
+color: #fff !important;
+background-color: #61a5c2 !important;
+border-radius: 10em;
+padding: .5rem 1.6rem;
+font-size: .64rem;
+/* cursor: pointer; */
+text-align: center!important;
+font-size:.75rem;
+
+}
   
 
 
