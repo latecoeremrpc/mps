@@ -1697,17 +1697,18 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     
 
     # calcul Demonstrated capacity (week and month)
+    # get current_date 
+    current_date = datetime.now()
     # get previous_month
-    previous_month = date_from - relativedelta(months=1)
-    df_prev_month = df_data[(df_data['date'] > previous_month.date()) & (df_data['date'] <= date_from.date())]
+    previous_month =current_date - relativedelta(months=1)
+    df_prev_month = df_data[(df_data['date'] > previous_month.date()) & (df_data['date'] <= current_date.date())]
 
     #  calcul sum of closed in previous_month
     df_prev_month_closed=df_prev_month[df_prev_month['closed']==True]
     previous_month_closed_count=df_prev_month_closed.shape[0]
-    print('work_days_in_previous_month_count:',previous_month_closed_count)
 
     #calcul number of work_days in previous_month
-    work_days_in_previous_month = df_work_days[(df_work_days['date'] >= previous_month.date()) & (df_work_days['date'] <= date_from.date())]
+    work_days_in_previous_month = df_work_days[(df_work_days['date'] >= previous_month.date()) & (df_work_days['date'] <= current_date.date())]
     work_days_in_previous_month_count = work_days_in_previous_month.shape[0]
     
     
