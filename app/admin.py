@@ -1,3 +1,4 @@
+from unittest import mock
 from django.contrib import admin
 from app import models
 
@@ -14,3 +15,4 @@ admin.site.register(models.Coois)
 admin.site.register(models.Zpp)
 admin.site.register(models.Shopfloor)
 admin.site.register(models.Cycle)
+admin.site.register(models.Staff)

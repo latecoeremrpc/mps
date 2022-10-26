@@ -1,5 +1,6 @@
 from time import timezone
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -247,10 +248,11 @@ class Cycle(BaseModel,SoftDeleteModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
 
 
-    
 
+
+#Staff Model
+class Staff(BaseModel,SoftDeleteModel,User):
+    function=models.CharField(max_length=50)
+    division= models.ForeignKey(Division, on_delete=models.CASCADE)
     
-    
-    
-     
-        
+  

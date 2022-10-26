@@ -217,7 +217,6 @@ def create_calendar(request,division,product):
                 day=""
                 for i in range(delta.days+1):
                     day= startDate + timedelta(days=i)
-                    print(day)
                     # check if day and product_id exists in DB don't save else save
                     if (day.strftime('%Y-%m-%d') in [day.strftime('%Y-%m-%d') for day in days]) and (int(product) in products):
                         exist_day =HolidaysCalendar.undeleted_objects.all().filter(holidaysDate = day,product_id =product) 
