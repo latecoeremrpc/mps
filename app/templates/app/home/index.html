@@ -7,151 +7,103 @@
 <div class="col-12"> 
     <div class="callout callout-info">
     <h5> Divisions</h5><br>
-    {%for division in divisions%}
-    <button class="btn  btn-outline-primary" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;" >{{division.name}}</button>
+    {%for d in divisions%}
+    {%if d.id == division %}
+    <button class="btn  btn-primary" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;" >{{d.name}}<a href =""></a></button>
+    {%else%}
+    <a class="btn  btn-outline-primary" href="{% url 'product' d.id %}" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;text-decoration:none;" >{{d.name}}</a>
+    {%endif%}
     {%endfor%}
     </div>
 </div>
 
 
-
-
-
-
-<!--create Division modal-->
-<div class="modal" id="create">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <form method="POST" action = "{% url 'create' %}">
-            <!-- Security token -->
-            {% csrf_token %}
-        <div class="modal-header">						
-        <h4 class="modal-title">Create New Division</h4>
-        </div>
-        <div class="modal-body">
-            <!-- Using the formset with crispy -->
-            {{ form|crispy}}
-       </div>
         
-          <div class="modal-footer">
-          <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-          <input type="submit" class="btn btn:hover btn-primary" value="Save">
-          </div>
-     </form>
-    </div>
-    </div>
-  </div>
+        <div class="col-12">
+                <div class="card">
+                      <div class="card-header ui-sortable-handle" >
+                            <h5 class="card-title" ><strong> List of Products </strong></h5>
+                      </div>               
+                    <div class="card-body table-responsive p-0" style="height: 500px;">
+                        <div class="card-body">
+                            <table id="product" class="table table-striped table-hover table-bordered  text-nowrap">
+                                <thead >
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Program</th>
+                                        <th>Has Treatment</th>
+                                        <th>Product</th>         
+                                        <th>Planning</th>
+                                        <th>Profit center</th>
+                                        <th>Material</th>
+                                        <th>Calendar</th>
+                                        <th>Calendar Config Treatment</th>
+                                        <th>Calendar Config CpOrdo</th>
+                                        <th>State</th>
 
-<!--Update Division modal-->
-<div class="modal" id="update" >
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <form method="POST" action ="{%url 'update'%}"> 
-            <!-- Security token by Django -->
-            {% csrf_token %}
-        <div class="modal-header">						
-            <h4 class="modal-title">Edit Division</h4>
-        </div>
-        <div class="modal-body">    
-                 <!-- formset with crispy -->
-                 {{ form|crispy}}
-                 <input type="hidden" id="id" name="id" value="">
-        </div>
-            <div class="modal-footer">
-                <input type="button"  class="btn btn-default" data-dismiss="modal"  value="Cancel">
-                <input type="submit" class="btn btn:hover btn-primary" value="update">
+                                        <th >Actions</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    
+                                        {% for d in current_division_products %}
+                                            <tr>
+                                                <td>{{ d.id}}</td> 
+                                                <td>{{ d.program}}</td>
+                                                <td>{{ d.has_treatement}}</td>   
+                                                <td>{{ d.product}}</td>
+                                                <td>{{ d.planning}}</td>
+                                                <td>{{d.Profit_center}}</td>
+                                                <td><center><a class="btn data_btn" href="{% url 'material' division d.id  %}" >Material</a></center></td> 
+                                                <td><center><a class="btn data_btn" href="{% url 'calendar' division d.id %}" >Calendar</a></center></td> 
+
+                                                <!-- <td><a href="{% url 'material' division d.id  %}" style="text-decoration: none;">Material</a></td> -->
+                                                <!-- <td><a href="{% url 'calendar' division d.id %}" style="text-decoration: none; ">Calendar</a></td> -->
+                                                {%if d.has_treatement %}
+                                                <td><center><a class="btn data_btn" href="{% url 'configTrait' division d.id %}" >Calendar Config Treatment</a></center></td> 
+                                                <td><center><a class="btn data_btn" href="{% url 'configCpordo' division d.id %}" >Calendar Config CpOrdo</a></center></td> 
+                                                
+                                                <!-- <td><a href="{% url 'configTrait' division d.id %}"style="text-decoration: none; ">Calendar Config Treatment</a></td> -->
+                                                <!-- <td><a href="{% url 'configCpordo' division d.id %}"style="text-decoration: none; ">Calendar Config CpOrdo</a></td> -->
+
+                                                {%else%}
+                                                    <td>N/A</td>
+                                                    <td>N/A</td>
+                                                {%endif%}
+
+                                                {% if d.is_deleted%} 
+                                                <td style="color: red;">Deleted</td> 
+                                                {%else%} 
+                                                <td >Active</td> 
+                                                {%endif%}
+                                                <td>
+                                                    {% if d.is_deleted%}
+                                                        <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
+                                                    {%else%}
+                                                        <button class="btn" data-toggle="modal" data-target="#update" data-id="{{d.id}}" data-traitement="{{d.has_treatement}}" data-product="{{d.product}}" data-profitcenter="{{d.Profit_center}}" data-program="{{d.program}}" data-planning="{{d.planning}}"  ><i class="fa-solid fa-pen" style="color: rgb(35, 35, 80);"></i></button>
+                                                        <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-product="{{d.product}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
+                                                    {%endif%}
+                                                </td>
+                                            </tr>
+                                            {%empty%}
+                                            <tr><td colspan="12"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td></tr> 
+                                        {% endfor %}
+                                </tbody>               
+                            </table>
+                        </div>
+                    </div>
             </div>
-        </form>
-    </div>
-    </div>
-  </div>
+        </div>
+       
+    
 
 
-<!--delete Division modal-->
-<div class="modal" id="delete" >
-    <div class="modal-dialog ">
-    <div class="modal-content">
-    <div class="modal-header">						
-        <h4 class="modal-title">Delete Division</h4>
-    </div>
-    <div class="modal-body">					
-    </div>
-    <div class="modal-footer">
-        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
-        <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>  
-    </div>
-    </div>
-    </div>
-</div>
-
-<!--restore Division modal-->
-<div class="modal" id="restore" >
-    <div class="modal-dialog ">
-    <div class="modal-content">
-    <div class="modal-header">						
-        <h4 class="modal-title">Restore Division</h4>
-    </div>
-    <div class="modal-body">					
-    </div>
-    <div class="modal-footer">
-        <input type="button" href="" class="btn btn-default" data-dismiss="modal" value="Cancel">
-        <a href="" id='link' class="btn btn-danger" value="Delete">Restore</a>  
-    </div>
-    </div>
-    </div>
-</div>
 
 
-<!--******************************************************************************************************************************-->
-
-<!-- Delete Modal  -->
-<script>
-    $('#delete').on('show.bs.modal', function (event) {
-    var id = $(event.relatedTarget).data('id');
-    var name = $(event.relatedTarget).data('name');
-    $(this).find(".modal-body").text('Are you sure you want to delete these division: '+name +'?');
-    document.getElementById("targetlink").href="/app/division/"+id+"/delete";
-
-    });
-</script>
 
 
-<!-- restore Modal  -->
-<script>
-    $('#restore').on('show.bs.modal', function (event) {
-    var id = $(event.relatedTarget).data('id');
-    var name = $(event.relatedTarget).data('name');
-    $(this).find(".modal-body").text('Are you sure you want to restore these division: '+name +'?');
-    document.getElementById("link").href="/app/division/"+id+"/restore";
-    });
-</script>
-
-
-<!-- Edit Modal -->
-<script>
-    $('#update').on('show.bs.modal', function (event) {
-    var id = $(event.relatedTarget).data('id');
-    var name = $(event.relatedTarget).data('name');
-    var description = $(event.relatedTarget).data('description');
-    $(this).find(".modal-body #id").val(id);
-    $(this).find(".modal-body #id_name").val(name);
-    $(this).find(".modal-body #id_description").val(description);
-
-    });
-</script>
-
-
-<script type="text/javascript" language="javascript">
-    jQuery(document).ready(function () {
-          $("#division").dataTable(
-          {"lengthChange":false,
-           "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
-           "responsive": false,
-        }
-          );
-          
-    });
- </script>
 
 
 {% endblock %}

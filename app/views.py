@@ -5,7 +5,7 @@ from operator import index
 from queue import Empty
 from django.http import HttpResponse
 from django.shortcuts import render ,redirect ,get_object_or_404
-from app.models import Division,Material,HolidaysCalendar,Product,WorkData,CalendarConfigurationTreatement,CalendarConfigurationCpordo,Coois,Zpp,Shopfloor,Cycle
+from app.models import Division,Material,HolidaysCalendar,Product,WorkData,CalendarConfigurationTreatement,CalendarConfigurationCpordo,Coois,Zpp,Shopfloor,Cycle,Staff
 from app.forms import DivisionForm,MaterialForm,ProductForm,CalendarConfigurationCpordoForm,CalendarConfigurationTreatementForm 
 from datetime import  date, datetime, timedelta, time, timezone
 from io import StringIO
@@ -920,10 +920,12 @@ def config_cpordo(request,division ,product):
 #********************** Home*****************************
 
 def home_page(request):
-    divisions = Division.undeleted_objects.values('name')
-    
-    
-    return render(request,'app/home/index.html', {'divisions':divisions})
+    divisions = Division.undeleted_objects.all()
+    current_user = request.user
+    staff_connected = Staff.objects.values('division').filter(username = current_user.username).first()
+    current_division_products= Product.undeleted_objects.all().filter(division__id= staff_connected['division'])
+    division= staff_connected['division']
+    return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'current_division_products':current_division_products})
 
 #*******************copy calendar*************************
 def copy_calendar(request,division,product):
@@ -1820,4 +1822,3 @@ def production_plan_kpi(df_data,date_from,date_to):
     production_plan_kpi.date_production_week =date_production_week
     production_plan_kpi.date_production_month =date_production_month
 
- 
