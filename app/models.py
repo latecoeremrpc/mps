@@ -195,6 +195,8 @@ class Zpp(BaseModel,SoftDeleteModel):
     date_reordo=models.DateField(null=True)
     supplier= models.CharField(max_length=50,null=True)    
     customer= models.CharField(max_length=50,null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
+
     
     # renames the instances of the Zpp
     # with their element

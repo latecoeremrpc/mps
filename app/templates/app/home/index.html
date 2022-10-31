@@ -7,13 +7,17 @@
 <div class="col-12"> 
     <div class="callout callout-info">
     <h5> Divisions</h5><br>
-    {%for d in divisions%}
-    {%if d.id == division %}
-    <button class="btn  btn-primary" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;" >{{d.name}}<a href =""></a></button>
-    {%else%}
-    <a class="btn  btn-outline-primary" href="{% url 'product' d.id %}" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;text-decoration:none;" >{{d.name}}</a>
-    {%endif%}
-    {%endfor%}
+    <form method="POST" action ="{% url 'home' %}">  
+        {% csrf_token %}
+        {%for d in divisions %}
+        {%if d.id == division %}
+        <!-- <button class="btn  btn-primary" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;" >{{d.name}}<a href =""></a></button> -->
+        <input  type="button" class="btn  btn-primary" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;text-decoration:none;" value="{{d.name}}" name="division">
+        {%else%}
+        <input  type="submit" class="btn  btn-outline-primary" style="border-radius: 10px 10px 10px 10px;margin-left: 7px;text-decoration:none;" value="{{d.name}}" name="division">
+        {%endif%}
+        {%endfor%}
+   </form>
     </div>
 </div>
 
@@ -39,6 +43,7 @@
                                         <th>Calendar</th>
                                         <th>Calendar Config Treatment</th>
                                         <th>Calendar Config CpOrdo</th>
+                                        <th>Import Files</th>
                                         <th>State</th>
 
                                         <th >Actions</th>
@@ -48,7 +53,7 @@
                                 <tbody>
                                     
                                     
-                                        {% for d in current_division_products %}
+                                        {% for d in products %}
                                             <tr>
                                                 <td>{{ d.id}}</td> 
                                                 <td>{{ d.program}}</td>
@@ -72,7 +77,7 @@
                                                     <td>N/A</td>
                                                     <td>N/A</td>
                                                 {%endif%}
-
+                                                <td><center><a class="btn data_btn" href="{% url 'uploadfiles' %}" >Files</a></center></td> 
                                                 {% if d.is_deleted%} 
                                                 <td style="color: red;">Deleted</td> 
                                                 {%else%} 
@@ -99,6 +104,19 @@
        
     
 
+<!--DataTables-->
+<script type="text/javascript" language="javascript">
+    jQuery(document).ready(function () {
+          $("#product").dataTable(
+          {"lengthChange":false,
+           "lengthMenu": [[7, 20, 30, -1], [8, 20, 30, "All"]],
+           "responsive": false,
+           scrollX :'500px',
+        }
+          );
+          
+    });
+</script>
 
 
 

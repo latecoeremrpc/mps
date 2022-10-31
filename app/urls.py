@@ -5,7 +5,8 @@ urlpatterns = [
     
     #url for Home 
     path('home/',views.home_page,name='home'),
-    
+
+
     #urls for CRUD Division
     path('division/',views.read_division,name='division'),
     path('create/',views.create_division,name='create'),

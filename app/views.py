@@ -921,11 +921,20 @@ def config_cpordo(request,division ,product):
 
 def home_page(request):
     divisions = Division.undeleted_objects.all()
+
     current_user = request.user
     staff_connected = Staff.objects.values('division').filter(username = current_user.username).first()
-    current_division_products= Product.undeleted_objects.all().filter(division__id= staff_connected['division'])
+    products= Product.undeleted_objects.all().filter(division__id= staff_connected['division'])
     division= staff_connected['division']
-    return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'current_division_products':current_division_products})
+    
+    if request.method == "POST":
+        divisionName = request.POST.get('division')
+        divisionId = Division.undeleted_objects.values('id').filter(name=divisionName).first()
+        products= Product.undeleted_objects.all().filter(division__id= divisionId['id'])
+        division=divisionId['id'] 
+    return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'products':products})
+
+
 
 #*******************copy calendar*************************
 def copy_calendar(request,division,product):
@@ -974,8 +983,8 @@ def save_coois(request):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     try:
         #Delete coois data 
-        coois_data = Coois.undeleted_objects.all().filter(created_by='Marwa')
-        coois_data.delete()
+        # coois_data = Coois.undeleted_objects.all().filter(created_by='Marwa')
+        # coois_data.delete()
         #Save file to DB
         if request.method == 'POST' and request.FILES['coois']:
             file=request.FILES['coois']
@@ -990,8 +999,8 @@ def save_coois(request):
 def save_zpp(request):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #Delete zpp data 
-    zpp_data = Zpp.undeleted_objects.all().filter(created_by='Marwa')
-    zpp_data.delete()
+    # zpp_data = Zpp.undeleted_objects.all().filter(created_by='Marwa')
+    # zpp_data.delete()
     
     #Save file to DB
     try:
