@@ -917,12 +917,16 @@ def config_cpordo(request,division,product):
 
 def home_page(request):
     divisions = Division.undeleted_objects.all()
-
+    division=products=None
     current_user = request.user
-    staff_connected = Staff.objects.values('division').filter(username = current_user.username).first()
-    products= Product.undeleted_objects.all().filter(division__id= staff_connected['division'])
-    division= staff_connected['division']
-    
+    try:
+        staff_connected = Staff.objects.values('division').filter(username = current_user.username).first()
+        products= Product.undeleted_objects.all().filter(division__id= staff_connected['division'])
+        division= staff_connected['division']
+
+    except:   
+        messages.error(request,"User not connected!") 
+        
     if request.method == "POST":
         divisionName = request.POST.get('division')
         divisionId = Division.undeleted_objects.values('id').filter(name=divisionName).first()
@@ -1678,7 +1682,7 @@ def filter_planning(request):
 
 
 
-def save_new_cycle(request):
+def update_cycle(request):
     if request.method == "POST":
         division=request.POST.get('division')
         profit_center=request.POST.get('profit_center')

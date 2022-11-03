@@ -80,7 +80,7 @@ urlpatterns = [
 
     # urls for planning 
     path('shopfloor/planning/',views.filter_planning,name='planning'),
-    path('shopfloor/planning/updateCycle',views.save_new_cycle,name='newcycle'), 
+    path('shopfloor/planning/updateCycle',views.update_cycle,name='newcycle'), 
 
      
     
