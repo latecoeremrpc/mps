@@ -44,6 +44,7 @@
                                         <th>Calendar Config Treatment</th>
                                         <th>Calendar Config CpOrdo</th>
                                         <th>Import Files</th>
+                                        <th>Needs</th>
                                         <th>State</th>
 
                                         <th >Actions</th>
@@ -77,7 +78,9 @@
                                                     <td>N/A</td>
                                                     <td>N/A</td>
                                                 {%endif%}
-                                                <td><center><a class="btn data_btn" href="{% url 'uploadfiles' %}" >Files</a></center></td> 
+                                                <td><center><a class="btn data_btn" href="{% url 'uploadfiles' division d.id %}" >Files</a></center></td> 
+                                                <td><center><a class="btn data_btn" href="{% url 'shopfloor' division d.id %}" >Needs</a></center></td> 
+                                                
                                                 {% if d.is_deleted%} 
                                                 <td style="color: red;">Deleted</td> 
                                                 {%else%} 

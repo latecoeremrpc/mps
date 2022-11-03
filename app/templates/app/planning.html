@@ -120,7 +120,70 @@
                       </div>          
                 </div>
             </div>
+            <br>
         </form>
+
+        <form  method="POST" action="{% url 'newcycle' %}">
+            <!-- Security token by Django -->
+            {% csrf_token %}
+
+            <div class="col-10 offset-1">
+                <div class="card card-row ">
+                    <div class="card-header ">
+                        <h3 class="card-title">
+                            Adjust Cycle Time
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        
+                        <table class="table table-bordered text-nowrap table-sm">
+                            <thead >
+                                <tr>
+                                    <th><label for="week_cycle" class="col-sm-4 control-label">Week</label></th>
+                                    <th><label for="smooth_family" class="col-sm-4 control-label">Smooth Family</label></th>
+                                    <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
+                                    <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
+        
+                                </tr>
+                            </thead> 
+                            <tbody>
+                                    
+                                {% for index,cycle in cycle_count.iterrows %}
+                                <tr>
+                                    <input name="division" id="division" type="hidden" class=" form-control" value="{{division}}" required> 
+                                    <input name="profit_center" id="profit_center" type="hidden" class=" form-control" value="{{profit_center}}" required> 
+                                    <input name="date_from" id="date_from" type="hidden" class=" form-control" value="{{from_date}}" required> 
+                                    <input name="date_to" id="date_to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+                                    <td><input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week }}"  readonly="readonly"> </td> 
+                                    <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{cycle.smooth_family}}" readonly="readonly"> </td> 
+                                    <td class="form-row">
+                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required="" step="0.01">
+                                    </td>
+                                    <td>
+                                        <div class="inline-radio-input col-sm-8">
+                                            <input style="margin:10px ;" type="radio" id="hour" name="cycle-type-{{cycle.work_year_week}}" value="Hours">
+                                            <label style="margin:10px ;" for="hour">Hours</label>
+                                            <input style="margin:10px ;" type="radio" id="day" name="cycle-type-{{cycle.work_year_week}}" value="Days">
+                                            <label style="margin:10px ;" for="day">Days</label><br>
+                                        </div> 
+                                    </td>
+                                </tr>
+                                {%endfor%} 
+                            </tbody>
+                            
+                        <!-- <button type="submit" class="btn btn-primary" id="save-work" name ='save-work'>Save</button> -->
+                            
+                        </table>   
+                    </div>  
+                    <div class="card-footer">
+                        <button type="submit" style="float: right;" class="btn btn-primary" >Save</button>
+                    </div>   
+                </div>
+            </div>    
+        </form>
+           
+
+        
         <!-- Switch Month Week button  -->
         <button onclick="myFunction()" id="switch_month_week"  class= "switch_week_month">
                 <i  class="fa-solid fa-repeat"></i>
@@ -239,8 +302,7 @@
                         <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
                         <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
                             <i class="fas fa-minus"></i></button></li>
-                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
-                        
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li> 
                     </ul>  
                 </div> 
                 </div>

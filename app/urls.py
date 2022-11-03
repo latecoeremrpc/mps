@@ -67,19 +67,21 @@ urlpatterns = [
     path('division/<division>/product/<id>/restoreconfigCpordo',views.restore_conf_cpordo,name='restoreconfigCpordo'),
     
     #urls for upload files
-    path('files/upload',views.upload_files,name='uploadfiles'), 
-    path('files/savecoois',views.save_coois,name='savecoois'),
-    path('files/savezpp',views.save_zpp,name='savezpp'), 
+    path('division/<division>/product/<product>/files/upload',views.upload_files,name='uploadfiles'), 
+    path('division/<division>/product/<product>/files/savecoois',views.save_coois,name='savecoois'),
+    path('division/<division>/product/<product>/files/savezpp',views.save_zpp,name='savezpp'), 
     
     #urls for shopfloor
-    path('shopfloor/',views.shopfloor,name='shopfloor'),
+    path('division/<division>/product/<product>/shopfloor/',views.shopfloor,name='shopfloor'),
     path('shopfloor/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
     path('shopfloor/result/',views.result,name='result'),
     path('shopfloor/filter/',views.filter,name='filter'),
     path('shopfloor/shared/',views.result_sharing,name='sharing'),
 
     # urls for planning 
-    path('shopfloor/planning/',views.filter_planning,name='planning'), 
+    path('shopfloor/planning/',views.filter_planning,name='planning'),
+    path('shopfloor/planning/updateCycle',views.save_new_cycle,name='newcycle'), 
+
      
     
      

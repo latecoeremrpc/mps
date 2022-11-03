@@ -481,7 +481,7 @@ def work_data(request,division,product):
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
         cycle_id = request.POST.getlist('cycle_id')
-        # convert starttime and endtime to datetime
+        # convert starttime and endtime(str) to datetime
         start_time = datetime.strptime(startTime, '%H:%M:%S')
         end_time = datetime.strptime(endTime, '%H:%M:%S')
         if start_time == end_time :
@@ -490,9 +490,7 @@ def work_data(request,division,product):
             work_hours= ((end_time - start_time).total_seconds() / 3600)
         else:
             work_hours = ((end_time+ timedelta(days =1)) - start_time ).total_seconds() / 3600
-            
-        
-
+       
         # If id exist Update Object if not create new one
         if id and cycle_id:
             # get object workdata
@@ -523,8 +521,6 @@ def work_data(request,division,product):
                     if cycle_type_input == 'Days':
                         # update cycle_time
                         # cycle_info.cycle_time=float(value) * 16
-                        print(end_time)
-                        print(type(end_time))
                         cycle_info.cycle_time= float(value) * work_hours
                     if cycle_type_input =='Hours':
                         cycle_info.cycle_time= float(value)
@@ -900,7 +896,7 @@ def delete_conf_cpordo(request,division ,id):
 
 
 # restore object (CalendarConfigurationCpordo) by id
-def restore_conf_cpordo(request,division ,id):
+def restore_conf_cpordo(request,division,id):
     # fetch the object related to passed id
     obj = get_object_or_404(CalendarConfigurationCpordo, id = id)
     # restore object
@@ -910,7 +906,7 @@ def restore_conf_cpordo(request,division ,id):
     
 
 # find all CalendarConfigurationCpordo for product 
-def config_cpordo(request,division ,product):
+def config_cpordo(request,division,product):
     #get CalendarConfigurationCpordoForm
     form = CalendarConfigurationCpordoForm()
     # undeleted_objects object of soft delete manager
@@ -933,8 +929,6 @@ def home_page(request):
         products= Product.undeleted_objects.all().filter(division__id= divisionId['id'])
         division=divisionId['id'] 
     return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'products':products})
-
-
 
 #*******************copy calendar*************************
 def copy_calendar(request,division,product):
@@ -974,12 +968,14 @@ def copy_calendar(request,division,product):
 
 #*********************Save uploads************************
 #upload files (for upload zpp and coois)
-def upload_files(request):  
-
-    return render(request,'app/files/file.html')  
+def upload_files(request,division,product):  
+    zpp_files= Zpp.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
+    coois_files= Coois.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
+    
+    return render(request,'app/files/file.html',{'division':division,'product':product, 'zpp_files':zpp_files,'coois_files':coois_files})  
 
 #save coois   
-def save_coois(request):
+def save_coois(request,division,product):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     try:
         #Delete coois data 
@@ -988,7 +984,7 @@ def save_coois(request):
         #Save file to DB
         if request.method == 'POST' and request.FILES['coois']:
             file=request.FILES['coois']
-            import_coois(file,conn)
+            import_coois(file,conn,product)
             messages.success(request,"COOIS file uploaded successfully!") 
     except Exception:
         messages.error(request,"unable to upload files,not exist or unreadable") 
@@ -996,7 +992,7 @@ def save_coois(request):
     return redirect("./upload")    
         
 #save zpp   
-def save_zpp(request):
+def save_zpp(request,division,product):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #Delete zpp data 
     # zpp_data = Zpp.undeleted_objects.all().filter(created_by='Marwa')
@@ -1006,7 +1002,7 @@ def save_zpp(request):
     try:
         if request.method == 'POST' and request.FILES['zpp']:
             file=request.FILES['zpp']
-            import_zpp(file,conn)
+            import_zpp(file,conn,product)
             messages.success(request,"ZPP file uploaded successfully!") 
          
     except Exception:
@@ -1017,7 +1013,7 @@ def save_zpp(request):
     
 #***********************Upload COOIS**********************
 
-def import_coois(file,conn):
+def import_coois(file,conn,product):
     #read file with pandas
     dc=pd.read_excel(file)
     #insert informations into file
@@ -1030,10 +1026,12 @@ def import_coois(file,conn):
     dc.insert(6,'deleted_at',datetime.now())
     dc.insert(7,'restored_at',datetime.now())
     dc.insert(8,'restored_by','Marwa')
+    dc.insert(24,'product_id',product)
+
     
     # Using the StringIO method to set
     # as file object
-    print(dc.head(10))
+    # print(dc.head(10))
     coois = StringIO()
     #convert file to csv
     coois.write(dc.to_csv(index=None , header=None))
@@ -1069,6 +1067,7 @@ def import_coois(file,conn):
                 'customer_order',
                 'date_end_real',
                 'entered_by',
+                'product_id',
                 
             ],
 
@@ -1080,7 +1079,7 @@ def import_coois(file,conn):
 
 #*********************Upload ZPP_MD_STOCK*****************
 
-def import_zpp(file,conn):
+def import_zpp(file,conn,product):
     #read file with pandas
     dc=pd.read_excel(file,names=['material','plan_date','element','data_element_planif','message','needs','qte_available','date_reordo','supplier','customer'])
     #insert informations into file
@@ -1093,6 +1092,9 @@ def import_zpp(file,conn):
     dc.insert(6,'deleted_at',datetime.now())
     dc.insert(7,'restored_at',datetime.now())
     dc.insert(8,'restored_by','Marwa')
+    dc.insert(19,'product_id',product)
+    
+    
     # delete the slash and the part after the slash
     dc['data_element_planif']= dc['data_element_planif'].str.split("/").str[0]
     # delete the zeros on the left
@@ -1132,6 +1134,8 @@ def import_zpp(file,conn):
                 'date_reordo',
                 'supplier',
                 'customer', 
+                'product_id',
+                
                     
             ],
 
@@ -1142,34 +1146,40 @@ def import_zpp(file,conn):
         )
     conn.commit()
 
+
 #******************Shopfloor and smoothing****************
 
 # @allowed_users(allowed_roles=["Planificateur"])
 # merge between coois and zpp and material
-def shopfloor(request):
-    
+def shopfloor(request,division,product):
     # Get Data from DB
     # to use in shopfloor
-    zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo')
+    zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
-    material_data=Material.undeleted_objects.values('material','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
+    material_data=Material.undeleted_objects.values('material','product__Profit_center','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
 
     #Convert data to DataFrame
     df_zpp=pd.DataFrame(list(zpp_data))
     df_coois=pd.DataFrame(list(coois_data))
     df_material=pd.DataFrame(list(material_data))
+    
     # rename df_material column 
-    df_material=df_material.rename(columns={'product__program':'program','product__division__name':'division'})
+    df_material=df_material.rename(columns={'product__program':'program','product__division__name':'division','product__Profit_center':'profit_center'})
+     # rename df_zpp column 
+    df_zpp=df_zpp.rename(columns={'product__division__name':'division','product__Profit_center':'profit_center'})
+    
 
     #add column key for zpp (concatinate  material and data_element_planif and created_by  )
-    df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str)
+    df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['division'].astype(str)+df_zpp['profit_center'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str)
     #add column key for coois (concatinate material, order, created_by )    
-    df_coois['key']=df_coois['material'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
+    df_coois['key']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
+
 
     #add column key for material (concatinate material, created_by )  
-    df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)+df_material['created_by'].astype(str)
+    df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)++df_material['profit_center'].astype(str)+df_material['created_by'].astype(str)
     #add column key for coois (concatinate material,division,profit_centre, created_by )    
-    df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['created_by'].astype(str)
+    df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['created_by'].astype(str)
+
 
     #Convert df_zpp to dict
     df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
@@ -1199,8 +1209,14 @@ def shopfloor(request):
     df_coois['Ranking']=np.where((df_coois['date_reordo'].isna()),(pd.to_datetime(df_coois['date_end_plan'])),(pd.to_datetime(df_coois['date_reordo'])))
     # 2: for closed  : equal true where order_stat containes TCLO ou LIVR
     df_coois['closed']=np.where(df_coois['order_stat'].str.contains('TCLO|LIVR'),True,False)
-    records=df_coois.sort_values(['Smooth_Family','Ranking'])
-    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records} ) 
+
+    division_name=Division.undeleted_objects.values('name').filter(id = division).first()
+    profit_center = Product.undeleted_objects.values('Profit_center').filter(id = product).first()
+    # filter df_coois by division and product
+    df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == profit_center['Profit_center']) & (df_coois['division'] == int(division_name['name']) ) ]
+    records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
+    
+    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records,'division':division,'product':product} ) 
 
 #create shopfloor
 # get inputs value, calculate smoothing end date and save 
@@ -1562,6 +1578,7 @@ def result_sharing(request):
     return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
 
 
+
 #****************************Planning*****************************  
 # filter panning result
 def filter_planning(request):
@@ -1605,9 +1622,9 @@ def filter_planning(request):
         #Get data
         data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning,Smooth_Family__in=smooth_family_selected,material__in=material_selected)
         division_id=Division.undeleted_objects.all().filter(name=division).values('pk').first()
-        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected,owner='officiel')
-        work_days=WorkData.undeleted_objects.values('date').filter(product__division=division_id['pk'],product__Profit_center =profit_center,owner='officiel').distinct()
-        zpp =Zpp.objects.all().filter()
+        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected,owner='officiel').distinct()
+        work_days=WorkData.undeleted_objects.values('date').filter(product__division=division_id['pk'],product__Profit_center =profit_center,owner='officiel')
+        # zpp =Zpp.objects.all().filter()
         if not data:
             messages.error(request,"No data with selected filter!") 
             return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
@@ -1659,6 +1676,32 @@ def filter_planning(request):
     'work_days_count_month':demand_prod_planning.work_days_count_month,
     })
 
+
+
+def save_new_cycle(request):
+    if request.method == "POST":
+        division=request.POST.get('division')
+        profit_center=request.POST.get('profit_center')
+        date_from=request.POST.get('date_from')
+        date_to=request.POST.get('date_to')
+        smooth_family= request.POST.getlist('smooth_family')
+        cycle_time= request.POST.getlist('cycle_time')
+        week_cycle= request.POST.getlist('week_cycle')
+        # convert from_date and to_date(str) to datetime
+        from_date = datetime.strptime(date_from,'%Y-%m-%d')
+        to_date = datetime.strptime(date_to,'%Y-%m-%d')
+        # get days between from_date and 
+        delta = to_date - from_date 
+        days = [from_date + timedelta(days=i) for i in range(delta.days + 1)]
+        cycle_to_update= Cycle.objects.all().filter(profit_center=profit_center,work_day__in=days,smooth_family__in=smooth_family,cycle_time__in=cycle_time)                         
+        print('*************')
+        print(cycle_to_update)
+        for i in week_cycle:
+            cycle_type_input = request.POST.get('cycle-type-'+i)
+            
+   
+    return redirect("planning")
+   
 
 # calculate nomber of OF and OP ( wek and month)
 def demand_prod_planning(df_data,df_work_days,date_from,date_to):
@@ -1769,7 +1812,10 @@ def cycle_time_kpi(df_data,date_from,date_to):
     cycle_count= df_cycle_time_interval.groupby(['work_year_week','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
     cycle_count['year']=cycle_count['work_year_week'].str.split('-W').str[0].astype(int)
     cycle_count['week']=cycle_count['work_year_week'].str.split('-W').str[1].astype(int)
-    cycle_count=cycle_count.sort_values(by=['year','week']).reset_index() 
+    cycle_count=cycle_count.sort_values(by=['year','week']).reset_index()
+    # cycle_count=cycle_count.rename(columns={'0':'cycle_time'})
+    # cycle_count.to_csv('test2.csv') 
+
     week_cycle_count_axis_x=cycle_count['work_year_week'].unique()
     smooth_family= cycle_count['smooth_family'].unique()
     

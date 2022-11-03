@@ -57,7 +57,7 @@ class SoftDeleteModel(models.Model):
 #**************************************************************
 
 # Division Model
-class Division(BaseModel ,SoftDeleteModel) :
+class Division(BaseModel,SoftDeleteModel) :
 
      name = models.CharField(max_length=20 , unique= True)
      description = models.CharField(max_length=200,unique=True)
@@ -176,7 +176,9 @@ class Coois(BaseModel,SoftDeleteModel):
     order_stat=models.CharField(max_length=50,null=True)
     customer_order=models.CharField(max_length=50,null=True)
     date_end_real=models.DateField(null=True)  
-    entered_by=models.CharField(max_length=50,null=True)   
+    entered_by=models.CharField(max_length=50,null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
+
     
     # renames the instances of the Coois
     # with their designation
@@ -248,8 +250,6 @@ class Cycle(BaseModel,SoftDeleteModel):
     workdata=models.ForeignKey(WorkData,on_delete=models.CASCADE,null=True)
     owner = models.CharField(default='officiel',max_length=30)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
-
-
 
 
 #Staff Model
