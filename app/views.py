@@ -923,15 +923,15 @@ def home_page(request):
         staff_connected = Staff.objects.values('division').filter(username = current_user.username).first()
         products= Product.undeleted_objects.all().filter(division__id= staff_connected['division'])
         division= staff_connected['division']
-
-    except:   
-        messages.error(request,"User not connected!") 
         
-    if request.method == "POST":
-        divisionName = request.POST.get('division')
-        divisionId = Division.undeleted_objects.values('id').filter(name=divisionName).first()
-        products= Product.undeleted_objects.all().filter(division__id= divisionId['id'])
-        division=divisionId['id'] 
+        if request.method == "POST":
+            divisionName = request.POST.get('division')
+            divisionId = Division.undeleted_objects.values('id').filter(name=divisionName).first()
+            products= Product.undeleted_objects.all().filter(division__id= divisionId['id'])
+            division=divisionId['id']
+    except:   
+        messages.error(request,"User not connected!")     
+
     return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'products':products})
 
 #*******************copy calendar*************************
