@@ -42,7 +42,6 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
                     </div>
                 </div>
                 <div class="col-2">
@@ -52,16 +51,15 @@
                             Planning
                             </h3>
                         </div>
-                            <div class="card-body">
-                                    <select name="planning" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
-                                        {% for item in planning_list %}
-                                            <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %} > {{item.planning}}</option>
-                                        {% endfor %}
-                                    </select> 
-                            </div>
+                        <div class="card-body">
+                            <select name="planning" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                {% for item in planning_list %}
+                                    <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %} > {{item.planning}}</option>
+                                {% endfor %}
+                            </select> 
+                        </div>
                     </div>
                 </div>
-
                 <div class="col-2">
                     <div class="card card-row">
                         <div class="card-header" style="background-color:#006d77; color:white;">
@@ -80,8 +78,6 @@
                         </div>
                     </div>
                 </div>
-     
-
                 <div class="col-2">
                     <div class="card card-row">
                         <div class="card-header" style="background-color:#0077b6; color:white;">
@@ -122,11 +118,9 @@
             </div>
             <br>
         </form>
-
         <form  method="POST" action="{% url 'newcycle' %}">
             <!-- Security token by Django -->
             {% csrf_token %}
-
             <div class="col-10 offset-1">
                 <div class="card card-row ">
                     <div class="card-header ">
@@ -143,7 +137,6 @@
                                     <th><label for="smooth_family" class="col-sm-4 control-label">Smooth Family</label></th>
                                     <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
                                     <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
-        
                                 </tr>
                             </thead> 
                             <tbody>
@@ -151,6 +144,7 @@
                                 {% for index,cycle in cycle_count.iterrows %}
                                 <tr>
                                     <input name="division" id="division" type="hidden" class=" form-control" value="{{division}}" required> 
+                                    <input name="planning" id="planning" type="hidden" class=" form-control" value="{{planning}}" required> 
                                     <input name="profit_center" id="profit_center" type="hidden" class=" form-control" value="{{profit_center}}" required> 
                                     <input name="date_from" id="date_from" type="hidden" class=" form-control" value="{{from_date}}" required> 
                                     <input name="date_to" id="date_to" type="hidden" class=" form-control" value="{{to_date}}" required> 
@@ -170,9 +164,7 @@
                                 </tr>
                                 {%endfor%} 
                             </tbody>
-                            
                         <!-- <button type="submit" class="btn btn-primary" id="save-work" name ='save-work'>Save</button> -->
-                            
                         </table>   
                     </div>  
                     <div class="card-footer">
@@ -181,15 +173,12 @@
                 </div>
             </div>    
         </form>
-           
-
-        
+      
         <!-- Switch Month Week button  -->
         <button onclick="myFunction()" id="switch_month_week"  class= "switch_week_month">
-                <i  class="fa-solid fa-repeat"></i>
-                <b id="text_switch">M</b>
+            <i  class="fa-solid fa-repeat"></i>
+            <b id="text_switch">M</b>
         </button>
-
     </div>
 </div>
 <br>
@@ -228,7 +217,6 @@
                 </div>
                 <div id="demand_prod_planning_month" style="display:none ;" >
                     {% include 'app/charts/demand_prod_planning_month.html' %}
-
                 </div>
                 <div class="card-footer clearfix">
                 </div>
@@ -351,19 +339,15 @@
         month_cycle.style.display = "none";
         month_production.style.display = "none";
         text_switch.textContent='M';
-
-
       }
-
     }
-    </script>
+</script>
 
     <!--JS for select multiple-->
 <script>
     $(document).ready(function() {
         $('#material').select2();
         $('#smooth_family').select2();
-
     });
 </script> 
 
@@ -371,7 +355,6 @@
 
 
    
-
 
 
 {% endblock content%}

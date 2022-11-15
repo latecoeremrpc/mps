@@ -8,6 +8,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MPS</title>
+  <!-- icon -->
+  <link href="{% static 'img/Lettre_M_.png' %}" rel="icon">
   <!------------------ styles------------------>
   <!--Data Table-->
   <link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
@@ -101,7 +103,7 @@
     <!-- Main Sidebar Container -->
     <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(198, 65%, 34%, 1) 0%, hsla(178, 44%, 32%, 1) 100%);"> -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(198, 65%, 34%, 1) 0%, hsla(178, 44%, 32%, 1) 100%);">
-    <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4" style = "background:linear-gradient(to bottom, rgba(6, 65, 95, 0.918) 65%, rgba(4, 55, 81, 0.298) 100%, rgba(17,82,114,0.800) 0%);"> -->
+    <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4" style = "background: rgb(2,0,36);background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 80%, rgba(0,212,255,1) 100%);"> -->
 
       {% comment %} <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%);"> {% endcomment %}
       
@@ -135,12 +137,12 @@
                     <p>Home</p>
                   </a>
                 </li>
-                <li class="nav-item">
-                  <a href="{% url 'filter' %}" class="nav-link">
+                <!-- <li class="nav-item">
+                  <a href="" class="nav-link">
                     <i class="fa-solid fa-chart-simple nav-icon"></i>
                     <p>Smoothing</p>
                   </a>
-                </li>   
+                </li>    -->
                 <li class="nav-item">
                   <a href="{% url 'planning' %}" class="nav-link">
                     <i class="fa-solid fa-chart-line  nav-icon"></i>

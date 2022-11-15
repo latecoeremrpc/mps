@@ -1,16 +1,19 @@
-from django.shortcuts import render ,redirect ,get_object_or_404
-from app.models import Division,Material,HolidaysCalendar,Product,WorkData,CalendarConfigurationTreatement,CalendarConfigurationCpordo,Coois,Zpp,Shopfloor,Cycle,Staff
-from app.forms import DivisionForm,MaterialForm,ProductForm,CalendarConfigurationCpordoForm,CalendarConfigurationTreatementForm 
-from datetime import  datetime, timedelta
+from datetime import datetime, timedelta
 from io import StringIO
-import psycopg2, pandas as pd
 import numpy as np
-from django.contrib import messages
+import pandas as pd
+import psycopg2
 from app.decorators import allowed_users
+from app.forms import (CalendarConfigurationCpordoForm,
+                       CalendarConfigurationTreatementForm, DivisionForm,
+                       MaterialForm, ProductForm)
+from app.models import (CalendarConfigurationCpordo,
+                        CalendarConfigurationTreatement, Coois, Cycle,
+                        Division, HolidaysCalendar, Material, Product,
+                        Shopfloor, Staff, WorkData, Zpp)
 from dateutil.relativedelta import relativedelta
-
-
-
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
 
 # Create your views here.
 #Comment Houssem
@@ -468,24 +471,24 @@ def work_data(request,division,product):
     if request.method=='POST' and 'save-work' in request.POST:
         # get inputs from form
         #    workdata informations
-        id = request.POST.get('event-index')
-        startTime = request.POST.get('start-time')
-        endTime = request.POST.get('end-time')
-        fte = request.POST.get('fte')
-        extraHours = request.POST.get('extra-hours')
-        AbsenteeismRatio = request.POST.get('Absenteeism-ratio')
-        UnproductivenessRatio = request.POST.get('Unproductiveness-ratio')
-        EfficientyRatio = request.POST.get('Efficienty-ratio')
-        startDate = request.POST.get('event-start-date')
-        endDate = request.POST.get('event-end-date')
+        id= request.POST.get('event-index')
+        startTime= request.POST.get('start-time')
+        endTime= request.POST.get('end-time')
+        fte= request.POST.get('fte')
+        extraHours= request.POST.get('extra-hours')
+        AbsenteeismRatio= request.POST.get('Absenteeism-ratio')
+        UnproductivenessRatio= request.POST.get('Unproductiveness-ratio')
+        EfficientyRatio= request.POST.get('Efficienty-ratio')
+        startDate= request.POST.get('event-start-date')
+        endDate= request.POST.get('event-end-date')
         #cycle informations
         profit_center= Product.objects.all().filter(id = product).values('Profit_center').first()
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time = request.POST.getlist('cycle_time')
-        cycle_id = request.POST.getlist('cycle_id')
+        cycle_id= request.POST.getlist('cycle_id')
         # convert starttime and endtime(str) to datetime
-        start_time = datetime.strptime(startTime, '%H:%M:%S')
-        end_time = datetime.strptime(endTime, '%H:%M:%S')
+        start_time= datetime.strptime(startTime, '%H:%M:%S')
+        end_time= datetime.strptime(endTime, '%H:%M:%S')
        
        
         # If id exist Update Object if not create new one
@@ -974,8 +977,8 @@ def save_coois(request,division,product):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     try:
         #Delete coois data 
-        # coois_data = Coois.undeleted_objects.all().filter(created_by='Marwa')
-        # coois_data.delete()
+        coois_data = Coois.undeleted_objects.all().filter(product=product,created_by='Marwa')
+        coois_data.delete()
         #Save file to DB
         if request.method == 'POST' and request.FILES['coois']:
             file=request.FILES['coois']
@@ -990,9 +993,8 @@ def save_coois(request,division,product):
 def save_zpp(request,division,product):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #Delete zpp data 
-    # zpp_data = Zpp.undeleted_objects.all().filter(created_by='Marwa')
-    # zpp_data.delete()
-    
+    zpp_data = Zpp.undeleted_objects.all().filter(product=product,created_by='Marwa')
+    zpp_data.delete()
     #Save file to DB
     try:
         if request.method == 'POST' and request.FILES['zpp']:
@@ -1129,9 +1131,7 @@ def import_zpp(file,conn,product):
                 'date_reordo',
                 'supplier',
                 'customer', 
-                'product_id',
-                
-                    
+                'product_id',  
             ],
 
             null="",
@@ -1211,11 +1211,11 @@ def shopfloor(request,division,product):
     df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == profit_center['Profit_center']) & (df_coois['division'] == int(division_name['name']) ) ]
     records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
     
-    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records,'division':division,'product':product} ) 
+    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records,'division':division,'product':product}) 
 
 #create shopfloor
 # get inputs value, calculate smoothing end date and save 
-def create_shopfloor(request):
+def create_shopfloor(request,division,product):
     
     if request.method=='POST':
         id = request.POST.getlist('index')
@@ -1293,8 +1293,10 @@ def create_shopfloor(request):
         for i in range(len(df_for_check)):
             if (pd.isnull(df_for_check.loc[i,'Freeze_end_date'])):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
-                return redirect("shopfloor")
+                return redirect("./shopfloor")
+                
                 # return render(request, 'app/Shopfloor/result.html')
+        
         #call function smoothing_calculate to calcul smoothing end date 
         df=smoothing_calculate(df)
         # delete key,freezed, key_start_day column
@@ -1305,19 +1307,19 @@ def create_shopfloor(request):
         df=df.reset_index(drop=True)
         # save shofloor with version 
         # get version_data 
-        version_number = Shopfloor.objects.values('version').order_by('-version').first()
+        version_number = Shopfloor.objects.values('version').filter(product=product).order_by('-version').first()
         # test if data is empty
-        if not version_number :
-            print('Emptyyy')
+        if not version_number:
             df['version'] = 1
         else:
             df['version'] = version_number['version']+1
-        df['shared']= 'False'
+        # df['shared']= 'False'
 
-        save_shopfloor(df)
-        messages.success(request,"Data saved successfully!") 
-        return redirect(filter)
-        
+        save_shopfloor(df,product)
+        # messages.success(request,"Data saved successfully!") 
+        return redirect('../result')
+
+
 # @allowed_users(allowed_roles=["Planificateur"]) 
 #  calculate smoothing end date to use in create shopfloor       
 def smoothing_calculate(df_data):
@@ -1379,8 +1381,7 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
     except Exception:
         
         return datetime(1900, 1, 1, 6) 
-       
-          
+            
     #stop condition to avoid the infinite loop
     if cycle==prev_cycle:
         return current_date
@@ -1433,7 +1434,7 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
     return   smooth_date_calcul(new_date,table,division,profit_center,Smooth_Family,cycle,current_date)
 
 # save shoploor to use in create_shopfloor
-def save_shopfloor(df):
+def save_shopfloor(df,product):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #insert base informations into file
     df.insert(0,'created_at',datetime.now())
@@ -1445,6 +1446,8 @@ def save_shopfloor(df):
     df.insert(6,'deleted_at',datetime.now())
     df.insert(7,'restored_at',datetime.now())
     df.insert(8,'restored_by','')
+    df.insert(35,'product_id', product)
+    # df.to_csv('test.csv')
 
     # Using the StringIO method to set
     # as file object
@@ -1494,8 +1497,8 @@ def save_shopfloor(df):
                     'Remain_to_do',
                     'closed',
                     'smoothing_end_date',
-                     'version',
-                     'shared',
+                    'version',
+                    'product_id',
                     ],
 
             null="",
@@ -1506,9 +1509,9 @@ def save_shopfloor(df):
 # filter by division, profit_center and panning, week to get versions
 def filter(request):
     divisions_list= Division.undeleted_objects.values('name').distinct().order_by('name')
-    center_profit_list = Product.undeleted_objects.values('Profit_center').distinct().order_by('Profit_center')
+    center_profit_list= Product.undeleted_objects.values('Profit_center').distinct().order_by('Profit_center')
     planning_list= Product.undeleted_objects.values('planning').distinct().order_by('planning')
-    dates=Shopfloor.objects.values('created_at__year','created_at__week').distinct()
+    dates= Shopfloor.objects.values('created_at__year','created_at__week').distinct()
 
     division= profit_center= planning=versions= date =None
 
@@ -1534,18 +1537,17 @@ def filter(request):
     })
 
 # def result diplay result of shoploor data with version  
-def result(request):
-
-    division= profit_center= planning=version= None
-    if request.method == "POST":
-        division= request.POST.get('division')
-        profit_center= request.POST.get('profit_center')
-        planning= request.POST.get('planning')
-        version= request.POST.get('version')
-        
-
-    data=Shopfloor.objects.all().order_by('version','smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=division,profit_centre=profit_center,designation=planning,version=version)
-    # print(data)
+def result(request,division,product):
+    product_data=Product.objects.values('Profit_center','planning','division__name').filter(id =product).first()
+    last_version = Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).order_by('-version').first()
+    data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=last_version['version'])
+    versions =Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).distinct()
+    selected_version=None
+    if request.method=='POST':
+        selected_version= request.POST.get('selected_version')
+        selected_version=int(selected_version)
+        data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=selected_version)
+    
     # if request.method == 'POST':
     #     # Download file 
     #     response = HttpResponse(content_type='text/csv')
@@ -1554,7 +1556,9 @@ def result(request):
     #     df_data=pd.DataFrame(list(data))
     #     df_data.to_csv(path_or_buf=response,index=False)
     #     return response
-    return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
+    
+    return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version['version'],}) 
+
 
 def result_sharing(request):
     division= profit_center= planning=version=data= None
@@ -1675,12 +1679,13 @@ def filter_planning(request):
 def update_cycle (request):
     if request.method == "POST":
         division=request.POST.get('division')
+        planning=request.POST.get('planning')
         profit_center=request.POST.get('profit_center')
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
         week_cycle= request.POST.getlist('week_cycle')
-       
-        for date , cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
+        division_id =Division.objects.values('id').filter(name=division).first()
+        for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
             # get year and week from table 
             year=date.split('-W')[0]
             week=date.split('-W')[1]
@@ -1688,8 +1693,8 @@ def update_cycle (request):
             cycle_type_input = request.POST.get('cycle-type-'+date)
 
             #Get Cycle to update
-            cycles=Cycle.objects.all().filter(profit_center=profit_center,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family) 
-            
+            cycles=Cycle.objects.all().filter(division=division_id['id'],product__planning=planning,profit_center=profit_center,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family) 
+            print(cycles)
             for cycle_to_update in cycles:
                 # get startTime and endTime  
                 startTime = WorkData.objects.values('startTime').filter(id=cycle_to_update.workdata_id).first()
@@ -1704,9 +1709,6 @@ def update_cycle (request):
                 cycle_to_update.save()
                 
     return redirect("planning")
-
-
-
 
 
 

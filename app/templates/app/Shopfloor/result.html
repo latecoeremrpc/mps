@@ -6,22 +6,42 @@
 <div class="content">
     <div class="container-fluid">
         <!--message alert -->
-        {% if messages %}
+        {% if messages %}                              
             {% for message in messages %}
                 {%include 'app/alerts/alert.html'%}
             {% endfor %}
         {% endif %}
-        
-        
+       <!--return back-->  
+        <div style='margin-bottom:10px'>
+            <a href="{%url 'product' division  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary card-outline">
                       <div class="card-header">
-                        <h5 class="card-title" ><strong> Smoothing </strong></h5>
+                        <h5 class="card-title" >
+                            <strong>Smoothing V  
+                                {% if selected_version %} 
+                                        {% if selected_version != last_version %} 
+                                            {{selected_version}}
+                                            <small class="badge badge-danger"><i class="fa-regular fa-circle-xmark"></i> Not the last version</small>
+
+                                        {% else %}
+                                        {{selected_version}} 
+                                         <small class="badge badge-success"><i class="fa-solid fa-check-double"></i> Last version</small>
+
+                                        {% endif %}
+                                {% else %}
+                                    {{last_version}}
+                                     <small class="badge badge-success"><i class="fa-solid fa-check-double"></i> Last version</small>
+
+                                {% endif %}
+                            </strong>
+                        </h5>
                         <!--card tools-->
                         <div class="card-tools"> 
                             <ul class="list-group list-group-horizontal" style="height: 35px;">
-                                <!-- <li class="list-group-item" style="padding:5px;" ><form method="post" action="{% url 'result' %}">{% csrf_token %} <button type="submit" class="btn btn-sm btn-tool" style="margin-bottom: 1px;padding: 1px;"><i class="download fas fa-download"></i></button></form></li> -->
+                                <!-- <li class="list-group-item" style="padding:5px;" ><form method="post" action="">{% csrf_token %} <button type="submit" class="btn btn-sm btn-tool" style="margin-bottom: 1px;padding: 1px;"><i class="download fas fa-download"></i></button></form></li> -->
                                 <!-- <li class="list-group-item" style="padding:7px;"><i type="button" class="download fas fa-download" id="btn-download-result-calcul-smoothing-end-date"></i></li> -->
                                 <li class="list-group-item" style="padding:6px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="margin-bottom: 0;padding: 1px;">
                                     <i class="fas fa-minus"></i></button></li>
@@ -34,16 +54,34 @@
                       </div>
                       <div class="card-body table-responsive p-0 " style="height: 650px;">
                       <div class="card-body">
+                        <!-- dropdown menu -->
+                    <form method="POST"  action="{% url 'result' division product %}">
+                        <!-- Security token by Django -->
+                        {% csrf_token %}
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-block btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Versions
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    {% for v in versions %}
+                                        <button type="submit" name="selected_version" class="dropdown-item" value="{{v.version}}">{{v.version}}</button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </form>
+                        <br><br>
+                      
+                       
                          <table id="smoothing" class="table table-striped table-hover table-bordered  text-nowrap">
-                            <thead >
+                            <thead>
                                 <tr>
                                     <th colspan="2"></th>
-                                    <th colspan="13" style="text-align: center; color:#b288ff;">COOIS</th>
+                                    <th colspan="13"style="text-align: center; color:#b288ff;">COOIS</th>
                                     <th colspan="2" style="text-align: center; color:#3dcae1;">ZPP</th>
                                     <th colspan="5" style="text-align: center; color:#e83e8c;">Material</th>
                                     <th colspan="3" style="text-align: center; color:#007bff;">User Input</th>
                                     <th colspan="1" style="text-align: center; color:#20c997;">Smoothing</th>
-                                    <th colspan="2"></th>
+                                    <th colspan="1"></th>
                                 </tr>
                                 <tr>
                                     <th>id</th>
@@ -76,14 +114,10 @@
                                     <th style='background: #007bff;color: white;'>Remain to do</th> 
                                     <th style='background: #20c997;;color: white;'>Smoothing end date</th>
                                     <th>Version</th>
-                                    <th>Shared</th>
-                                    
                                 </tr>
                             </thead>
                             <tbody>
             
-            
-                                
                                 {% for data in records %}
                                     <tr>
                                         <!--coois-->
@@ -121,7 +155,7 @@
                                         <!--Smoothing-->
                                         <td>{{data.smoothing_end_date | date:'d/m/Y'}} {{data.smoothing_end_date | time:'H:i'}}</td>
                                         <td>{{ data.version}} </td>
-                                        <td>{{ data.shared}} </td>
+                                        
                                     </tr>
                                     {%empty%}
                                     <tr><td> Data Empty</td></tr>
@@ -133,21 +167,19 @@
                 </div>  
                 <!-- <input type="submit" class="btn btn:hover btn-color" value="Save" style="float: right;"> -->
                 <!-- <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" style="float: right;"> -->
-                <form action="{% url 'sharing' %}" method="post">
+                <!-- <form action="" method="post">
                     {% csrf_token %}
                     <input type="hidden" value="{{division}}" name="division">
                         <input type="hidden" value="{{profit_center}}" name="profit_center">
                         <input type="hidden" value="{{planning}}" name="planning">
                         <input type="hidden" value="{{version}}" name="version">
-                        <!-- <input type="hidden" value="{{date}}" name="date">  -->
-
                         <center>
                             <button type="submit" class="btn btn:hover " style="background-color: #2a9d8f; color:white;">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i> 
                             Share this result
                             </button>
                         </center>
-                  </form>
+                  </form> -->
         </div>
     </div>
 

@@ -73,7 +73,7 @@ class Product(BaseModel,SoftDeleteModel):
     has_treatement = models.BooleanField(null= False, default=False) 
     product = models.CharField(max_length=200)
     planning= models.CharField(max_length=200)
-    Profit_center= models.CharField(max_length=200,null= True )
+    Profit_center= models.CharField(max_length=200,null= True)
     division= models.ForeignKey(Division, on_delete=models.CASCADE)
 
 # renames the instances of the Product
@@ -228,12 +228,13 @@ class Shopfloor(BaseModel,SoftDeleteModel):
     Allocated_Time_On_Workstation =models.FloatField()
     Smooth_Family=models.CharField(max_length=50)
     Ranking=models.DateField()
-    Freeze_end_date=models.DateTimeField(null=True,)
+    Freeze_end_date=models.DateTimeField(null=True)
     Remain_to_do=models.FloatField(null=True)
     smoothing_end_date=models.DateTimeField(null=True)
     closed=models.BooleanField(null=True)
     version=models.IntegerField(null=True)
-    shared=models.BooleanField(null=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    
 
     # renames the instances of the Shopfloor
     # with their order

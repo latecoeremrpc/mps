@@ -73,10 +73,10 @@ urlpatterns = [
     
     #urls for shopfloor
     path('division/<division>/product/<product>/shopfloor/',views.shopfloor,name='shopfloor'),
-    path('shopfloor/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
-    path('shopfloor/result/',views.result,name='result'),
-    path('shopfloor/filter/',views.filter,name='filter'),
-    path('shopfloor/shared/',views.result_sharing,name='sharing'),
+    path('division/<division>/product/<product>/shopfloor/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
+    path('division/<division>/product/<product>/shopfloor/result/',views.result,name='result'),
+    # path('shopfloor/filter/',views.filter,name='filter'),
+    # path('shopfloor/shared/',views.result_sharing,name='sharing'),
 
     # urls for planning 
     path('shopfloor/planning/',views.filter_planning,name='planning'),

@@ -51,18 +51,15 @@
         <div style='margin-bottom:10px'>
             <a href="{%url 'product' division  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
         </div>
-        
         <div class="row">
             <div class="col-12">
-                <!-- <form method="POST" action="{%url 'createshopfloor' %}"> -->
-                    <!-- Security token -->
-                    <!-- {% csrf_token %} -->
                 <div class="card card-primary card-outline">
                       <div class="card-header ui-sortable-handle">
-                        <h5 class="card-title" ><strong> Shopfloor</strong></h5>
+                        <h5 class="card-title" ><strong>Shopfloor</strong></h5> 
+
                         <!--card tools-->
                         <div class="card-tools">
-                            <form method="POST" action="{%url 'createshopfloor' %}">
+                            <form method="POST" action="{%url 'createshopfloor' division product %}">
                                 <!-- Security token -->
                                 {% csrf_token %}
                             <ul class="list-group list-group-horizontal" style="height: 35px;">
@@ -92,9 +89,7 @@
                       </div>
                       <div class="card-body table-responsive p-0 " style="height: 600px;">
                       <div class="card-body">
-                        <!-- <form method="POST" action="{%url 'createshopfloor' %}"> -->
-                            <!-- Security token -->
-                            <!-- {% csrf_token %} -->
+                        
                          <table  class="table table-bordered table-head-fixed text-nowrap table-hover">
                             <thead>
                                 <tr>
