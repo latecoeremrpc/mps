@@ -9,6 +9,38 @@
         <div style='margin-bottom:10px'>
             <a href="{%url 'calendar' division  product  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
         </div>
+
+         <!-- info -->
+         <div class="card-footer " style="border: 1px solid rgba(0,0,0,.125); border-radius: 15px;">
+            <div class="row">
+                <div class="col-sm-4 col-6">
+                    <div class="description-block border-right">
+                    <span class="description-percentage text-success"><i class="fa-solid fa-building"></i></span>
+                    <h5 class="description-header">{{product_info.division.name}} | {{product_info.division.description}}</h5>
+                    <span class="description-text">Division</span>
+                    </div>
+                
+                </div>
+                
+                <div class="col-sm-4 col-6">
+                    <div class="description-block border-right">
+                    <span class="description-percentage text-warning"><i class="fa-solid fa-plane"></i></i></span>
+                    <h5 class="description-header">{{product_info.program}} |{{product_info.product}}</h5>
+                    <span class="description-text">Product</span>
+                    </div>
+                
+                </div>
+                
+                <div class="col-sm-4 col-6">
+                    <div class="description-block border-right">
+                    <span class="description-percentage text-success"><i class="fa-solid fa-barcode"></i></i></span>
+                    <h5 class="description-header">{{product_info.Profit_center}} | {{product_info.planning}}</h5>
+                    <span class="description-text">Designation</span>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <br>
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary card-outline">

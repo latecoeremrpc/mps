@@ -140,8 +140,9 @@ def material(request ,division, product):
     #get MaterialForm
     form = MaterialForm()
     # undeleted_objects object of soft delete manager
-    data = Material.objects.filter(product__pk = product ).order_by('id')    
-    return render(request, "app/material/material.html", {'data':data,'division':division,'product':product,'form':form})
+    data = Material.objects.filter(product__pk = product ).order_by('id') 
+    product_info=Product.objects.all().filter(id=product).first()  
+    return render(request, "app/material/material.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info})
 
 #******************** calendar****************************
 
@@ -157,7 +158,8 @@ def calendar(request,division,product):
     # get all holiday objects to display in Calendar
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
     # get cycle ifo and workdata infos to display in Calendar
-    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'smooth_family': smooth_family,'cycle': cycle})
+    product_info=Product.objects.all().filter(id=product).first()  
+    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'smooth_family': smooth_family,'cycle': cycle,'product_info':product_info})
 
 
 # create calendar for product 
@@ -298,7 +300,8 @@ def custom_calendar(request,division,product):
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product , owner = 'marwa') 
     # get all work data objects to display in Calendar    
     work = WorkData.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
-    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'smooth_family': smooth_family,'cycle':cycle})
+    product_info=Product.objects.all().filter(id=product).first()  
+    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'smooth_family': smooth_family,'cycle':cycle,'product_info':product_info})
     
 
 #create custom calendar
@@ -446,8 +449,9 @@ def restore_product(request, id):
 def product(request ,division):
     form = ProductForm()
     # undeleted_objects object of soft delete manager
-    data = Product.objects.filter(division__pk = division ).order_by('id')    
-    return render(request, "app/product/product.html", {'data':data,'division':division,'form':form})
+    data = Product.objects.filter(division__pk = division ).order_by('id') 
+    division_info=Division.objects.all().filter(id=division).first()  
+    return render(request, "app/product/product.html", {'data':data,'division':division,'form':form,'division_info':division_info})
 
 #********************work Data***********************************
 # clacul work hours (when type of cycle = Days)
@@ -842,8 +846,9 @@ def config_trait(request, division,product):
     #get CalendarConfigurationTraitementForm
     form = CalendarConfigurationTreatementForm()
     # undeleted_objects object of soft delete manager
-    data = CalendarConfigurationTreatement.objects.filter(product__pk = product ).order_by('id')    
-    return render(request, "app/CalendarConfigurationTraitement/home_conf_traitement.html", {'data':data,'division':division,'product':product,'form':form})
+    data = CalendarConfigurationTreatement.objects.filter(product__pk = product ).order_by('id')   
+    product_info=Product.objects.all().filter(id=product).first()  
+    return render(request, "app/CalendarConfigurationTraitement/home_conf_traitement.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info})
 
 
 #***************CRUD CalendarConfigurationCpOrdo*****************
@@ -904,8 +909,9 @@ def config_cpordo(request,division,product):
     #get CalendarConfigurationCpordoForm
     form = CalendarConfigurationCpordoForm()
     # undeleted_objects object of soft delete manager
-    data = CalendarConfigurationCpordo.objects.filter(product__pk = product ).order_by('id')    
-    return render(request, "app/CalendarConfigurationCpordo/home_conf_cpordo.html", {'data':data,'division':division,'product':product,'form':form})
+    data = CalendarConfigurationCpordo.objects.filter(product__pk = product ).order_by('id') 
+    product_info=Product.objects.all().filter(id=product).first()  
+    return render(request, "app/CalendarConfigurationCpordo/home_conf_cpordo.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info})
 
 #********************** Home*****************************
 
@@ -969,8 +975,9 @@ def copy_calendar(request,division,product):
 def upload_files(request,division,product):  
     zpp_files= Zpp.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
     coois_files= Coois.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
+    product_info=Product.objects.all().filter(id=product).first()  
     
-    return render(request,'app/files/file.html',{'division':division,'product':product, 'zpp_files':zpp_files,'coois_files':coois_files})  
+    return render(request,'app/files/file.html',{'division':division,'product':product, 'zpp_files':zpp_files,'coois_files':coois_files,'product_info':product_info})  
 
 #save coois   
 def save_coois(request,division,product):
@@ -1210,8 +1217,9 @@ def shopfloor(request,division,product):
     # filter df_coois by division and product
     df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == profit_center['Profit_center']) & (df_coois['division'] == int(division_name['name']) ) ]
     records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
+    product_info=Product.objects.all().filter(id=product).first()  
     
-    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records,'division':division,'product':product}) 
+    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records,'division':division,'product':product,'product_info':product_info}) 
 
 #create shopfloor
 # get inputs value, calculate smoothing end date and save 
@@ -1556,8 +1564,8 @@ def result(request,division,product):
     #     df_data=pd.DataFrame(list(data))
     #     df_data.to_csv(path_or_buf=response,index=False)
     #     return response
-    
-    return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version['version'],}) 
+    product_info=Product.objects.all().filter(id=product).first()  
+    return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version['version'],'product_info':product_info}) 
 
 
 def result_sharing(request):
