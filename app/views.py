@@ -446,7 +446,7 @@ def restore_product(request, id):
 
 
 # find all product for division 
-def product(request ,division):
+def product(request,division):
     form = ProductForm()
     # undeleted_objects object of soft delete manager
     data = Product.objects.filter(division__pk = division ).order_by('id') 
@@ -933,6 +933,7 @@ def home_page(request):
         messages.error(request,"User not connected!")     
 
     return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'products':products})
+
 
 #*******************copy calendar*************************
 def copy_calendar(request,division,product):
@@ -1546,25 +1547,30 @@ def filter(request):
 
 # def result diplay result of shoploor data with version  
 def result(request,division,product):
-    product_data=Product.objects.values('Profit_center','planning','division__name').filter(id =product).first()
-    last_version = Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).order_by('-version').first()
-    data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=last_version['version'])
-    versions =Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).distinct()
-    selected_version=None
-    if request.method=='POST':
-        selected_version= request.POST.get('selected_version')
-        selected_version=int(selected_version)
-        data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=selected_version)
     
-    # if request.method == 'POST':
-    #     # Download file 
-    #     response = HttpResponse(content_type='text/csv')
-    #     response['Content-Disposition'] = 'attachment; filename=Smoothing_result.csv'
-    #     # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
-    #     df_data=pd.DataFrame(list(data))
-    #     df_data.to_csv(path_or_buf=response,index=False)
-    #     return response
-    product_info=Product.objects.all().filter(id=product).first()  
+    try:
+        data= versions= selected_version = None
+        product_data=Product.objects.values('Profit_center','planning','division__name').filter(id =product).first()
+        last_version = Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).order_by('-version').first()
+        data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=last_version['version'])
+        versions =Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).distinct()
+
+        if request.method=='POST':
+            selected_version= request.POST.get('selected_version')
+            selected_version=int(selected_version)
+            data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=selected_version)
+        
+        # if request.method == 'POST':
+        #     # Download file 
+        #     response = HttpResponse(content_type='text/csv')
+        #     response['Content-Disposition'] = 'attachment; filename=Smoothing_result.csv'
+        #     # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+        #     df_data=pd.DataFrame(list(data))
+        #     df_data.to_csv(path_or_buf=response,index=False)
+        #     return response
+        product_info=Product.objects.all().filter(id=product).first() 
+    except Exception:
+        print("empty data") 
     return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version['version'],'product_info':product_info}) 
 
 
@@ -1684,7 +1690,7 @@ def filter_planning(request):
 
 
 # Adjust cycle time  
-def update_cycle (request):
+def update_cycle(request):
     if request.method == "POST":
         division=request.POST.get('division')
         planning=request.POST.get('planning')

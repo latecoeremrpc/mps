@@ -5,14 +5,20 @@ urlpatterns = [
     
     #url for Home 
     path('home/',views.home_page,name='home'),
-
-
+    
     #urls for CRUD Division
     path('division/',views.read_division,name='division'),
     path('create/',views.create_division,name='create'),
     path('division/update',views.update_division,name='update'),
     path('division/<id>/delete',views.delete_division,name='delete'),
     path('division/<id>/restore',views.restore_division,name='restore'),
+
+     #urls for CRUD product
+    path('division/<division>/product/',views.product,name='product'),
+    path('division/<division>/createproduct',views.create_product,name='createproduct'),
+    path('division/updateproduct',views.update_product,name='updateproduct'),
+    path('division/<id>/deleteproduct',views.delete_product,name='deleteproduct'),
+    path('division/<id>/restoreproduct',views.restore_product,name='restoreproduct'),
 
     #urls for CRUD Material
     path('division/<division>/product/<product>/material/',views.material,name='material'),
@@ -38,12 +44,6 @@ urlpatterns = [
     path('division/<division>/product/<product>/createcustomcalendar/',views.create_custom_calendar,name='createcustomcalendar'),
     path('division/<division>/product/<product>/deletedaycustom/',views.delete_day_custom,name='deletedaycustom'),
     
-    #urls for CRUD product
-    path('division/<division>/product/',views.product,name='product'),
-    path('division/<division>/createproduct',views.create_product,name='createproduct'),
-    path('division/updateproduct',views.update_product,name='updateproduct'),
-    path('division/<id>/deleteproduct',views.delete_product,name='deleteproduct'),
-    path('division/<id>/restoreproduct',views.restore_product,name='restoreproduct'),
 
     #url for work data
     path('division/<division>/product/<product>/workdata/',views.work_data,name='workdata'),
