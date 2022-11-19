@@ -8,6 +8,9 @@
                 {%include 'app/alerts/alert.html'%}
             {% endfor %}
         {% endif %}
+
+      
+
         <form method="POST"  action="{% url 'planning' %}">
             <!-- Security token by Django -->
             {% csrf_token %}

@@ -75,11 +75,13 @@ urlpatterns = [
     path('division/<division>/product/<product>/shopfloor/',views.shopfloor,name='shopfloor'),
     path('division/<division>/product/<product>/shopfloor/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
     path('division/<division>/product/<product>/shopfloor/result/',views.result,name='result'),
+    path('division/<division>/product/<product>/allplanning/',views.planning,name='allplanning'),
+    path('division/<division>/product/<product>/newplanning/',views.new_planning,name='newplanning'),
     # path('shopfloor/filter/',views.filter,name='filter'),
     # path('shopfloor/shared/',views.result_sharing,name='sharing'),
 
     # urls for planning 
-    path('shopfloor/planning/',views.filter_planning,name='planning'),
+    path('planning/',views.filter_planning,name='planning'),
     path('shopfloor/planning/updatecycle',views.update_cycle,name='newcycle'), 
 
      

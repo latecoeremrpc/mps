@@ -1900,3 +1900,12 @@ def production_plan_kpi(df_data,date_from,date_to):
     production_plan_kpi.date_production_week =date_production_week
     production_plan_kpi.date_production_month =date_production_month
 
+def planning(request,division,product):
+    product_info=Product.objects.all().filter(id=product).first() 
+
+    return render(request,'app/Shopfloor/planning.html',{'division':division,'product':product,'product_info':product_info})
+
+def new_planning(request,division,product):
+    product_info=Product.objects.all().filter(id=product).first() 
+
+    return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product, 'product_info':product_info})

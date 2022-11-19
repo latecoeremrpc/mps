@@ -8,6 +8,13 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MPS</title>
+  <!-- Time line css -->
+    <!-- Additional CSS Files -->
+    <!-- <link rel="stylesheet" href="{% static 'timeline/css/fontawesome.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'timeline/css/timeline.css' %}">
+    <link rel="stylesheet" href="{% static 'timeline/css/animated.css' %}">
+    <link rel="stylesheet" href="{% static 'timeline/css/owl.css' %}">
+
   <!-- icon -->
   <link href="{% static 'img/Lettre_M_.png' %}" rel="icon">
   <!------------------ styles------------------>
@@ -36,8 +43,15 @@
   <script src="{% static 'jquery/popper.min.js' %}"></script>
   <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
 
+  <!-- Time line js  -->
+   <!-- <script src="{% static 'timeline/vendor/jquery/jquery.min.js' %}"></script> -->
+   <!-- <script src="{% static 'timeline/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script> -->
+   <script src="{% static 'timeline/js/owl-carousel.js' %} "></script>
+   <script src="{% static 'timeline/js/animation.js' %}"></script>
+   <script src="{% static 'timeline/js/imagesloaded.js' %}"></script>
+   <script src="{% static 'timeline/js/custom.js' %}"></script>
+
    <!--Data Table JS-->
-  
    <script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
    <script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
    <script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
@@ -109,7 +123,7 @@
       
       <!-- Brand Logo -->
       <a href="" class="brand-link"  style="text-decoration: none; ">
-        <img src="{% static 'img/Lettre_M_.png' %}" alt="mps"  style="margin-left: 7px;:opacity: .7;width:30px">
+        <img src="{% static 'img/Lettre_M_.png' %}" alt="mps"  style="margin-left: 1px;:opacity:.5;width:29px">
         <i class="badge" style="font-weight:100"><b>Master Production Schedule</b></i>
       </a>
 
@@ -134,40 +148,35 @@
                 <li class="nav-item">
                   <a href="{% url 'home' %}" class="nav-link">
                     <i class="nav-icon fas fa-house"></i>
-                    <p>Home</p>
+                    <span style="font-size: 15px;">Home</span>
                   </a>
                 </li>
-                <!-- <li class="nav-item">
-                  <a href="" class="nav-link">
-                    <i class="fa-solid fa-chart-simple nav-icon"></i>
-                    <p>Smoothing</p>
-                  </a>
-                </li>    -->
                 <li class="nav-item">
                   <a href="{% url 'planning' %}" class="nav-link">
                     <i class="fa-solid fa-chart-line  nav-icon"></i>
-                    <p>Planning</p>
+                    <span style="font-size: 15px;">Planning</span>
                   </a>
                 </li>
             <li class="nav-item has-treeview menu-open" >
               <a href="#" class="nav-link active" style="background-color: #adb5bd;">
                 <i class="nav-icon fas fa-solid fa-gears"></i>
-                <p>
+                <span style="font-size: 15px;">
                   Configuration
                   <i class="right fas fa-angle-left" ></i>
-                </p>
+                </span>
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
                 <a href="/admin" class="nav-link">
                   <i class="fa-solid fa-user-gear nav-icon"></i>
-                  <p>Administration</p>
+                  <span style="font-size: 15px;">Administration</span>
                   </a>
                 </li>  
                 <li class="nav-item">
                   <a href="{% url 'division' %}" class="nav-link">
                     <i class="nav-icon fas fa-th"></i>
-                    <p>Divisions</p>
+                  <span style="font-size: 15px;">Divisions</span>
+                    <!-- <p>Divisions</p> -->
                   </a>
                 </li>  
 
@@ -189,16 +198,17 @@
           <div class="row mb-2">
             <div class="col-sm-6">
             <!-- <h1 class="m-0"><a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important">MPS </a></h1> -->
-            <a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important;width: 75px;">
+            <a href="{% url 'home' %}" class="nav-link active" style="color:#0a3197 !important;width: 75px;">
             <img src="{% static 'img/mps_logo.png' %}" style="width: 75px;
               margin-top: 5px;
               margin-left: -13px"> </a>
             </div><!-- /.col -->
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right" style="margin-top: 10px;">
-                <!-- <li class="breadcrumb-item"> <a href="{% url 'home' %}">MPS </a></li> -->
-                <li class="breadcrumb-item active">{{request.get_full_path}}</li>
-                <!-- <li class="breadcrumb-item active">Starter Page</li> -->
+
+
+test
+
               </ol>
             </div><!-- /.col -->
           </div><!-- /.row -->
