@@ -9,9 +9,15 @@
             {% endfor %}
         {% endif %}
 
-      
+        <!--return back-->  
+       {% include "app/info/return_back.html" %}
+       <!-- info -->
+       {% include "app/info/info_page.html" %}
+       
+       <!-- time line (process) -->
+       {% include "app/info/timeline.html" %}
 
-        <form method="POST"  action="{% url 'planning' %}">
+        <form method="POST"  action="{% url 'kpi' division product %}">
             <!-- Security token by Django -->
             {% csrf_token %}
             <div class="row">

@@ -972,12 +972,32 @@ Features Style
 }
 .features-item-selected h4 {
   color: #fff !important;
+}
 
+.features-item-selected-schedule .icon {
+  background-image: url(../images/schedule-white.png) !important;
+}
+
+.features-item-selected-file .icon {
+  background-image: url(../images/file-white.png) !important;
+}
+
+.features-item-selected-calendar .icon {
+  background-image: url(../images/calendar-white.png) !important;
+}
+
+.features-item-selected-result .icon {
+  background-image: url(../images/result-white.png) !important;
+}
+
+.features-item-selected-chart .icon {
+  background-image: url(../images/chart-white.png)!important;
 }
 .features-item-selected p {
   color: #fff;
 
 }
+
 
 .features-item:hover h4 {
   color: #fff;
@@ -992,24 +1012,26 @@ Features Style
 }
 
 .first-feature:hover .icon {
-  background-image: url(../images/schedule.png);
+  background-image: url(../images/schedule-white.png);
 }
 
 .second-feature:hover .icon {
-  background-image: url(../images/file.png);
+  background-image: url(../images/file-white.png);
 }
 
 .third-feature:hover .icon {
-  background-image: url(../images/calendar.png);
+  background-image: url(../images/calendar-white.png);
 }
 
 .fourth-feature:hover .icon {
-  background-image: url(../images/result.png);
+  background-image: url(../images/result-white.png);
 }
 
-fifth-feature:hover .icon {
-  background-image: url(../images/bar-chart.png);
+
+.fifth-feature:hover .icon {
+  background-image: url(../images/chart-white.png);
 }
+
 .features-item .number h6 {
   background-repeat: no-repeat;
   width: 111px;

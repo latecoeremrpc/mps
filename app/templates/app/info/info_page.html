@@ -1,11 +1,12 @@
+{% load static %}
 
 {% block content %}
 
-    {% if 'newplanning' in  request.get_full_path or 'material' in  request.get_full_path or 'calendar' in request.get_full_path or 'configTrait' in request.get_full_path or 'upload' in request.get_full_path or 'configCpordo'  in request.get_full_path %}
+    {% if 'allplanning' in  request.get_full_path or 'newplanning' in  request.get_full_path or 'material' in  request.get_full_path or 'calendar' in request.get_full_path or 'configTrait' in request.get_full_path or 'configCpordo' in request.get_full_path %}
     <div class="card-footer " style="border: 1px solid rgba(0,0,0,.125); border-radius: 15px;" >
         <div class="row">
             <div class="col-sm-4 col-6">
-                <div class="description-block border-right" style="display: flex; flex-wrap: wrap;justify-content: space-between;">
+                <div class="description-block border-right" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
                 <span class="description-percentage text-success"><i class="fa-solid fa-building"></i></span>
                 <h5 class="description-header">{{product_info.division.name}} | {{product_info.division.description}}</h5>
                 <!-- <span class="description-text">Division</span> -->
@@ -14,7 +15,7 @@
             </div>
             
             <div class="col-sm-4 col-6">
-                <div class="description-block border-right" style="display: flex; flex-wrap: wrap;justify-content: space-between;">
+                <div class="description-block border-right" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
                 <span class="description-percentage text-warning"><i class="fa-solid fa-plane"></i></i></span>
                 <h5 class="description-header">{{product_info.program}} |{{product_info.product}}</h5>
                 <!-- <span class="description-text">Product</span> -->
@@ -23,7 +24,7 @@
             </div>
             
             <div class="col-sm-4 col-6">
-                <div class="description-block border-right" style="display: flex; flex-wrap: wrap;justify-content: space-between;">
+                <div class="description-block" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
                 <span class="description-percentage text-success"><i class="fa-solid fa-paper-plane"></i></i></span>
                 <h5 class="description-header">{{product_info.Profit_center}} | {{product_info.planning}}</h5>
                 <!-- <span class="description-text">Designation</span> -->
@@ -33,6 +34,50 @@
     </div>
     <br>
 
+    {% endif %}
+
+    {% if 'uploadcoois' in  request.get_full_path or 'uploadzpp' in  request.get_full_path or 'needs' in request.get_full_path or 'result' in request.get_full_path or 'kpi' in request.get_full_path %}
+    <div class="card-footer " style="border: 1px solid rgba(0,0,0,.125); border-radius: 15px;" >
+        <div class="row">
+            <!-- <img src="{% static 'img/mps_logo.png' %}" style="width: 75px;
+              margin-top: 5px;
+              margin-left: -13px"> -->
+            
+
+            <div class="col-sm-3 col-6">
+                <div class="description-block border-right" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
+                <span class="description-percentage text-success"><i class="fa-solid fa-building"></i></span>
+                <h5 class="description-header">{{product_info.division.name}} | {{product_info.division.description}}</h5>
+                <!-- <span class="description-text">Division</span> -->
+                </div>
+            </div>
+            
+            <div class="col-sm-3 col-6">
+                <div class="description-block border-right" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
+                <span class="description-percentage text-warning"><i class="fa-solid fa-plane"></i></i></span>
+                <h5 class="description-header">{{product_info.program}} |{{product_info.product}}</h5>
+                <!-- <span class="description-text">Product</span> -->
+                </div>
+            
+            </div>
+            
+            <div class="col-sm-3 col-6">
+                <div class="description-block border-right" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
+                <span class="description-percentage text-success"><i class="fa-solid fa-paper-plane"></i></i></span>
+                <h5 class="description-header">{{product_info.Profit_center}} | {{product_info.planning}}</h5>
+                <!-- <span class="description-text">Designation</span> -->
+                </div>
+            </div>
+            <div class="col-sm-3 col-6">
+                <div class="description-block" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
+                    <span class="description-percentage text-danger"><i class="fa-solid fa-plane-arrival"></i></span>
+                    <h5 class="description-header">xplannig</h5>
+                    <!-- <span class="description-text">Division</span> -->
+                </div>
+            </div>
+        </div> 
+    </div>
+    <br>
     {% endif %}
 
    

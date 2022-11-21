@@ -12,12 +12,12 @@
             <div class="row">
               <div id="name" class="col-lg-2">
                 <a href="{% url 'newplanning' division product %}">
-                  <div class="features-item first-feature  {%if 'newplanning' in request.get_full_path %} features-item-selected {% endif%}" data-wow-duration="1s" data-wow-delay="0s">
+                  <div class="features-item first-feature  {%if 'newplanning' in request.get_full_path %} features-item-selected features-item-selected-schedule {% endif%}" data-wow-duration="1s" data-wow-delay="0s">
                     <div class="first-number number">
                       <h6>01</h6>
                     </div>
                     <div class="icon"></div>
-                    <h4>Name</h4>
+                    <h4>NAME</h4>
                     <div class="line-dec"></div>
                     <p>Name of planning</p>
                   </div>
@@ -25,8 +25,8 @@
               </div>
 
               <div id="coois" class="col-lg-2">
-                  <a href="{% url 'uploadfiles' division product %}">
-                    <div class="features-item second-feature " data-wow-duration="1s" data-wow-delay="0.2s">
+                  <a href="{% url 'uploadcoois' division product %}">
+                    <div class="features-item second-feature {%if 'uploadcoois' in request.get_full_path %} features-item-selected features-item-selected-file {% endif%}" data-wow-duration="1s" data-wow-delay="0.2s">
                       <div class="second-number number">
                         <h6>02</h6>
                       </div>
@@ -38,52 +38,56 @@
                   </a>
                 </div>
               <div id="zpp" class="col-lg-2">
-                <a href="{% url 'uploadfiles' division product %}">
-                  <div class="features-item second-feature" data-wow-duration="1s" data-wow-delay="0.4s">
+                <a href="{% url 'uploadzpp' division product %}">
+                  <div class="features-item second-feature {%if 'uploadzpp' in request.get_full_path %} features-item-selected features-item-selected-file {% endif%}" data-wow-duration="1s" data-wow-delay="0.4s">
                     <div class="third-number number">
                       <h6>03</h6>
                     </div>
                     <div class="icon"></div>
-                    <h4>Import Zpp</h4>
+                    <h4>ZPP</h4>
                     <div class="line-dec"></div>
                     <p>Import zpp</p>
                   </div>
                 </a>
               </div>
-              <div id="needs"  onclick="window.location.href = '../shopfloor' "  class="col-lg-2"> 
-                <div class="features-item third-feature last-features-item" data-wow-duration="1s" data-wow-delay="0.6s">
-                  <div class="fourth-number number">
-                    <h6>04</h6>
+              <div id="needs" class="col-lg-2"> 
+                <a href="{% url 'needs' division product %}">
+                  <div class="features-item third-feature last-features-item {%if 'needs' in request.get_full_path %} features-item-selected features-item-selected-calendar {% endif%}" data-wow-duration="1s" data-wow-delay="0.6s">
+                    <div class="fourth-number number">
+                      <h6>04</h6>
+                    </div>
+                    <div class="icon"></div>
+                    <h4>NEEDS</h4>
+                    <div class="line-dec"></div>
+                    <p>Freeze end date</p>
                   </div>
-                  <div class="icon"></div>
-                  <h4>Needs</h4>
-                  <div class="line-dec"></div>
-                  <p>Freeze end date</p>
-                </div>
+                </a>
               </div>
               <div id="data" class="col-lg-2">
                 <a href="{% url 'result' division product %}">
-                  <div class="features-item fourth-feature {%if 'shopfloor/result/' in request.get_full_path %} features-item-selected {% endif%}" data-wow-duration="1s" data-wow-delay="0.4s">
+                  <div class="features-item fourth-feature {%if 'shopfloor/result' in request.get_full_path %} features-item-selected features-item-selected-result {% endif%}" data-wow-duration="1s" data-wow-delay="0.4s">
                     <div class="first-number number">
                       <h6>05</h6>
                     </div>
                     <div class="icon"></div>
-                    <h4>Data</h4>
+                    <h4>DATA</h4>
                     <div class="line-dec"></div>
                     <p>Smoothing result</p>
                   </div>
                 </a>
               </div>
               <div id="kpi" class="col-lg-2">
-                <div class="features-item fifth-feature last-features-item " data-wow-duration="1s" data-wow-delay="0.6s">
-                  <div class="second-number number">
-                    <h6>06</h6>
+                <a href="{% url 'kpi' division product %}">
+                  <div class="features-item fifth-feature last-features-item {%if 'kpi' in request.get_full_path %} features-item-selected features-item-selected-chart {% endif%}" data-wow-duration="1s" data-wow-delay="0.6s">
+                    <div class="second-number number">
+                      <h6>06</h6>
+                    </div>
+                    <div class="icon"></div>
+                    <h4>KPI's</h4>
+                    <div class="line-dec"></div>
+                    <p>KPI's</p>
                   </div>
-                  <div class="icon"></div>
-                  <h4>KPI's</h4>
-                  <div class="line-dec"></div>
-                  <p>KPI's</p>
-                </div>
+                </a>
               </div>
             </div>
           </div>
@@ -91,6 +95,5 @@
       </div>
     </div>
   </div>
-
-
+<br>
 {% endblock %}

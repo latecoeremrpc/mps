@@ -257,5 +257,12 @@ class Cycle(BaseModel,SoftDeleteModel):
 class Staff(BaseModel,SoftDeleteModel,User):
     function=models.CharField(max_length=50)
     division= models.ForeignKey(Division, on_delete=models.CASCADE)
+
+# Planning model 
+class Planning(BaseModel,SoftDeleteModel):
+    name=models.CharField(max_length=200)
+    product = models.ForeignKey(Product, related_name='palnningname',on_delete=models.CASCADE,null=True)
+
+
     
   

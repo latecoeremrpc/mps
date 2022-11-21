@@ -3,27 +3,49 @@
 {% block content %}
 
 <!--return back-->  
-<div style='margin-bottom:10px'>
-    <a href="{%url 'allplanning' division product  %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
-</div>
+{% include "app/info/return_back.html" %}
 <!-- info -->
 {% include "app/info/info_page.html" %}
 <!-- time line (process) -->
 {% include "app/info/timeline.html" %}
+<br>
+
+<div class="content">  
+  <div class="col-lg-10 offset-lg-1"> 
+    <div class="card custom-card" style="height:250px;">
+        <div class="card-header custom-card-header ui-sortable-handle">
+          <h5 class="card-title custom-card-title">Planning Name</h5>
+        </div>
+        <div class="card-body">
+          <form action=""" method="post">
+          {% csrf_token %}
+          <div>
+          <input type="name" name="name" id="name" style="border-radius: 30px !important;" placeholder="Name" class="form-control" autocomplete="on" autofocus required>
+          </div>
+          <div>
+          <center><button formaction="{% url 'name' division product %}" type="submit" style="width: 120px !important;" class="bn632-hover-upload bn20"><i class="fa-solid fa-angles-right"></i> Next</button></center>
+          </div>
+        </form>
+        </div>
+        <!-- <div class="card-footer custom-card-footer">
+        </div> -->
+    </div>
+</div>
+</div>
 
 
 
-<div id="contact" class="contact-us section">
+
+
+<!-- <div card="card custom-card">
     <div class="container">
       <div class="row">
-        <div class="col-lg-12 wow fadeInUp" data-wow-duration="0.5s" data-wow-delay="0.25s">
+        <div class="col-lg-12" data-wow-duration="0.5s" data-wow-delay="0.25s">
           <form id="contact" action="" method="post">
             <div class="row">
               <div class="col-lg-6 offset-lg-3">
                 <div class="section-heading">
-                  <!-- <h6>Planning Name</h6>  -->
-                  <!-- <h2>Fill Out The Form Below To <span>Get</span> In <em>Touch</em> With Us</h2>  -->
-                  <h3>Plannig Name </h3> 
+                  <h3>Plannig Name</h3> 
                 </div>
               </div>
                 <div class="row">
@@ -34,7 +56,7 @@
                   </div>
                   <div class="col-lg-12">
                     <fieldset>
-                      <button type="submit" id="form-submit" class="main-button ">Next</button>
+                      <button type="submit" class="bn632-hover-upload bn20">Next</button>
                     </fieldset>
                   </div>
                 </div>
@@ -44,8 +66,8 @@
         </div>
       </div>
     </div>
-  </div>
-
+</div>
+ -->
 
 
 {% endblock %}

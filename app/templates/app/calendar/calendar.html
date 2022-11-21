@@ -8,9 +8,9 @@
 <div class="content">
     <div class="container-fluid">
          <!--return back-->
-        <div style='margin-bottom:10px'>
+        <!-- <div style='margin-bottom:10px'>
             <a href="{%url 'product' division %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
-        </div>
+        </div> -->
 
          <!-- info -->
          {% include "app/info/info_page.html" %}
@@ -18,17 +18,17 @@
             
         <div class="row">
             <div class="col-12">
-                <div class="card card-primary card-outline">
-                    <div class="card-header ui-sortable-handle" >
-                        <h5 class="card-title" ><strong> Calendar</strong></h5>
-                        <div class="card-tools">
+                <div class="card custom-card">
+                    <div class="card-header custom-card-header ui-sortable-handle" >
+                        <h5 class="card-title custom-card-title"> Calendar</h5>
+                        <!-- <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
                             </button>
                             <button type="button" class="btn btn-tool" data-card-widget="remove">
                                 <i class="fas fa-times"></i>
                             </button>
-                      </div>
+                      </div> -->
                     </div>
                       <div class="card-body">
                         <div class="row">
@@ -64,11 +64,11 @@
                              {% endfor %}
                             </select> 
                             <input class="btn btn-outline-primary" type="submit" value="valid"/>  -->
-                        <hr>
+                        <br>
                         <!--Display Calendar-->
                         <div class="calendar"></div>
                       </div>
-                      <div class="card-footer clearfix"></div>
+                      <!-- <div class="card-footer clearfix"></div> -->
                 </div>
             </div>
         </div>

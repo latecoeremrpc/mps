@@ -96,6 +96,8 @@
 </div>
 </div>
 
+
+
 <br><br>
 <div class="card">
     <div class="card-header">
@@ -111,6 +113,7 @@
           <th style="width: 50px">Uploded At</th>
           </tr>
           </thead>
+          <tbody>
           {% for zpp in zpp_files %}
           <tr>                                                      
               <td>Zpp</td>   
@@ -126,11 +129,7 @@
               <td>{{ coois.created_at}}</td>
           </tr>
           {% endfor %} 
-
-
-
-          <tbody>
-          </tbody>
+        </tbody>
         </table>
     </div>
   </div>

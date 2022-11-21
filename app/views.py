@@ -10,7 +10,7 @@ from app.forms import (CalendarConfigurationCpordoForm,
 from app.models import (CalendarConfigurationCpordo,
                         CalendarConfigurationTreatement, Coois, Cycle,
                         Division, HolidaysCalendar, Material, Product,
-                        Shopfloor, Staff, WorkData, Zpp)
+                        Shopfloor, Staff, WorkData, Zpp, Planning)
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
@@ -980,6 +980,23 @@ def upload_files(request,division,product):
     
     return render(request,'app/files/file.html',{'division':division,'product':product, 'zpp_files':zpp_files,'coois_files':coois_files,'product_info':product_info})  
 
+
+# upload coois
+def upload_coois(request,division,product):  
+    coois_files= Coois.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
+    product_info=Product.objects.all().filter(id=product).first()  
+    
+    return render(request,'app/files/coois.html',{'division':division,'product':product,'coois_files':coois_files,'product_info':product_info})  
+
+# upload zpp 
+def upload_zpp(request,division,product):  
+    zpp_files= Zpp.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
+    product_info=Product.objects.all().filter(id=product).first()  
+    
+    return render(request,'app/files/zpp.html',{'division':division,'product':product, 'zpp_files':zpp_files,'product_info':product_info})  
+
+
+
 #save coois   
 def save_coois(request,division,product):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
@@ -995,7 +1012,7 @@ def save_coois(request,division,product):
     except Exception:
         messages.error(request,"unable to upload files,not exist or unreadable") 
         print('unable to upload files,not exist or unreadable')
-    return redirect("./upload")    
+    return redirect("./uploadcoois")    
         
 #save zpp   
 def save_zpp(request,division,product):
@@ -1013,7 +1030,7 @@ def save_zpp(request,division,product):
     except Exception:
         messages.error(request,"unable to upload ZPP files,not exist or unreadable") 
         print('unable to upload files,not exist or unreadable')
-    return redirect("./upload")     
+    return redirect("./uploadzpp")     
     
     
 #***********************Upload COOIS**********************
@@ -1302,9 +1319,7 @@ def create_shopfloor(request,division,product):
         for i in range(len(df_for_check)):
             if (pd.isnull(df_for_check.loc[i,'Freeze_end_date'])):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
-                return redirect("./shopfloor")
-                
-                # return render(request, 'app/Shopfloor/result.html')
+                return redirect("../")
         
         #call function smoothing_calculate to calcul smoothing end date 
         df=smoothing_calculate(df)
@@ -1325,7 +1340,7 @@ def create_shopfloor(request,division,product):
         # df['shared']= 'False'
 
         save_shopfloor(df,product)
-        # messages.success(request,"Data saved successfully!") 
+        messages.success(request,"Data saved successfully!") 
         return redirect('../result')
 
 
@@ -1593,15 +1608,16 @@ def result_sharing(request):
 
 #****************************Planning*****************************  
 # filter planning result
-def filter_planning(request):
+def filter_planning(request,division,product):
     divisions_list= Division.undeleted_objects.values('name').distinct().order_by('name')
     center_profit_list = Product.undeleted_objects.values('Profit_center').distinct().order_by('Profit_center')
     planning_list= Product.undeleted_objects.values('planning').distinct().order_by('planning')
     smooth_family_list=Material.undeleted_objects.values('Smooth_Family').distinct().order_by('Smooth_Family')
     material_list=Material.undeleted_objects.values('material').distinct().order_by('material')
+    product_info=Product.objects.all().filter(id=product).first()  
     
 
-    division= profit_center= planning=df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=None
+    division_name= profit_center= planning=df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
@@ -1620,7 +1636,7 @@ def filter_planning(request):
 
 
     if request.method == "POST":
-        division= request.POST.get('division_name')
+        division_name= request.POST.get('division_name')
         profit_center= request.POST.get('center_profit')
         planning= request.POST.get('planning')
         smooth_family_selected = request.POST.getlist('smooth_family')
@@ -1632,8 +1648,8 @@ def filter_planning(request):
         date_to = datetime.strptime(to_date,'%Y-%m-%d')
 
         #Get data
-        data=Shopfloor.objects.all().filter(shared=True,division=division,profit_centre= profit_center,designation=planning,Smooth_Family__in=smooth_family_selected,material__in=material_selected)
-        division_id=Division.undeleted_objects.all().filter(name=division).values('pk').first()
+        data=Shopfloor.objects.all().filter(shared=True,division=division_name,profit_centre= profit_center,designation=planning,Smooth_Family__in=smooth_family_selected,material__in=material_selected)
+        division_id=Division.undeleted_objects.all().filter(name=division_name).values('pk').first()
         cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected,owner='officiel').distinct()
         work_days=WorkData.undeleted_objects.values('date').filter(product__division=division_id['pk'],product__Profit_center =profit_center,owner='officiel')
         # zpp =Zpp.objects.all().filter()
@@ -1659,8 +1675,9 @@ def filter_planning(request):
             cycle_time_kpi(df_cycle,date_from,date_to)
         
 
-    return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,'smooth_family_list':smooth_family_list,'material_list':material_list,
-    'division':division,
+    return render(request,'app/planning.html',{'product_info':product_info,'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,'smooth_family_list':smooth_family_list,'material_list':material_list,
+    'division':division,'product':product,
+    'division_name':division_name,
     'profit_center':profit_center,
     'planning':planning,
     'records':df_data,
@@ -1909,3 +1926,14 @@ def new_planning(request,division,product):
     product_info=Product.objects.all().filter(id=product).first() 
 
     return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product, 'product_info':product_info})
+
+def save_planning_name(request,division,product):
+    if request.method == "POST":
+        planning_name=request.POST.get('name')
+        print('******************************')
+        print(planning_name)
+        print(product)
+        data =Planning(name=planning_name,product_id = product)
+        data.save()
+    return redirect(f'../files/uploadcoois')
+

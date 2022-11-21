@@ -70,10 +70,12 @@ urlpatterns = [
     path('division/<division>/product/<product>/files/upload',views.upload_files,name='uploadfiles'), 
     path('division/<division>/product/<product>/files/savecoois',views.save_coois,name='savecoois'),
     path('division/<division>/product/<product>/files/savezpp',views.save_zpp,name='savezpp'), 
+    path('division/<division>/product/<product>/files/uploadcoois',views.upload_coois,name='uploadcoois'),
+    path('division/<division>/product/<product>/files/uploadzpp',views.upload_zpp,name='uploadzpp'), 
     
     #urls for shopfloor
-    path('division/<division>/product/<product>/shopfloor/',views.shopfloor,name='shopfloor'),
-    path('division/<division>/product/<product>/shopfloor/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
+    path('division/<division>/product/<product>/needs/',views.shopfloor,name='needs'),
+    path('division/<division>/product/<product>/needs/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
     path('division/<division>/product/<product>/shopfloor/result/',views.result,name='result'),
     path('division/<division>/product/<product>/allplanning/',views.planning,name='allplanning'),
     path('division/<division>/product/<product>/newplanning/',views.new_planning,name='newplanning'),
@@ -81,8 +83,10 @@ urlpatterns = [
     # path('shopfloor/shared/',views.result_sharing,name='sharing'),
 
     # urls for planning 
-    path('planning/',views.filter_planning,name='planning'),
+    path('division/<division>/product/<product>/kpi/',views.filter_planning,name='kpi'),
     path('shopfloor/planning/updatecycle',views.update_cycle,name='newcycle'), 
+    path('division/<division>/product/<product>/name/',views.save_planning_name,name='name'),
+
 
      
     

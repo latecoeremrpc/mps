@@ -7,7 +7,7 @@
 
   .custom-save-shopfloor{
 
-    float: right;
+    /* float:center !important; */
     width: 120px !important;
     margin-bottom: 20px;
   }
@@ -67,7 +67,25 @@ font-size:.75rem;
   border: 1px solid rgba(0,0,0,.125); 
   border-radius: 15px;
 }
-  
+/*  upload files */
+#uploadcoois {
+  opacity: 0;
+}
+#uploadzpp {
+opacity: 0;
+}
+#upload-label-coois {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+}
+#upload-label-zpp {
+position: absolute;
+top: 50%;
+left: 1rem;
+transform: translateY(-50%);
+}
 
 /*********Slider *********/
 /* 
@@ -370,7 +388,7 @@ font-size:.75rem;
   width: 100px;
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: -33px !important;
+  margin-bottom: -80px !important;
   /* position: absolute; */
   z-index: 9999;
   /* bottom: 50px; */
@@ -407,13 +425,60 @@ font-size:.75rem;
   outline: none;
 }
 
+
+.bn632-hover-upload {
+  width: 150px;
+  font-size: 16px;
+  font-weight: 600;
+  /* position: fixed; */
+  z-index: 9999;
+  /* right: 50px;
+  bottom: 50px; */
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 30px;
+  margin-top: 20px; 
+  height: 52px;
+  text-align:center;
+  border: none;
+  background-size: 300% 100%;
+  border-radius: 50px;
+  /* moz-transition: all .4s ease-in-out; */
+  -o-transition: all .4s ease-in-out;
+  -webkit-transition: all .4s ease-in-out;
+  transition: all .4s ease-in-out;
+}
+
+.bn632-hover-upload:hover {
+  background-position: 100% 0;
+  /* moz-transition: all .4s ease-in-out; */
+  -o-transition: all .4s ease-in-out;
+  -webkit-transition: all .4s ease-in-out;
+  transition: all .4s ease-in-out;
+}
+.bn632-hover-upload:focus {
+  outline: none;
+}
+
+.bn20{
+  /* background-image: linear-gradient(105deg, rgba(51,204,197,1) 0%, rgba(8,141,195,1) 100%); */
+  background-image: linear-gradient(
+    to right,
+    #33ccc5,
+    #088dc3,
+    #33ccc5,
+    #088dc3
+  );
+  box-shadow: 0 4px 15px 0 rgba(8,141,195,1);
+}
+
 /* custom card */
 .custom-card {
-  border-radius: 50px !important;
+  border-radius: 10px !important;
   box-shadow: 0px 0px 15px rgb(0 0 0 / 10%);
 }
 
-.custom-card-hider{
+.custom-card-header{
   border-radius: 50px 50px 0 0 !important;
   background-color:white !important;
 }
@@ -421,6 +486,12 @@ font-size:.75rem;
   margin-top: 3px;
   margin-left: 10px;
   margin-bottom: .5rem;
+}
+
+.custom-card-footer{
+  border-radius:0 0 50px 50px!important;
+  background-color:white !important;
+  height: 30px;
 }
 
 

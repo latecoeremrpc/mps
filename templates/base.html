@@ -151,12 +151,12 @@
                     <span style="font-size: 15px;">Home</span>
                   </a>
                 </li>
-                <li class="nav-item">
-                  <a href="{% url 'planning' %}" class="nav-link">
+                <!-- <li class="nav-item">
+                  <a href="" class="nav-link">
                     <i class="fa-solid fa-chart-line  nav-icon"></i>
                     <span style="font-size: 15px;">Planning</span>
                   </a>
-                </li>
+                </li> -->
             <li class="nav-item has-treeview menu-open" >
               <a href="#" class="nav-link active" style="background-color: #adb5bd;">
                 <i class="nav-icon fas fa-solid fa-gears"></i>
@@ -204,10 +204,11 @@
               margin-left: -13px"> </a>
             </div><!-- /.col -->
             <div class="col-sm-6">
-              <ol class="breadcrumb float-sm-right" style="margin-top: 10px;">
+              <ol class="breadcrumb float-sm-right" style="margin-top: 10px;"> 
+                <!-- {{request.get_full_path}} -->
 
 
-test
+
 
               </ol>
             </div><!-- /.col -->
