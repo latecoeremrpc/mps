@@ -159,7 +159,12 @@ class CalendarConfigurationCpordo(BaseModel,SoftDeleteModel):
     # with their msn
     def __str__(self):
         return  str(self.msn)
- 
+# Planning model 
+class PlanningApproval(BaseModel,SoftDeleteModel):
+    name=models.CharField(max_length=200)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
+    def __str__(self):
+        return  str(self.name)
 #Coois Model    
 class Coois(BaseModel,SoftDeleteModel):
     division=models.IntegerField(null=True)
@@ -178,6 +183,7 @@ class Coois(BaseModel,SoftDeleteModel):
     date_end_real=models.DateField(null=True)  
     entered_by=models.CharField(max_length=50,null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
+    planning_approval = models.ForeignKey(PlanningApproval, on_delete=models.CASCADE,null=True)
 
     
     # renames the instances of the Coois
@@ -198,6 +204,7 @@ class Zpp(BaseModel,SoftDeleteModel):
     supplier= models.CharField(max_length=50,null=True)    
     customer= models.CharField(max_length=50,null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
+    planning_approval = models.ForeignKey(PlanningApproval, on_delete=models.CASCADE,null=True)
 
     
     # renames the instances of the Zpp
@@ -233,7 +240,10 @@ class Shopfloor(BaseModel,SoftDeleteModel):
     smoothing_end_date=models.DateTimeField(null=True)
     closed=models.BooleanField(null=True)
     version=models.IntegerField(null=True)
+    shared=models.BooleanField(null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    planning_approval = models.ForeignKey(PlanningApproval, on_delete=models.CASCADE,null=True)
+
     
 
     # renames the instances of the Shopfloor
@@ -258,10 +268,7 @@ class Staff(BaseModel,SoftDeleteModel,User):
     function=models.CharField(max_length=50)
     division= models.ForeignKey(Division, on_delete=models.CASCADE)
 
-# Planning model 
-class Planning(BaseModel,SoftDeleteModel):
-    name=models.CharField(max_length=200)
-    product = models.ForeignKey(Product, related_name='palnningname',on_delete=models.CASCADE,null=True)
+
 
 
     

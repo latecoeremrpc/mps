@@ -25,7 +25,11 @@
               </div>
 
               <div id="coois" class="col-lg-2">
-                  <a href="{% url 'uploadcoois' division product %}">
+                {%if 'newplanning' in request.get_full_path %}
+                  <a href=""></a> 
+                {%else%}
+                  <a href="{% url 'uploadcoois' division product planningapproval %}">
+                {% endif%}
                     <div class="features-item second-feature {%if 'uploadcoois' in request.get_full_path %} features-item-selected features-item-selected-file {% endif%}" data-wow-duration="1s" data-wow-delay="0.2s">
                       <div class="second-number number">
                         <h6>02</h6>
@@ -38,7 +42,11 @@
                   </a>
                 </div>
               <div id="zpp" class="col-lg-2">
-                <a href="{% url 'uploadzpp' division product %}">
+                {%if 'newplanning' in request.get_full_path or 'uploadcoois' in request.get_full_path %}
+                  <a href=""></a> 
+                {%else%}
+                  <a href="{% url 'uploadzpp' division product planningapproval %}">
+                {% endif%}
                   <div class="features-item second-feature {%if 'uploadzpp' in request.get_full_path %} features-item-selected features-item-selected-file {% endif%}" data-wow-duration="1s" data-wow-delay="0.4s">
                     <div class="third-number number">
                       <h6>03</h6>
@@ -51,7 +59,11 @@
                 </a>
               </div>
               <div id="needs" class="col-lg-2"> 
-                <a href="{% url 'needs' division product %}">
+                {%if 'newplanning' in request.get_full_path or 'uploadzpp' in request.get_full_path %}
+                  <a href=""></a> 
+                {%else%}
+                <a href="{% url 'needs' division product planningapproval %}">
+                {% endif%} 
                   <div class="features-item third-feature last-features-item {%if 'needs' in request.get_full_path %} features-item-selected features-item-selected-calendar {% endif%}" data-wow-duration="1s" data-wow-delay="0.6s">
                     <div class="fourth-number number">
                       <h6>04</h6>
@@ -64,8 +76,12 @@
                 </a>
               </div>
               <div id="data" class="col-lg-2">
-                <a href="{% url 'result' division product %}">
-                  <div class="features-item fourth-feature {%if 'shopfloor/result' in request.get_full_path %} features-item-selected features-item-selected-result {% endif%}" data-wow-duration="1s" data-wow-delay="0.4s">
+                {%if 'newplanning' in request.get_full_path or 'needs' in request.get_full_path %}
+                  <a href=""></a> 
+                {%else%}
+                <a href="{% url 'result' division product planningapproval %}">
+                {% endif%}  
+                  <div class="features-item fourth-feature {%if 'result' in request.get_full_path %} features-item-selected features-item-selected-result {% endif%}" data-wow-duration="1s" data-wow-delay="0.4s">
                     <div class="first-number number">
                       <h6>05</h6>
                     </div>
@@ -77,7 +93,11 @@
                 </a>
               </div>
               <div id="kpi" class="col-lg-2">
-                <a href="{% url 'kpi' division product %}">
+                {%if 'newplanning' in request.get_full_path or 'result' in request.get_full_path %}
+                  <a href=""></a> 
+                {%else%}
+                <a href="{% url 'kpi' division product planningapproval %}">
+                {% endif%}  
                   <div class="features-item fifth-feature last-features-item {%if 'kpi' in request.get_full_path %} features-item-selected features-item-selected-chart {% endif%}" data-wow-duration="1s" data-wow-delay="0.6s">
                     <div class="second-number number">
                       <h6>06</h6>

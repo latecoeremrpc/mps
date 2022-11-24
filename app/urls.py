@@ -67,25 +67,20 @@ urlpatterns = [
     path('division/<division>/product/<id>/restoreconfigCpordo',views.restore_conf_cpordo,name='restoreconfigCpordo'),
     
     #urls for upload files
-    path('division/<division>/product/<product>/files/upload',views.upload_files,name='uploadfiles'), 
-    path('division/<division>/product/<product>/files/savecoois',views.save_coois,name='savecoois'),
-    path('division/<division>/product/<product>/files/savezpp',views.save_zpp,name='savezpp'), 
-    path('division/<division>/product/<product>/files/uploadcoois',views.upload_coois,name='uploadcoois'),
-    path('division/<division>/product/<product>/files/uploadzpp',views.upload_zpp,name='uploadzpp'), 
-    
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/files/uploadcoois',views.upload_coois,name='uploadcoois'),
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/files/uploadzpp',views.upload_zpp,name='uploadzpp'), 
     #urls for shopfloor
-    path('division/<division>/product/<product>/needs/',views.shopfloor,name='needs'),
-    path('division/<division>/product/<product>/needs/createshopfloor/',views.create_shopfloor,name='createshopfloor'), 
-    path('division/<division>/product/<product>/shopfloor/result/',views.result,name='result'),
-    path('division/<division>/product/<product>/allplanning/',views.planning,name='allplanning'),
+    path('division/<division>/product/<product>/allplanning/',views.all_planning,name='allplanning'),
     path('division/<division>/product/<product>/newplanning/',views.new_planning,name='newplanning'),
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/needs/',views.needs,name='needs'),
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/createneeds/',views.create_needs,name='createneeds'), 
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/result/',views.result,name='result'),
     # path('shopfloor/filter/',views.filter,name='filter'),
     # path('shopfloor/shared/',views.result_sharing,name='sharing'),
 
     # urls for planning 
-    path('division/<division>/product/<product>/kpi/',views.filter_planning,name='kpi'),
-    path('shopfloor/planning/updatecycle',views.update_cycle,name='newcycle'), 
-    path('division/<division>/product/<product>/name/',views.save_planning_name,name='name'),
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/kpi/',views.filter_kpi,name='kpi'),
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/updatecycle',views.update_cycle,name='newcycle'), 
 
 
      

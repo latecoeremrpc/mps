@@ -54,7 +54,7 @@
                       <div class="card-body table-responsive p-0 " style="height: 650px;">
                       <div class="card-body">
                         <!-- dropdown menu -->
-                        <form method="POST"  action="{% url 'result' division product %}">
+                        <form method="POST"  action="{% url 'result' division product planningapproval %}">
                             <!-- Security token by Django -->
                             {% csrf_token %}
                                 <div class="btn-group" role="group">
@@ -164,7 +164,13 @@
                       </div>
                       </div>
                 </div>  
-                <center><button type="submit" class="bn632-hover-upload bn20 custom-save-shopfloor"><i class="fa-solid fa-angles-right"></i> Next </button></center>
+                <center>
+                    <a href="{% url 'kpi' division product planningapproval %}">
+                        <button class="bn632-hover-upload bn20" style="text-decoration:none !important;"><i class="fa-solid fa-angles-right"></i> 
+                            Next 
+                        </button>
+                    </a>
+                </center>
             </div>
         </div>
     </div>

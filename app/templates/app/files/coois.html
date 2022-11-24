@@ -24,17 +24,17 @@
                   <h5 class="card-title custom-card-title">COOIS</h5>
               </div>
               <div class="card-body">
-                <form action="{% url 'savecoois' division product %}" method="post" enctype="multipart/form-data">
+                <form action="{% url 'uploadcoois' division product planningapproval %}" method="post" enctype="multipart/form-data">
                   {% csrf_token %}
                   <!-- Upload file input-->
                   <div class="input-group mb-3 px-2 py-2 rounded-pill bg-white shadow-sm">
-                    <input id="uploadcoois" name="coois" type="file"  class="form-control border-0" style="box-shadow: 15px 15px 15px rgb(0 0 0 / 50%);" required>
+                    <input id="uploadcoois" name="coois" type="file"  class="form-control border-0" style="box-shadow: 20px 20px 20px 20px rgb(0 0 0 / 50%);" required>
                     <label id="upload-label-coois" for="uploadcoois" class="font-weight-light text-muted">Choose a COOIS file</label>
                     <div class="input-group-append">
                     <label for="uploadcoois" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a COOIS file</small></label>
                     </div>
                   </div>
-                  <center><button type="submit" class="bn632-hover-upload bn20" value="Upload" style="width:120px"><i class="fa-solid fa-angles-right"></i> Next</button></center>
+                  <center><button type="submit" class="bn632-hover-upload bn20" value="Upload" ><i class="fa-solid fa-angles-right"></i> Next</button></center>
                 </form>
                 <table class="table table-sm">
                   <thead>

@@ -68,7 +68,7 @@
 
                         <!--card tools-->
                         <div class="card-tools">
-                            <form method="POST" action="{%url 'createshopfloor' division product %}">
+                            <form method="POST" action="{%url 'createneeds' division product planningapproval %}">
                                 <!-- Security token -->
                                 {% csrf_token %}
                             <ul class="list-group list-group-horizontal" style="height: 35px;">
@@ -190,7 +190,7 @@
                       </div>
                     </div>
                 </div>  
-               <center><button type="submit" class="bn632-hover-upload bn20 custom-save-shopfloor"><i class="fa-solid fa-angles-right"></i> Next </button></center>
+               <center><button type="submit" class="bn632-hover-upload bn20"><i class="fa-solid fa-angles-right"></i> Next </button></center>
                 <!-- <input type="button"  data-target="#launching_calculation" data-toggle="modal" class="btn btn:hover btn-primary custom-save-shopfloor" value="Save"  > -->
                 <!-- <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" style="float: right;"> -->
                 </form>  

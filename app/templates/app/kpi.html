@@ -14,64 +14,18 @@
        <!-- info -->
        {% include "app/info/info_page.html" %}
        
-       <!-- time line (process) -->
+       <!-- time line (process) -->                                      
        {% include "app/info/timeline.html" %}
 
-        <form method="POST"  action="{% url 'kpi' division product %}">
+        <form method="POST"  action="{% url 'kpi' division product planningapproval %}">
             <!-- Security token by Django -->
             {% csrf_token %}
             <div class="row">
-                <div class="col-2 offset-1">
-                    <div class="card card-row" >
-                        <div class="card-header"style="background-color:#2c7da0; color:white;">
-                            <h3 class="card-title">
-                            Divisions
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <select name="division_name" size="1"  class="custom-select form-control-border" id="exampleSelectBorder" required>
-                                {% for item in divisions_list %}
-                                <option value="{{item.name}}" {% if division == item.name %} selected {% endif %}>{{item.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-2">
-                    <div class="card card-row">
-                        <div class="card-header" style="background-color:#2a9d8f; color:white;">
-                            <h3 class="card-title">
-                            Profit Center
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <select name="center_profit" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
-                                {% for item in center_profit_list %}
-                                <option value="{{item.Profit_center}}" {% if item.Profit_center in profit_center%} selected {% endif %}>{{item.Profit_center}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-2">
-                    <div class="card card-row card-info">
-                        <div class="card-header card-info">
-                            <h3 class="card-title">
-                            Planning
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <select name="planning" size="1" size="1"  class="custom-select form-control-border" id="exampleSelectBorder">
-                                {% for item in planning_list %}
-                                    <option value="{{item.planning}}" {% if item.planning in planning   %} selected {% endif %} > {{item.planning}}</option>
-                                {% endfor %}
-                            </select> 
-                        </div>
-                    </div>
-                </div>
-                <div class="col-2">
-                    <div class="card card-row">
-                        <div class="card-header" style="background-color:#006d77; color:white;">
+                
+                
+                <div class="col-3 offset-3">
+                    <div class="card custom-card">
+                        <div class="card-header custom-card-header" style="background:linear-gradient(105deg, rgb(254 92 102) 0%, rgb(250 152 79) 100%) !important; color:white;">
                             <h3 class="card-title">
                            Materials
                             </h3>
@@ -79,7 +33,7 @@
                         <div class="card-body">
                             <div class="select2-primary" >
                                     <select name="material" size="1"id="material"class="select2 select2-hidden-accessible" multiple="" data-placeholder="* Multiple" data-dropdown-css-class="select2-primary"   style="width: 100%;">
-                                    {%for item in material_list  %}
+                                    {%for item in material_smooth_family_list  %}
                                         <option value ="{{item.material}}" {% if item.material in material_selected  %} selected {% endif %}>{{item.material}}</option> 
                                     {%endfor%}
                                 </select> 
@@ -87,9 +41,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-2">
-                    <div class="card card-row">
-                        <div class="card-header" style="background-color:#0077b6; color:white;">
+                <div class="col-3">
+                    <div class="card custom-card">
+                        <div class="card-header custom-card-header" style="background:linear-gradient(105deg, rgb(186 78 220) 0%, rgb(244 77 172) 100%) !important; color:white;">
                             <h3 class="card-title">
                                 Smooth Family
                             </h3>
@@ -98,8 +52,8 @@
 
                             <div class="select2-primary" >
                                 <select name="smooth_family" id="smooth_family" size="1" class="select2 select2-hidden-accessible" multiple="" data-placeholder="* Multiple" data-dropdown-css-class="select2-primary" style="width: 100%;">
-                                {%for item in smooth_family_list %}
-                                    <option value ="{{item.Smooth_Family}}"{% if item.Smooth_Family in smooth_family_selected  %} selected {% endif %}>{{item.Smooth_Family}}</option> 
+                                {%for item in list_smooth_family %}                           
+                                    <option value ="{{item}}"{% if item in smooth_family_selected  %} selected {% endif %}>{{item}}</option> 
                                 {%endfor%}
                                 </select> 
                             </div>
@@ -117,7 +71,7 @@
                         <span class="input-group-text">To</span>
                         <input name="to" id="to" type="date" class=" form-control" value="{{to_date}}" required> 
                         <div class="input-group-prepend">
-                            <button type="submit" class="btn btn-default" style="color:#4285f4;border-radius: 0 8px 8px 0;background-color: white;border: 1px solid #ced4da" > 
+                            <button type="submit" class="btn btn-default" style="color:#4285f4;border-radius: 0 8px 8px 0;background-color: white;border: 1px solid #ced4da"> 
                                 <i class="fa-solid fa-magnifying-glass" style="color:#4285f4 ;"></i>
                                 Go!
                             </button>
@@ -127,13 +81,13 @@
             </div>
             <br>
         </form>
-        <form  method="POST" action="{% url 'newcycle' %}">
+        <form  method="POST" action="{% url 'newcycle' division product planningapproval %}">
             <!-- Security token by Django -->
             {% csrf_token %}
             <div class="col-10 offset-1">
-                <div class="card card-row ">
-                    <div class="card-header ">
-                        <h3 class="card-title">
+                <div class="card custom-card">
+                    <div class="card-header custom-card-header">
+                        <h3 class="card-title custom-card-title">
                             Adjust Cycle Time
                         </h3>
                     </div>
@@ -152,11 +106,9 @@
                                     
                                 {% for index,cycle in cycle_count.iterrows %}
                                 <tr>
-                                    <input name="division" id="division" type="hidden" class=" form-control" value="{{division}}" required> 
-                                    <input name="planning" id="planning" type="hidden" class=" form-control" value="{{planning}}" required> 
-                                    <input name="profit_center" id="profit_center" type="hidden" class=" form-control" value="{{profit_center}}" required> 
                                     <input name="date_from" id="date_from" type="hidden" class=" form-control" value="{{from_date}}" required> 
                                     <input name="date_to" id="date_to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+
                                     <td><input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week }}"  readonly="readonly"> </td> 
                                     <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{cycle.smooth_family}}" readonly="readonly"> </td> 
                                     <td class="form-row">
@@ -174,11 +126,14 @@
                                 {%endfor%} 
                             </tbody>
                         <!-- <button type="submit" class="btn btn-primary" id="save-work" name ='save-work'>Save</button> -->
-                        </table>   
+                        </table> 
+                        <br>
+                        <button type="submit" style="float: right;" class="btn btn-primary">Save</button>
+
                     </div>  
-                    <div class="card-footer">
-                        <button type="submit" style="float: right;" class="btn btn-primary" >Save</button>
-                    </div>   
+                    <!-- <div class="card-footer">
+                        <button type="submit" style="float: right;" class="btn btn-primary">Save</button>
+                    </div>    -->
                 </div>
             </div>    
         </form>
@@ -206,9 +161,9 @@
 
 <div  class="row">
     <div class="col-12">
-        <div class="card card-primary card-outline">
-            <div class="card-header">
-              <h3 class="card-title">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+              <h3 class="card-title custom-card-title">
                 <i class="far fa-chart-bar"></i>
                     Demand | Production
                 </h3>
@@ -221,13 +176,11 @@
                     </ul>  
                 </div> 
                 </div>
-                <div id="demand_prod_planning_week" style="display:block ;" >
+                <div id="demand_prod_planning_week" style="display:block ;">
                     {% include 'app/charts/demand_prod_planning_week.html' %}
                 </div>
-                <div id="demand_prod_planning_month" style="display:none ;" >
+                <div id="demand_prod_planning_month" style="display:none ;">
                     {% include 'app/charts/demand_prod_planning_month.html' %}
-                </div>
-                <div class="card-footer clearfix">
                 </div>
         </div> 
     </div>
@@ -236,7 +189,7 @@
 
     
 <!--Program demand  -->
-<div class="modal" id="test_stocked" >
+<div class="modal" id="test_stocked">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">						
@@ -256,9 +209,9 @@
 <!--Cycle time -->
 <div  class="row">
     <div class="col-12">
-        <div class="card card-primary card-outline">
-            <div class="card-header">
-              <h3 class="card-title">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+              <h3 class="card-title custom-card-title">
                 <i class="far fa-chart-bar"></i>
                     Cycle Time
                 </h3>
@@ -267,8 +220,7 @@
                         <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
                         <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
                             <i class="fas fa-minus"></i></button></li>
-                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
-                        
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li> 
                     </ul>  
                 </div> 
                 </div>
@@ -277,9 +229,6 @@
                 </div>
                 <div id="cycle_kpi_month" style="display:none ;" >
                     {% include 'app/charts/month_cycle_count.html' %}
-
-                </div>
-                <div class="card-footer clearfix">
                 </div>
         </div> 
     </div>
@@ -288,9 +237,9 @@
 <!-- Production plan-->
 <div  class="row">
     <div class="col-12">
-        <div class="card card-primary card-outline">
-            <div class="card-header">
-              <h3 class="card-title">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+              <h3 class="card-title custom-card-title">
                 <i class="far fa-chart-bar"></i>
                    Production Plan
                 </h3>
@@ -309,9 +258,7 @@
                 <div id="production_plan_month" style="display:none ;" >
                     {% include 'app/charts/month_production_plan.html' %}
 
-                </div>
-                <div class="card-footer clearfix">
-                </div>
+                </div> 
         </div> 
     </div>
 </div> 

@@ -2,6 +2,15 @@
 {% load static %}
 {% block content %}
 
+
+<!--message alert -->
+{% if messages %}
+{% for message in messages %}
+    {%include 'app/alerts/alert.html'%}
+{% endfor %}
+{% endif %}
+
+
 <!--return back-->  
 {% include "app/info/return_back.html" %}
 <!-- info -->
@@ -17,15 +26,17 @@
           <h5 class="card-title custom-card-title">Planning Name</h5>
         </div>
         <div class="card-body">
-          <form action=""" method="post">
-          {% csrf_token %}
-          <div>
-          <input type="name" name="name" id="name" style="border-radius: 30px !important;" placeholder="Name" class="form-control" autocomplete="on" autofocus required>
-          </div>
-          <div>
-          <center><button formaction="{% url 'name' division product %}" type="submit" style="width: 120px !important;" class="bn632-hover-upload bn20"><i class="fa-solid fa-angles-right"></i> Next</button></center>
-          </div>
-        </form>
+          <form action="{% url 'newplanning' division product %}" method="post">
+            {% csrf_token %}
+              <div>
+                <input type="name" name="name" id="name" style="border-radius: 30px !important;" placeholder="Name" class="form-control" autocomplete="on" autofocus required>
+              </div>
+              <div>
+              <center>
+                <button type="submit" class="bn632-hover-upload bn20"><i class="fa-solid fa-angles-right"></i> Next</button>
+              </center>
+              </div>
+          </form>
         </div>
         <!-- <div class="card-footer custom-card-footer">
         </div> -->

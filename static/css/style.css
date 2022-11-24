@@ -10,6 +10,8 @@
     /* float:center !important; */
     width: 120px !important;
     margin-bottom: 20px;
+    text-decoration: none !important;
+    color:white !important;
   }
 
   .calendar-text {
@@ -46,6 +48,14 @@
   line-height: 50px;
   border-radius: 50%;
   background-color: #E91E63;
+  /* background-image: linear-gradient(
+    to right,
+    #33ccc5,
+    #088dc3,
+    #33ccc5,
+    #088dc3
+  ); */
+
   color: #FFFFFF;
   font-size: 19px;
 }
@@ -223,7 +233,7 @@ transform: translateY(-50%);
 }
 .data-card h3 {
   color: #2e3c40;
-  font-size: 1.5em;
+  font-size: 1.1em;
   font-weight: 600;
   text-transform: uppercase;
   line-height: 1;
@@ -388,7 +398,7 @@ transform: translateY(-50%);
   width: 100px;
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: -80px !important;
+  /* margin-bottom: -80px !important; */
   /* position: absolute; */
   z-index: 9999;
   /* bottom: 50px; */
@@ -427,7 +437,7 @@ transform: translateY(-50%);
 
 
 .bn632-hover-upload {
-  width: 150px;
+  width: 120px;
   font-size: 16px;
   font-weight: 600;
   /* position: fixed; */
@@ -479,7 +489,7 @@ transform: translateY(-50%);
 }
 
 .custom-card-header{
-  border-radius: 50px 50px 0 0 !important;
+  border-radius: 10px 10px 0 0 !important;
   background-color:white !important;
 }
 .custom-card-title{

@@ -10,7 +10,7 @@ from app.forms import (CalendarConfigurationCpordoForm,
 from app.models import (CalendarConfigurationCpordo,
                         CalendarConfigurationTreatement, Coois, Cycle,
                         Division, HolidaysCalendar, Material, Product,
-                        Shopfloor, Staff, WorkData, Zpp, Planning)
+                        Shopfloor, Staff, WorkData, Zpp, PlanningApproval)
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
@@ -60,7 +60,7 @@ def update_division(request):
 
 
 # delete object(Division) by id
-def delete_division(request, id):
+def delete_division(request,id):
     # fetch the object related to passed id
     obj = get_object_or_404(Division, id = id)
     # delete object
@@ -71,7 +71,7 @@ def delete_division(request, id):
     
 
 # restore object(Division) by id
-def restore_division(request, id):
+def restore_division(request,id):
     # fetch the object related to passed id
     obj = get_object_or_404(Division, id = id)
     # restore object
@@ -79,7 +79,67 @@ def restore_division(request, id):
     #alert message
     messages.success(request,"Division restored successfully!")
     return redirect("../")
+
+
+#********************Crud Product****************************
+# add new object(product)
+def create_product(request,division):
+    form = ProductForm(request.POST)
+    if request.method == "POST":
+        if form.is_valid():
+         instance=form.save(commit=False)
+         instance.division_id=division
+         instance.save()
+         messages.success(request," Product created successfully!")
+        else:
+            messages.error(request,"Form not valid! try again") 
+    return redirect(f'../{division}/product/')
+   
+
+#update object(Product) by id
+def update_product(request):
+    id = id = request.POST.get('id')
+    # fetch the object related to passed id
+    obj = get_object_or_404(Product, id = id)
+    # pass the object as instance in form
+    form = ProductForm(request.POST or None, instance = obj)
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request," Product updated successfully!")  
+        else:
+            messages.error(request," try again!")        
+    return redirect(f'./{str(obj.division_id)}/product/')
     
+
+# delete object(Product) by id
+def delete_product(request, id):
+    # fetch the object related to passed id
+    obj = get_object_or_404(Product, id = id)
+    # delete object
+    obj.soft_delete()
+    messages.success(request," Product deleted successfully!")  
+    return redirect(f'../{str(obj.division_id)}/product/')
+    
+
+# restore object(Product) by id
+def restore_product(request, id):
+    # fetch the object related to passed id
+    obj = get_object_or_404(Product, id = id)
+    # restore object
+    obj.restore()
+    messages.success(request," Product restored successfully!")  
+    return redirect(f'../{str(obj.division_id)}/product/')
+
+
+# find all product for division 
+def product(request,division):
+    form = ProductForm()
+    # undeleted_objects object of soft delete manager
+    data = Product.objects.filter(division__pk = division ).order_by('id') 
+    division_info=Division.objects.all().filter(id=division).first()  
+    return render(request, "app/product/product.html", {'data':data,'division':division,'form':form,'division_info':division_info})
+
 
 #*********************CRUD Material************************
 
@@ -114,7 +174,7 @@ def update_material(request,division):
     
 
 # delete object (Material) by id
-def delete_material(request, division ,id):
+def delete_material(request,division,id):
     # fetch the object related to passed id
     obj = get_object_or_404(Material, id = id)
     # delete object
@@ -125,7 +185,7 @@ def delete_material(request, division ,id):
    
 
 # restore object(Material) by id
-def restore_material(request, division ,id):
+def restore_material(request,division,id):
     # fetch the object related to passed id
     obj = get_object_or_404(Material, id = id)
     # restore object
@@ -136,7 +196,7 @@ def restore_material(request, division ,id):
 
 
 # find all Material for product 
-def material(request ,division, product):
+def material(request,division,product):
     #get MaterialForm
     form = MaterialForm()
     # undeleted_objects object of soft delete manager
@@ -394,64 +454,6 @@ def delete_day_custom(request,division,product):
         # redirect to calendar 
     return redirect("../customcalendar")
 
-#********************Crud Product****************************
-# add new object(product)
-def create_product(request,division):
-    form = ProductForm(request.POST)
-    if request.method == "POST":
-        if form.is_valid():
-         instance=form.save(commit=False)
-         instance.division_id=division
-         instance.save()
-         messages.success(request," Product created successfully!")
-        else:
-            messages.error(request,"Form not valid! try again") 
-    return redirect(f'../{division}/product/')
-   
-
-#update object(Product) by id
-def update_product(request):
-    id = id = request.POST.get('id')
-    # fetch the object related to passed id
-    obj = get_object_or_404(Product, id = id)
-    # pass the object as instance in form
-    form = ProductForm(request.POST or None, instance = obj)
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            messages.success(request," Product updated successfully!")  
-        else:
-            messages.error(request," try again!")        
-    return redirect(f'./{str(obj.division_id)}/product/')
-    
-
-# delete object(Product) by id
-def delete_product(request, id):
-    # fetch the object related to passed id
-    obj = get_object_or_404(Product, id = id)
-    # delete object
-    obj.soft_delete()
-    messages.success(request," Product deleted successfully!")  
-    return redirect(f'../{str(obj.division_id)}/product/')
-    
-
-# restore object(Product) by id
-def restore_product(request, id):
-    # fetch the object related to passed id
-    obj = get_object_or_404(Product, id = id)
-    # restore object
-    obj.restore()
-    messages.success(request," Product restored successfully!")  
-    return redirect(f'../{str(obj.division_id)}/product/')
-
-
-# find all product for division 
-def product(request,division):
-    form = ProductForm()
-    # undeleted_objects object of soft delete manager
-    data = Product.objects.filter(division__pk = division ).order_by('id') 
-    division_info=Division.objects.all().filter(id=division).first()  
-    return render(request, "app/product/product.html", {'data':data,'division':division,'form':form,'division_info':division_info})
 
 #********************work Data***********************************
 # clacul work hours (when type of cycle = Days)
@@ -971,71 +973,60 @@ def copy_calendar(request,division,product):
         #     custom_cycle.save()  
     return redirect("../calendar")
 
-#*********************Save uploads************************
-#upload files (for upload zpp and coois)
-def upload_files(request,division,product):  
-    zpp_files= Zpp.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
+
+#*********************Planning Approval************************
+
+#All Planning Approval
+def all_planning(request,division,product):
+    product_info=Product.objects.all().filter(id=product).first() 
+    all_planning=PlanningApproval.objects.all().filter(product=product)
+    return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info})
+
+
+#Save new Planning Approval
+def new_planning(request,division,product):
+    product_info=Product.objects.all().filter(id=product).first() 
+    data=None
+    planning_approval_name_list=list(PlanningApproval.objects.values_list('name',flat=True).filter(product=product))
+
+    if request.method == "POST":
+        planning_name=request.POST.get('name')
+
+        if planning_name not in planning_approval_name_list:
+            data= PlanningApproval(name=planning_name,product_id= product)
+            data.save()
+            messages.success(request,"Name saved successfully!")
+            return redirect(f'../planningapproval/{data.id}/files/uploadcoois')
+        else:
+            messages.error(request,"Name exit! try again")
+            return redirect('../newplanning')
+    return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product,'product_info':product_info})
+
+
+#*********************Upload To DB COOIS************************
+# From upload coois
+def upload_coois(request,division,product,planningapproval):  
     coois_files= Coois.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
-    product_info=Product.objects.all().filter(id=product).first()  
-    
-    return render(request,'app/files/file.html',{'division':division,'product':product, 'zpp_files':zpp_files,'coois_files':coois_files,'product_info':product_info})  
-
-
-# upload coois
-def upload_coois(request,division,product):  
-    coois_files= Coois.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
-    product_info=Product.objects.all().filter(id=product).first()  
-    
-    return render(request,'app/files/coois.html',{'division':division,'product':product,'coois_files':coois_files,'product_info':product_info})  
-
-# upload zpp 
-def upload_zpp(request,division,product):  
-    zpp_files= Zpp.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
-    product_info=Product.objects.all().filter(id=product).first()  
-    
-    return render(request,'app/files/zpp.html',{'division':division,'product':product, 'zpp_files':zpp_files,'product_info':product_info})  
-
-
-
-#save coois   
-def save_coois(request,division,product):
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
-    try:
+    product_info=Product.objects.all().filter(id=product).first() 
+    # name of planning approval for info page
+    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first() 
+    if request.method == 'POST' and request.FILES['coois']:
         #Delete coois data 
         coois_data = Coois.undeleted_objects.all().filter(product=product,created_by='Marwa')
         coois_data.delete()
-        #Save file to DB
-        if request.method == 'POST' and request.FILES['coois']:
-            file=request.FILES['coois']
-            import_coois(file,conn,product)
+        file=request.FILES['coois']
+        try:
+            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+            import_coois(file,conn,product,planningapproval)
             messages.success(request,"COOIS file uploaded successfully!") 
-    except Exception:
-        messages.error(request,"unable to upload files,not exist or unreadable") 
-        print('unable to upload files,not exist or unreadable')
-    return redirect("./uploadcoois")    
-        
-#save zpp   
-def save_zpp(request,division,product):
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
-    #Delete zpp data 
-    zpp_data = Zpp.undeleted_objects.all().filter(product=product,created_by='Marwa')
-    zpp_data.delete()
-    #Save file to DB
-    try:
-        if request.method == 'POST' and request.FILES['zpp']:
-            file=request.FILES['zpp']
-            import_zpp(file,conn,product)
-            messages.success(request,"ZPP file uploaded successfully!") 
-         
-    except Exception:
-        messages.error(request,"unable to upload ZPP files,not exist or unreadable") 
-        print('unable to upload files,not exist or unreadable')
-    return redirect("./uploadzpp")     
-    
-    
-#***********************Upload COOIS**********************
+            return redirect('./uploadzpp')
+        except Exception:
+            messages.error(request,"unable to upload files,not exist or unreadable") 
+ 
 
-def import_coois(file,conn,product):
+    return render(request,'app/files/coois.html',{'planningapproval_name':planningapproval_name,'division':division,'product':product,'planningapproval':planningapproval,'coois_files':coois_files,'product_info':product_info})  
+
+def import_coois(file,conn,product,planningapproval):
     #read file with pandas
     dc=pd.read_excel(file)
     #insert informations into file
@@ -1049,8 +1040,9 @@ def import_coois(file,conn,product):
     dc.insert(7,'restored_at',datetime.now())
     dc.insert(8,'restored_by','Marwa')
     dc.insert(24,'product_id',product)
+    dc.insert(25,'planning_approval_id',planningapproval)
 
-    
+
     # Using the StringIO method to set
     # as file object
     # print(dc.head(10))
@@ -1090,6 +1082,7 @@ def import_coois(file,conn,product):
                 'date_end_real',
                 'entered_by',
                 'product_id',
+                'planning_approval_id',
                 
             ],
 
@@ -1097,11 +1090,33 @@ def import_coois(file,conn,product):
             sep=",",
 
         )
-    conn.commit()
+    conn.commit()       
 
-#*********************Upload ZPP_MD_STOCK*****************
+#*********************Upload TO DB ZPP************************
+# Form upload zpp 
+def upload_zpp(request,division,product,planningapproval):  
+    zpp_files= Zpp.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
+    product_info=Product.objects.all().filter(id=product).first() 
+    # name of planning approval for info page
+    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first()  
 
-def import_zpp(file,conn,product):
+    if request.method == 'POST' and request.FILES['zpp']:
+        file=request.FILES['zpp']
+        #Delete zpp data 
+        zpp_data = Zpp.undeleted_objects.all().filter(product=product,created_by='Marwa')
+        zpp_data.delete()
+        #Save file to DB
+        try:
+            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+            import_zpp(file,conn,product,planningapproval)
+            messages.success(request,"ZPP file uploaded successfully!") 
+            return redirect("../needs")    
+        except Exception:
+            messages.error(request,"unable to upload ZPP files,not exist or unreadable") 
+
+    return render(request,'app/files/zpp.html',{'planningapproval_name':planningapproval_name,'division':division,'product':product,'planningapproval':planningapproval, 'zpp_files':zpp_files,'product_info':product_info})  
+    
+def import_zpp(file,conn,product,planningapproval):
     #read file with pandas
     dc=pd.read_excel(file,names=['material','plan_date','element','data_element_planif','message','needs','qte_available','date_reordo','supplier','customer'])
     #insert informations into file
@@ -1115,6 +1130,8 @@ def import_zpp(file,conn,product):
     dc.insert(7,'restored_at',datetime.now())
     dc.insert(8,'restored_by','Marwa')
     dc.insert(19,'product_id',product)
+    dc.insert(20,'planning_approval_id',planningapproval)
+
     
     
     # delete the slash and the part after the slash
@@ -1156,7 +1173,8 @@ def import_zpp(file,conn,product):
                 'date_reordo',
                 'supplier',
                 'customer', 
-                'product_id',  
+                'product_id',
+                'planning_approval_id',  
             ],
 
             null="",
@@ -1171,9 +1189,12 @@ def import_zpp(file,conn,product):
 
 # @allowed_users(allowed_roles=["Planificateur"])
 # merge between coois and zpp and material
-def shopfloor(request,division,product):
+def needs(request,division,product,planningapproval):
     # Get Data from DB
-    # to use in shopfloor
+    product_info=Product.objects.all().filter(id=product).first()  
+    # name of planning approval for info page
+    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first()  
+    # data for merge
     zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
     material_data=Material.undeleted_objects.values('material','product__Profit_center','product__program','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
@@ -1188,18 +1209,15 @@ def shopfloor(request,division,product):
      # rename df_zpp column 
     df_zpp=df_zpp.rename(columns={'product__division__name':'division','product__Profit_center':'profit_center'})
     
-
     #add column key for zpp (concatinate  material and data_element_planif and created_by  )
     df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['division'].astype(str)+df_zpp['profit_center'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str)
     #add column key for coois (concatinate material, order, created_by )    
     df_coois['key']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
 
-
     #add column key for material (concatinate material, created_by )  
     df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)++df_material['profit_center'].astype(str)+df_material['created_by'].astype(str)
     #add column key for coois (concatinate material,division,profit_centre, created_by )    
     df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['created_by'].astype(str)
-
 
     #Convert df_zpp to dict
     df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
@@ -1215,7 +1233,6 @@ def shopfloor(request,division,product):
     df_material_dict_workstation= dict((zip(df_material.key,df_material.workstation)))
     df_material_dict_Allocated_Time_On_Workstation= dict((zip(df_material.key,df_material.Allocated_Time_On_Workstation)))
     df_material_dict_Smooth_Family= dict((zip(df_material.key,df_material.Smooth_Family)))
-
 
     #Merge coois and material with keys
     df_coois['AllocatedTime']=df_coois['key2'].map(df_material_dict_AllocatedTime)
@@ -1235,14 +1252,12 @@ def shopfloor(request,division,product):
     # filter df_coois by division and product
     df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == profit_center['Profit_center']) & (df_coois['division'] == int(division_name['name']) ) ]
     records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
-    product_info=Product.objects.all().filter(id=product).first()  
     
-    return render(request,'app/Shopfloor/Shopfloor.html',{'records': records,'division':division,'product':product,'product_info':product_info}) 
+    return render(request,'app/Shopfloor/Shopfloor.html',{'planningapproval_name':planningapproval_name,'planningapproval':planningapproval,'records': records,'division':division,'product':product,'product_info':product_info}) 
 
-#create shopfloor
+#create needs
 # get inputs value, calculate smoothing end date and save 
-def create_shopfloor(request,division,product):
-    
+def create_needs(request,division,product,planningapproval):
     if request.method=='POST':
         id = request.POST.getlist('index')
         # get inputs values
@@ -1319,7 +1334,7 @@ def create_shopfloor(request,division,product):
         for i in range(len(df_for_check)):
             if (pd.isnull(df_for_check.loc[i,'Freeze_end_date'])):
                 messages.error(request,'Please fill at least the first Freeze end date, for the Smooth Family: '+df_for_check.loc[i,'Smooth_Family'])
-                return redirect("../")
+                return redirect("../needs")
         
         #call function smoothing_calculate to calcul smoothing end date 
         df=smoothing_calculate(df)
@@ -1337,15 +1352,15 @@ def create_shopfloor(request,division,product):
             df['version'] = 1
         else:
             df['version'] = version_number['version']+1
-        # df['shared']= 'False'
+        df['shared']= 'False'
 
-        save_shopfloor(df,product)
+        save_needs(df,product,planningapproval)
         messages.success(request,"Data saved successfully!") 
-        return redirect('../result')
+        return redirect(f'../result/')
 
 
 # @allowed_users(allowed_roles=["Planificateur"]) 
-#  calculate smoothing end date to use in create shopfloor       
+#  calculate smoothing end date to use in create needs      
 def smoothing_calculate(df_data):
     #Get Work date data
     # cycle_data=Cycle.undeleted_objects.values('profit_center','smooth_family','cycle_time','work_day') 
@@ -1457,8 +1472,8 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
     new_date=add_hours(prev_date, cycle)
     return   smooth_date_calcul(new_date,table,division,profit_center,Smooth_Family,cycle,current_date)
 
-# save shoploor to use in create_shopfloor
-def save_shopfloor(df,product):
+# save shoploor to use in create_needs
+def save_needs(df,product,planningapproval):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #insert base informations into file
     df.insert(0,'created_at',datetime.now())
@@ -1470,7 +1485,9 @@ def save_shopfloor(df,product):
     df.insert(6,'deleted_at',datetime.now())
     df.insert(7,'restored_at',datetime.now())
     df.insert(8,'restored_by','')
-    df.insert(35,'product_id', product)
+    df.insert(36,'product_id', product)
+    df.insert(37,'planning_approval_id',planningapproval)
+
     # df.to_csv('test.csv')
 
     # Using the StringIO method to set
@@ -1522,7 +1539,9 @@ def save_shopfloor(df,product):
                     'closed',
                     'smoothing_end_date',
                     'version',
+                    'shared',
                     'product_id',
+                    'planning_approval_id',  
                     ],
 
             null="",
@@ -1561,32 +1580,28 @@ def filter(request):
     })
 
 # def result diplay result of shoploor data with version  
-def result(request,division,product):
+def result(request,division,product,planningapproval):
+    data= versions= selected_version = None
     
+    product_data=Product.objects.values('Profit_center','planning','division__name').filter(id =product).first()
+    last_version = Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).order_by('-version').first()
     try:
-        data= versions= selected_version = None
-        product_data=Product.objects.values('Profit_center','planning','division__name').filter(id =product).first()
-        last_version = Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).order_by('-version').first()
         data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=last_version['version'])
-        versions =Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).distinct()
-
-        if request.method=='POST':
-            selected_version= request.POST.get('selected_version')
-            selected_version=int(selected_version)
-            data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=selected_version)
-        
-        # if request.method == 'POST':
-        #     # Download file 
-        #     response = HttpResponse(content_type='text/csv')
-        #     response['Content-Disposition'] = 'attachment; filename=Smoothing_result.csv'
-        #     # data.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
-        #     df_data=pd.DataFrame(list(data))
-        #     df_data.to_csv(path_or_buf=response,index=False)
-        #     return response
-        product_info=Product.objects.all().filter(id=product).first() 
     except Exception:
-        print("empty data") 
-    return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version['version'],'product_info':product_info}) 
+        messages.error(request,"Empty data here,Please fill in needs") 
+        return redirect("../needs")  
+
+    versions =Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).distinct()
+
+    if request.method=='POST':
+        selected_version= request.POST.get('selected_version')
+        selected_version=int(selected_version)
+        data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=selected_version)
+    product_info=Product.objects.all().filter(id=product).first()
+    # name of planning approval for info page
+    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first()   
+
+    return render(request,'app/Shopfloor/result.html',{'planningapproval_name':planningapproval_name,'planningapproval':planningapproval,'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version['version'],'product_info':product_info}) 
 
 
 def result_sharing(request):
@@ -1608,16 +1623,20 @@ def result_sharing(request):
 
 #****************************Planning*****************************  
 # filter planning result
-def filter_planning(request,division,product):
-    divisions_list= Division.undeleted_objects.values('name').distinct().order_by('name')
-    center_profit_list = Product.undeleted_objects.values('Profit_center').distinct().order_by('Profit_center')
-    planning_list= Product.undeleted_objects.values('planning').distinct().order_by('planning')
-    smooth_family_list=Material.undeleted_objects.values('Smooth_Family').distinct().order_by('Smooth_Family')
-    material_list=Material.undeleted_objects.values('material').distinct().order_by('material')
-    product_info=Product.objects.all().filter(id=product).first()  
-    
+def filter_kpi(request,division,product,planningapproval):
 
-    division_name= profit_center= planning=df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=None
+    product_info=Product.objects.all().filter(id=product).first() 
+     # name of planning approval for info page
+    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first()    
+    #Get data to pass them to the filter
+    material_smooth_family_list=Material.undeleted_objects.all().filter(product=product).order_by('Smooth_Family','material')
+    
+    list_smooth_family=set()
+    for data in material_smooth_family_list:
+        list_smooth_family.add(data.Smooth_Family) 
+
+    
+    df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
@@ -1636,9 +1655,6 @@ def filter_planning(request,division,product):
 
 
     if request.method == "POST":
-        division_name= request.POST.get('division_name')
-        profit_center= request.POST.get('center_profit')
-        planning= request.POST.get('planning')
         smooth_family_selected = request.POST.getlist('smooth_family')
         material_selected= request.POST.getlist('material')
         from_date= request.POST.get('from')
@@ -1646,24 +1662,23 @@ def filter_planning(request,division,product):
 
         date_from = datetime.strptime(from_date,'%Y-%m-%d')
         date_to = datetime.strptime(to_date,'%Y-%m-%d')
-
+        
         #Get data
-        data=Shopfloor.objects.all().filter(shared=True,division=division_name,profit_centre= profit_center,designation=planning,Smooth_Family__in=smooth_family_selected,material__in=material_selected)
-        division_id=Division.undeleted_objects.all().filter(name=division_name).values('pk').first()
-        cycle_data=Cycle.undeleted_objects.all().filter(division=division_id['pk'],profit_center =profit_center,smooth_family__in=smooth_family_selected,owner='officiel').distinct()
-        work_days=WorkData.undeleted_objects.values('date').filter(product__division=division_id['pk'],product__Profit_center =profit_center,owner='officiel')
+        data=Shopfloor.objects.all().filter(Smooth_Family__in=smooth_family_selected,material__in=material_selected)
+        cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,smooth_family__in=smooth_family_selected,owner='officiel').distinct()
+        work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
         # zpp =Zpp.objects.all().filter()
         if not data:
             messages.error(request,"No data with selected filter!") 
-            return render(request,'app/planning.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
-            'smooth_family_list':smooth_family_list,
-            'material_list':material_list,
-            })
+            return render(request,'app/kpi.html',{'material_smooth_family_list':material_smooth_family_list,'list_smooth_family':list_smooth_family,
+            'division':division,'product':product,'planningapproval':planningapproval,'product_info':product_info,})
 
         df_data=pd.DataFrame(data.values())
         df_cycle=pd.DataFrame(cycle_data.values())
         df_work_days=pd.DataFrame(work_days.values())
-
+        # df_data.to_csv('df_data.csv')
+        # df_cycle.to_csv('df_cycle.csv')
+        # df_work_days.to_csv('df_work_days.csv')
         # date
         df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
         # call function demand_prod_planning
@@ -1675,11 +1690,9 @@ def filter_planning(request,division,product):
             cycle_time_kpi(df_cycle,date_from,date_to)
         
 
-    return render(request,'app/planning.html',{'product_info':product_info,'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,'smooth_family_list':smooth_family_list,'material_list':material_list,
+    return render(request,'app/kpi.html',{'planningapproval_name':planningapproval_name,'planningapproval':planningapproval,'product_info':product_info,'material_smooth_family_list':material_smooth_family_list,
     'division':division,'product':product,
-    'division_name':division_name,
-    'profit_center':profit_center,
-    'planning':planning,
+    'list_smooth_family':list_smooth_family,
     'records':df_data,
     'df_cycle':df_cycle,
     'df_work_days':df_work_days,
@@ -1707,15 +1720,11 @@ def filter_planning(request,division,product):
 
 
 # Adjust cycle time  
-def update_cycle(request):
+def update_cycle(request,division,product,planningapproval):
     if request.method == "POST":
-        division=request.POST.get('division')
-        planning=request.POST.get('planning')
-        profit_center=request.POST.get('profit_center')
         smooth_family= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
         week_cycle= request.POST.getlist('week_cycle')
-        division_id =Division.objects.values('id').filter(name=division).first()
         for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
             # get year and week from table 
             year=date.split('-W')[0]
@@ -1724,8 +1733,8 @@ def update_cycle(request):
             cycle_type_input = request.POST.get('cycle-type-'+date)
 
             #Get Cycle to update
-            cycles=Cycle.objects.all().filter(division=division_id['id'],product__planning=planning,profit_center=profit_center,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family) 
-            print(cycles)
+            cycles=Cycle.objects.all().filter(division=division,product=product,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family) 
+            
             for cycle_to_update in cycles:
                 # get startTime and endTime  
                 startTime = WorkData.objects.values('startTime').filter(id=cycle_to_update.workdata_id).first()
@@ -1739,9 +1748,7 @@ def update_cycle(request):
                     cycle_to_update.cycle_time= float(cycle_time)
                 cycle_to_update.save()
                 
-    return redirect("planning")
-
-
+    return render(request,'app/kpi.html',{'planningapproval':planningapproval,'division':division,'product':product,'smooth_family':smooth_family,'cycle_time_list':cycle_time_list,'week_cycle':week_cycle})
 
 # calculate nomber of OF and OP ( wek and month)
 def demand_prod_planning(df_data,df_work_days,date_from,date_to):
@@ -1916,24 +1923,4 @@ def production_plan_kpi(df_data,date_from,date_to):
 
     production_plan_kpi.date_production_week =date_production_week
     production_plan_kpi.date_production_month =date_production_month
-
-def planning(request,division,product):
-    product_info=Product.objects.all().filter(id=product).first() 
-
-    return render(request,'app/Shopfloor/planning.html',{'division':division,'product':product,'product_info':product_info})
-
-def new_planning(request,division,product):
-    product_info=Product.objects.all().filter(id=product).first() 
-
-    return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product, 'product_info':product_info})
-
-def save_planning_name(request,division,product):
-    if request.method == "POST":
-        planning_name=request.POST.get('name')
-        print('******************************')
-        print(planning_name)
-        print(product)
-        data =Planning(name=planning_name,product_id = product)
-        data.save()
-    return redirect(f'../files/uploadcoois')
 

@@ -86,10 +86,7 @@
                                                     <td>N/A</td>
                                                 {%endif%}
                                                 <td><center><a class="btn data_btn" href="{% url 'allplanning' division d.id %}">Planning</a></center></td> 
-                                                <!-- <td><center><a class="btn data_btn" href="{% url 'uploadfiles' division d.id %}" >Files</a></center></td> 
-                                                <td><center><a class="btn data_btn" href="{% url 'needs' division d.id %}" >Needs</a></center></td> 
-                                                <td><center><a class="btn data_btn" href="{% url 'result' division d.id %}">Data</a></center></td> 
-                                                 -->
+                                                 
                                                 {% if d.is_deleted%} 
                                                 <td style="color: red;">Deleted</td> 
                                                 {%else%} 
