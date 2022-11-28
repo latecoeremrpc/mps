@@ -22,7 +22,6 @@
             {% csrf_token %}
             <div class="row">
                 
-                
                 <div class="col-3 offset-3">
                     <div class="card custom-card">
                         <div class="card-header custom-card-header" style="background:linear-gradient(105deg, rgb(254 92 102) 0%, rgb(250 152 79) 100%) !important; color:white;">
@@ -218,7 +217,7 @@
                 <div class="card-tools"> 
                     <ul class="list-group list-group-horizontal" style="height: 35px;">
                         <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
-                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top:0px;">
                             <i class="fas fa-minus"></i></button></li>
                         <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li> 
                     </ul>  
@@ -257,7 +256,6 @@
                 </div>
                 <div id="production_plan_month" style="display:none ;" >
                     {% include 'app/charts/month_production_plan.html' %}
-
                 </div> 
         </div> 
     </div>

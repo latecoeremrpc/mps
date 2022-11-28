@@ -59,7 +59,7 @@
                 </a>
               </div>
               <div id="needs" class="col-lg-2"> 
-                {%if 'newplanning' in request.get_full_path or 'uploadzpp' in request.get_full_path %}
+                {%if 'newplanning' in request.get_full_path or 'uploadcoois' in request.get_full_path or 'uploadzpp' in request.get_full_path %}
                   <a href=""></a> 
                 {%else%}
                 <a href="{% url 'needs' division product planningapproval %}">
@@ -76,7 +76,7 @@
                 </a>
               </div>
               <div id="data" class="col-lg-2">
-                {%if 'newplanning' in request.get_full_path or 'needs' in request.get_full_path %}
+                {%if 'newplanning' in request.get_full_path or 'uploadcoois' in request.get_full_path or 'uploadzpp' in request.get_full_path or 'needs' in request.get_full_path %}
                   <a href=""></a> 
                 {%else%}
                 <a href="{% url 'result' division product planningapproval %}">
@@ -93,7 +93,7 @@
                 </a>
               </div>
               <div id="kpi" class="col-lg-2">
-                {%if 'newplanning' in request.get_full_path or 'result' in request.get_full_path %}
+                {%if 'newplanning' in request.get_full_path or 'uploadcoois' in request.get_full_path or 'uploadzpp' in request.get_full_path or 'needs' in request.get_full_path or 'result' in request.get_full_path %}
                   <a href=""></a> 
                 {%else%}
                 <a href="{% url 'kpi' division product planningapproval %}">
@@ -103,9 +103,9 @@
                       <h6>06</h6>
                     </div>
                     <div class="icon"></div>
-                    <h4>KPI's</h4>
+                    <h4>SHOPFLOOR</h4>
                     <div class="line-dec"></div>
-                    <p>KPI's</p>
+                    <p>Shopfloor</p>
                   </div>
                 </a>
               </div>

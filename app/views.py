@@ -980,8 +980,9 @@ def copy_calendar(request,division,product):
 def all_planning(request,division,product):
     product_info=Product.objects.all().filter(id=product).first() 
     all_planning=PlanningApproval.objects.all().filter(product=product)
+    
     return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info})
-
+   
 
 #Save new Planning Approval
 def new_planning(request,division,product):
@@ -1003,13 +1004,22 @@ def new_planning(request,division,product):
     return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product,'product_info':product_info})
 
 
+def palnning_details(request,division,product,planningapproval):
+    # planning approval for info page
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
+    versions =Shopfloor.objects.values_list('version', flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('version')
+
+    
+    return render(request,'app/shopfloor/planning_details.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'versions':versions})  
+
+
+
 #*********************Upload To DB COOIS************************
 # From upload coois
 def upload_coois(request,division,product,planningapproval):  
-    coois_files= Coois.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
-    product_info=Product.objects.all().filter(id=product).first() 
-    # name of planning approval for info page
-    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first() 
+    coois_files= Coois.objects.filter(product_id = product, product__division = division,planning_approval_id=planningapproval).values('created_at','created_by').distinct() 
+    # planning approval for info page
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
     if request.method == 'POST' and request.FILES['coois']:
         #Delete coois data 
         coois_data = Coois.undeleted_objects.all().filter(product=product,created_by='Marwa')
@@ -1024,7 +1034,7 @@ def upload_coois(request,division,product,planningapproval):
             messages.error(request,"unable to upload files,not exist or unreadable") 
  
 
-    return render(request,'app/files/coois.html',{'planningapproval_name':planningapproval_name,'division':division,'product':product,'planningapproval':planningapproval,'coois_files':coois_files,'product_info':product_info})  
+    return render(request,'app/files/coois.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'planningapproval':planningapproval,'coois_files':coois_files})  
 
 def import_coois(file,conn,product,planningapproval):
     #read file with pandas
@@ -1095,10 +1105,9 @@ def import_coois(file,conn,product,planningapproval):
 #*********************Upload TO DB ZPP************************
 # Form upload zpp 
 def upload_zpp(request,division,product,planningapproval):  
-    zpp_files= Zpp.objects.filter(product_id = product, product__division = division).values('created_at','created_by').distinct()
-    product_info=Product.objects.all().filter(id=product).first() 
-    # name of planning approval for info page
-    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first()  
+    zpp_files= Zpp.objects.filter(product_id = product, product__division = division,planning_approval_id=planningapproval).values('created_at','created_by').distinct()
+    # planning approval for info page
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()  
 
     if request.method == 'POST' and request.FILES['zpp']:
         file=request.FILES['zpp']
@@ -1114,7 +1123,7 @@ def upload_zpp(request,division,product,planningapproval):
         except Exception:
             messages.error(request,"unable to upload ZPP files,not exist or unreadable") 
 
-    return render(request,'app/files/zpp.html',{'planningapproval_name':planningapproval_name,'division':division,'product':product,'planningapproval':planningapproval, 'zpp_files':zpp_files,'product_info':product_info})  
+    return render(request,'app/files/zpp.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'planningapproval':planningapproval, 'zpp_files':zpp_files})  
     
 def import_zpp(file,conn,product,planningapproval):
     #read file with pandas
@@ -1190,10 +1199,8 @@ def import_zpp(file,conn,product,planningapproval):
 # @allowed_users(allowed_roles=["Planificateur"])
 # merge between coois and zpp and material
 def needs(request,division,product,planningapproval):
-    # Get Data from DB
-    product_info=Product.objects.all().filter(id=product).first()  
     # name of planning approval for info page
-    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first()  
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()  
     # data for merge
     zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
@@ -1253,7 +1260,7 @@ def needs(request,division,product,planningapproval):
     df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == profit_center['Profit_center']) & (df_coois['division'] == int(division_name['name']) ) ]
     records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
     
-    return render(request,'app/Shopfloor/Shopfloor.html',{'planningapproval_name':planningapproval_name,'planningapproval':planningapproval,'records': records,'division':division,'product':product,'product_info':product_info}) 
+    return render(request,'app/Shopfloor/Shopfloor.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'records': records,'division':division,'product':product}) 
 
 #create needs
 # get inputs value, calculate smoothing end date and save 
@@ -1346,7 +1353,7 @@ def create_needs(request,division,product,planningapproval):
         df=df.reset_index(drop=True)
         # save shofloor with version 
         # get version_data 
-        version_number = Shopfloor.objects.values('version').filter(product=product).order_by('-version').first()
+        version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
         # test if data is empty
         if not version_number:
             df['version'] = 1
@@ -1584,24 +1591,23 @@ def result(request,division,product,planningapproval):
     data= versions= selected_version = None
     
     product_data=Product.objects.values('Profit_center','planning','division__name').filter(id =product).first()
-    last_version = Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).order_by('-version').first()
+    last_version = Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],planning_approval_id=planningapproval).order_by('-version').first()
     try:
         data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=last_version['version'])
     except Exception:
         messages.error(request,"Empty data here,Please fill in needs") 
         return redirect("../needs")  
 
-    versions =Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning']).distinct()
+    versions =Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],planning_approval_id=planningapproval).distinct().order_by('version')
 
     if request.method=='POST':
         selected_version= request.POST.get('selected_version')
         selected_version=int(selected_version)
         data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=selected_version)
-    product_info=Product.objects.all().filter(id=product).first()
     # name of planning approval for info page
-    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first()   
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()   
 
-    return render(request,'app/Shopfloor/result.html',{'planningapproval_name':planningapproval_name,'planningapproval':planningapproval,'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version['version'],'product_info':product_info}) 
+    return render(request,'app/Shopfloor/result.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version['version']}) 
 
 
 def result_sharing(request):
@@ -1625,17 +1631,13 @@ def result_sharing(request):
 # filter planning result
 def filter_kpi(request,division,product,planningapproval):
 
-    product_info=Product.objects.all().filter(id=product).first() 
      # name of planning approval for info page
-    planningapproval_name=PlanningApproval.objects.all().filter(id=planningapproval).first()    
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()
     #Get data to pass them to the filter
     material_smooth_family_list=Material.undeleted_objects.all().filter(product=product).order_by('Smooth_Family','material')
-    
-    list_smooth_family=set()
-    for data in material_smooth_family_list:
-        list_smooth_family.add(data.Smooth_Family) 
+    # set of Smooth_Family (we use set because no duplicated value)
+    list_smooth_family = {data.Smooth_Family for data in material_smooth_family_list}
 
-    
     df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
@@ -1662,7 +1664,8 @@ def filter_kpi(request,division,product,planningapproval):
 
         date_from = datetime.strptime(from_date,'%Y-%m-%d')
         date_to = datetime.strptime(to_date,'%Y-%m-%d')
-        
+
+
         #Get data
         data=Shopfloor.objects.all().filter(Smooth_Family__in=smooth_family_selected,material__in=material_selected)
         cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,smooth_family__in=smooth_family_selected,owner='officiel').distinct()
@@ -1688,9 +1691,9 @@ def filter_kpi(request,division,product,planningapproval):
         if cycle_data:
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle,date_from,date_to)
-        
 
-    return render(request,'app/kpi.html',{'planningapproval_name':planningapproval_name,'planningapproval':planningapproval,'product_info':product_info,'material_smooth_family_list':material_smooth_family_list,
+
+    return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'material_smooth_family_list':material_smooth_family_list,
     'division':division,'product':product,
     'list_smooth_family':list_smooth_family,
     'records':df_data,
@@ -1900,10 +1903,12 @@ def cycle_time_kpi(df_data,date_from,date_to):
 def production_plan_kpi(df_data,date_from,date_to):
     # get df between two dates
     df_production_plan_kpi_interval=df_data[(df_data['date'] > date_from.date()) & (df_data['date'] <= date_to.date())]
+    print(df_production_plan_kpi_interval)
     # date
     df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['Freeze_end_date'].isna()),(df_production_plan_kpi_interval['smoothing_end_date']),(df_production_plan_kpi_interval['Freeze_end_date']))
     # replace the nan values of date_production column with date_end_plan values
-    df_production_plan_kpi_interval.date_production.fillna(df_production_plan_kpi_interval.date_end_plan, inplace=True)
+    df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['date_production'].isna()),(df_production_plan_kpi_interval['date_end_plan']),(df_production_plan_kpi_interval['date_production']))
+    # df_production_plan_kpi_interval.date_production=df_production_plan_kpi_interval.date_production.fillna(df_production_plan_kpi_interval.date_end_plan, inplace=True)
     # week of date date_production
     df_production_plan_kpi_interval['date_production_week']=pd.to_datetime(df_production_plan_kpi_interval['date_production']).dt.week
     # month of date_production

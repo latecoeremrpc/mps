@@ -4,13 +4,14 @@
 
 {% block content %} 
 
+<!--message alert -->
+{% if messages %}
+{% for message in messages %}
+    {%include 'app/alerts/alert.html'%}
+{% endfor %}
+{% endif %}
+
 <div class="col-12"> 
-     <!--message alert -->
-     {% if messages %}
-     {% for message in messages %}
-         {%include 'app/alerts/alert.html'%}
-     {% endfor %}
- {% endif %}
     <div class="callout callout-info">
     <h5> Divisions</h5><br>
     <form method="POST" action ="{% url 'home' %}">  
@@ -41,7 +42,7 @@
                                         <th>Program</th>
                                         <th>Has Treatment</th>
                                         <th>Product</th>         
-                                        <th>Planning</th>
+                                        <th>Designation</th>
                                         <th>Profit center</th>
                                         <th>Material</th>
                                         <th>Calendar</th>
