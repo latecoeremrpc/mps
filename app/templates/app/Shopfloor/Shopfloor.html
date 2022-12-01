@@ -71,26 +71,26 @@
                             <form method="POST" action="{%url 'createneeds' division product planningapproval %}">
                                 <!-- Security token -->
                                 {% csrf_token %}
-                            <ul class="list-group list-group-horizontal" style="height: 35px;">
+                                <ul class="list-group list-group-horizontal" style="height: 35px;">
                                 <!-- <li class="list-group-item" style="padding:7px;"><i type="button" data-toggle="modal" data-target="#inventory_accuracy_count_per_division_modal" class="info fas fa-info-circle"></i></li> -->
-                                <li class="list-group-item" style="padding:5px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:4px;" >
-                                    <i class="fas fa-minus"></i></button></li>  
-                                <li class="list-group-item" style="padding:7px;"><div class="btn-group">
-                                <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="padding:3px;">
-                                <i class="fas fa-wrench"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right" role="menu" >
-                                    <a href="#" class="dropdown-item">Calendar</a><hr>
-                                    
-                                    <input class="control-input" type="radio" id="official" name="calendar" checked="" style="margin-left: 10px;" value="official">
-                                    <label for="official" class="control-label" >Official</label>
-                                    <br>
-                                    <input class="control-input" type="radio" id="custom" name="calendar" style="margin-left: 10px;" value="custom">
-                                    <label for="custom" class="control-label">Custom</label>
-                                    <!-- <hr>
-                                    <a href="#" class="dropdown-item">Exemple</a> -->
-                                </div>
-                            </div></li>
+                                    <li class="list-group-item" style="padding:5px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:4px;" >
+                                        <i class="fas fa-minus"></i></button>
+                                    </li>  
+                                <li class="list-group-item" style="padding:7px;">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="padding:3px;">
+                                            <i class="fas fa-wrench"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right" role="menu" >
+                                            <a href="#" class="dropdown-item">Calendar</a><hr>
+                                            <input class="control-input" type="radio" id="official" name="calendar" checked="" style="margin-left: 10px;" value="official">
+                                            <label for="official" class="control-label" >Official</label>
+                                            <br>
+                                            <input class="control-input" type="radio" id="custom" name="calendar" style="margin-left: 10px;" value="custom">
+                                            <label for="custom" class="control-label">Custom</label>
+                                        </div>
+                                    </div>
+                                </li>
                             <li class="list-group-item" style="padding:5px;"><button type="button" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;"><i class="fas fa-expand"></i></button></li>
                             </ul>
                         </div>
@@ -137,11 +137,8 @@
                             </thead>
                             <tbody >
                                 {% for index,data in records.iterrows %}
-                                    
                                     <tr {%if data.closed == True %} style="display:none;" {% endif %}>
-
                                         <!--coois-->
-                                        <!-- <td >{{data.id}}</td> -->
                                         <td><input id="index" name="index" type="hidden" class="form-control custom-input"  value="{{data.id}}" readonly="readonly">{{data.id}} </td> 
                                         <td><input id="closed" name="closed" type="hidden" class="form-control custom-input"  value="{{data.closed}}" readonly="readonly"> {{data.closed}} </td> 
                                         <td><input id="division" name="division" type="hidden" class="form-control custom-input"  value="{{ data.division }}" readonly="readonly">{{data.division}}</td> 

@@ -1293,15 +1293,7 @@ def create_needs(request,division,product,planningapproval):
         closed = request.POST.getlist('closed')
         calendar_type=request.POST.get('calendar')
 
-        # make holidays and cycle_data as global varibale to reduce access to database
-        global holidays, cycle_data
-        if calendar_type == 'official':
-            holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'officiel') 
-            cycle_data=Cycle.undeleted_objects.values('product__division__name','profit_center','smooth_family','cycle_time','work_day').filter( owner = 'officiel') 
-            # print('cycle_data', cycle_data)
-        else:
-            holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'marwa') 
-            cycle_data=Cycle.undeleted_objects.values('product__division__name','profit_center','smooth_family','cycle_time','work_day').filter( owner = 'marwa') 
+
         #Convert Input Data to DateFrame
         data={
             'division':division,
@@ -1334,8 +1326,6 @@ def create_needs(request,division,product,planningapproval):
         # convert freeze_end_date to datetime 
         df['Freeze_end_date'] = pd.to_datetime(df['Freeze_end_date'])
         df_for_check = df[df['closed'].str.contains('False')].groupby(["Smooth_Family"], as_index=False)["Freeze_end_date"].first()        
-        # print('#'*50)
-        # print(df_for_check)
         # test line by line to return the index of smooth family is not filled
         for i in range(len(df_for_check)):
             if (pd.isnull(df_for_check.loc[i,'Freeze_end_date'])):
@@ -1343,7 +1333,8 @@ def create_needs(request,division,product,planningapproval):
                 return redirect("../needs")
         
         #call function smoothing_calculate to calcul smoothing end date 
-        df=smoothing_calculate(df)
+        df=smoothing_calculate(df,calendar_type)
+
         # delete key,freezed, key_start_day column
         del df['key']
         del df['freezed']
@@ -1351,46 +1342,23 @@ def create_needs(request,division,product,planningapproval):
         # delete index from df
         df=df.reset_index(drop=True)
         # save shofloor with version 
-        # get version_data 
-        version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
-        # test if data is empty
-        if not version_number:
-            df['version'] = 1
-        else:
-            df['version'] = version_number['version']+1
-        df['shared']= 'False'
-
         save_needs(df,product,planningapproval)
         messages.success(request,"Data saved successfully!") 
         return redirect(f'../result/')
-
-        
-    #call function smoothing_calculate to calcul smoothing end date 
-    df=smoothing_calculate(df)
-    # delete key,freezed, key_start_day column
-    del df['key']
-    del df['freezed']
-    del df['key_start_day']
-    # delete index from df
-    df=df.reset_index(drop=True)
-    # save shofloor with version 
-    # get version_data 
-    version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
-    # test if data is empty
-    if not version_number:
-        df['version'] = 1
-    else:
-        df['version'] = version_number['version']+1
-    df['shared']= 'False'
-
-    save_needs(df,product,planningapproval)
-    messages.success(request,"Data saved successfully!") 
-    return redirect(f'../result/')
-
-
 # @allowed_users(allowed_roles=["Planificateur"]) 
 #  calculate smoothing end date to use in create needs      
-def smoothing_calculate(df_data):
+def smoothing_calculate(df_data,calendar_type):
+    # make holidays and cycle_data as global varibale to reduce access to database
+    global holidays, cycle_data
+    if calendar_type == 'official':
+        # we use holidays in is_in_open_hours function
+        holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'officiel') 
+        # we use cycle_data in smoothing_calculate function
+        cycle_data=Cycle.undeleted_objects.values('product__division__name','profit_center','smooth_family','cycle_time','work_day').filter( owner = 'officiel') 
+        # print('cycle_data', cycle_data)
+    else:
+        holidays = HolidaysCalendar.undeleted_objects.values_list('holidaysDate',flat=True).filter( owner = 'marwa') 
+        cycle_data=Cycle.undeleted_objects.values('product__division__name','profit_center','smooth_family','cycle_time','work_day').filter( owner = 'marwa') 
     #Get Work date data
     # cycle_data=Cycle.undeleted_objects.values('profit_center','smooth_family','cycle_time','work_day') 
     #Convert to DataFrame cycle_data( globale variable)
@@ -1399,9 +1367,6 @@ def smoothing_calculate(df_data):
     df_cycle_data['key']= df_cycle_data['product__division__name'].astype(str)+df_cycle_data['profit_center'].astype(str)+df_cycle_data['smooth_family'].astype(str)+df_cycle_data['work_day'].astype(str)
    # df_product_work_data_dict_date=dict(zip(df_product_work_data.key, df_product_work_data.workdate))
     df_dict_cycle=dict(zip(df_cycle_data.key, df_cycle_data.cycle_time))
-    #Get Shopfloor from DB
-    # data=Shopfloor.objects.all().values()
-    # df_data=pd.DataFrame(list(data))
     # sort values with Ranking
     df_data=df_data.sort_values('Ranking') 
     #Add col freezed to know how row is freezed
@@ -1409,19 +1374,21 @@ def smoothing_calculate(df_data):
     df_data['key']=df_data['division'].astype(str)+df_data['profit_centre'].astype(str)+df_data['Smooth_Family'].astype(str)+pd.to_datetime(df_data['Freeze_end_date']).astype(str)
     df_data[['Freeze_end_date']] = df_data[['Freeze_end_date']].astype(object).where(df_data[['Freeze_end_date']].notnull(), None)
     df_data['smoothing_end_date']=df_data['Freeze_end_date']
-    # df_data.to_csv('freeze.csv')
     df_data.insert(0,'key_start_day','')
+    df_data['closed']=df_data['closed'].astype(str)
+
     df_closed_false= df_data[df_data['closed']=='False']
     
 
     df_closed_false = df_closed_false.sort_values(['Smooth_Family','Ranking']).reset_index()
     del df_closed_false['index']
-    df_closed_false.to_csv('df_closed_false.csv')
+    # filter df_data where closed == True
     df_closed_true = df_data[df_data['closed'] =='True']
     df_closed_true=df_closed_true.reset_index()
     del df_closed_true['index']
     
     for i in range(len(df_closed_false)-1):
+        # test if df_closed_false not freezed calculate smoothing end date 
         if (df_closed_false.loc[i+1,'freezed']=='not_freezed'):
             df_closed_false.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_closed_false.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_closed_false.loc[i,'division'],df_closed_false.loc[i,'profit_centre'],df_closed_false.loc[i,'Smooth_Family'])
     df_data = pd.concat([df_closed_true, df_closed_false])
@@ -1504,6 +1471,10 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
 # save shoploor to use in create_needs
 def save_needs(df,product,planningapproval):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+    # get version_data 
+    version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
+    version = version_number['version']+1 if version_number else 1
+    
     #insert base informations into file
     df.insert(0,'created_at',datetime.now())
     df.insert(1,'updated_at',datetime.now())
@@ -1514,10 +1485,12 @@ def save_needs(df,product,planningapproval):
     df.insert(6,'deleted_at',datetime.now())
     df.insert(7,'restored_at',datetime.now())
     df.insert(8,'restored_by','')
-    df.insert(36,'product_id', product)
-    df.insert(37,'planning_approval_id',planningapproval)
+    df['version']=version
+    df['shared']=False
+    df['product_id']=product
+    df['planning_approval_id']=planningapproval
 
-    # df.to_csv('test.csv')
+    df.to_csv('df_shopfloor_data_after_calcul.csv')
 
     # Using the StringIO method to set
     # as file object
@@ -1577,6 +1550,7 @@ def save_needs(df,product,planningapproval):
             sep=";",
         )
     conn.commit()
+
 
 # filter by division, profit_center and panning, week to get versions
 def filter(request):
@@ -1647,8 +1621,6 @@ def result_sharing(request):
     # return redirect("../result")
     return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
 
-
-
 #****************************Planning*****************************  
 # filter planning result
 def filter_kpi(request,division,product,planningapproval):
@@ -1676,9 +1648,6 @@ def filter_kpi(request,division,product,planningapproval):
     demand_prod_planning.work_days_count =None
     demand_prod_planning.work_days_count_month=None
     
-    # data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=last_version)
-    # cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel').distinct()
-    # work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
     
     if request.method == "POST":
         smooth_family_selected = request.POST.getlist('smooth_family')
@@ -1750,6 +1719,7 @@ def filter_kpi(request,division,product,planningapproval):
 
 # Adjust cycle time  
 def update_cycle(request,division,product,planningapproval):
+    
     from_date=to_date=smooth_family=cycle_time_list=week_cycle=None
     # to use info page
     last_version = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
@@ -1771,7 +1741,7 @@ def update_cycle(request,division,product,planningapproval):
             cycle_type_input = request.POST.get('cycle-type-'+date)
 
             #Get Cycle to update
-            cycles=Cycle.objects.all().filter(division=division,product=product,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family) 
+            cycles=Cycle.objects.all().filter(division=division,product=product,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family,owner = 'officiel') 
             
             for cycle_to_update in cycles:
                 # get startTime and endTime  
@@ -1786,6 +1756,52 @@ def update_cycle(request,division,product,planningapproval):
                     cycle_to_update.cycle_time= float(cycle_time)
                 cycle_to_update.save()
                 
+    # get DF
+    shopfloor_data=Shopfloor.objects.filter(
+                                            version=last_version,
+                                            product_id=product,
+                                            planning_approval_id=planningapproval
+                                            ).values(
+                                                    'division',
+                                                    'profit_centre',
+                                                    'order',
+                                                    'material',
+                                                    'designation',
+                                                    'order_type',
+                                                    'order_quantity',
+                                                    'date_start_plan',
+                                                    'date_end_plan' ,
+                                                    'fixation',
+                                                    'date_reordo',
+                                                    'message',
+                                                    'order_stat',
+                                                    'customer_order',
+                                                    'date_end_real', 
+                                                    'AllocatedTime', 
+                                                    'Leadtime', 
+                                                    'workstation',
+                                                    'Allocated_Time_On_Workstation', 
+                                                    'Smooth_Family',
+                                                    'Ranking', 
+                                                    'Freeze_end_date', 
+                                                    'Remain_to_do', 
+                                                    'closed')
+    df_shopfloor_data=pd.DataFrame(shopfloor_data)
+    # get calendar type
+    calendar_type= 'official'
+    # => smoothing_calculate (df, calendar type)
+    df=smoothing_calculate(df_shopfloor_data,calendar_type)
+    # delete key,freezed, key_start_day column
+    del df['key']
+    del df['freezed']
+    del df['key_start_day']
+    # delete index from df
+    df=df.reset_index(drop=True)
+    # =>  save_needs (df, product, planningapproval)
+    save_needs(df,product,planningapproval)
+
+
+
     return render(request,'app/kpi.html',{'from_date':from_date,'to_date':to_date,'last_version':last_version,'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'division':division,'product':product,'smooth_family':smooth_family,'cycle_time_list':cycle_time_list,'week_cycle':week_cycle})
 
 # calculate nomber of OF and OP ( wek and month)
@@ -1874,10 +1890,8 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     demand_prod_planning.work_days_count=work_days_count
     demand_prod_planning.work_days_count_month=work_days_count_month
 
-
 # Kpi cycle time per smooth family (week and month)
 def cycle_time_kpi(df_data,date_from,date_to):
-    
     
     df_cycle_time_interval = df_data[(df_data['work_day'] > date_from.date()) & (df_data['work_day'] <= date_to.date())]
 
@@ -1911,8 +1925,6 @@ def cycle_time_kpi(df_data,date_from,date_to):
     month_cycle_count_axis_x=cycle_count_month['work_year_month'].unique()
     smooth_family_month= cycle_count_month['smooth_family'].unique()
     
-
-
     ### for week 
     # list of colors
     colors_list=['#34a0a4','#023e8a','#e9c46a','#ffafcc','#2a9d8f','#e5989b','#e56b6f','#9e2a2b']
