@@ -48,7 +48,6 @@
                             </h3>
                         </div>                           
                         <div class="card-body">
-
                             <div class="select2-primary" >
                                 <select name="smooth_family" id="smooth_family" size="1" class="select2 select2-hidden-accessible" multiple="" data-placeholder="* Multiple" data-dropdown-css-class="select2-primary" style="width: 100%;">
                                 {%for item in list_smooth_family %}                           
@@ -77,8 +76,8 @@
                         </div>
                       </div>          
                 </div>
-            </div>
-            <br>
+            </div>   
+            <br>     
         </form>
         <form  method="POST" action="{% url 'newcycle' division product planningapproval %}">
             <!-- Security token by Django -->
@@ -105,13 +104,13 @@
                                     
                                 {% for index,cycle in cycle_count.iterrows %}
                                 <tr>
-                                    <input name="date_from" id="date_from" type="hidden" class=" form-control" value="{{from_date}}" required> 
-                                    <input name="date_to" id="date_to" type="hidden" class=" form-control" value="{{to_date}}" required> 
-
-                                    <td><input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week }}"  readonly="readonly"> </td> 
-                                    <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{cycle.smooth_family}}" readonly="readonly"> </td> 
+                                    <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
+                                    <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+                                    
+                                    <td><input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week }}"readonly="readonly"></td> 
+                                    <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{cycle.smooth_family}}" readonly="readonly"></td> 
                                     <td class="form-row">
-                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required="" step="0.01">
+                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required="" step="0.01"> 
                                     </td>
                                     <td>
                                         <div class="inline-radio-input col-sm-8">

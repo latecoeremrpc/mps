@@ -81,7 +81,7 @@
     {% endif %}
 
 
-    {% if  'result' in request.get_full_path or 'kpi' in request.get_full_path %}
+    {% if  'result' in request.get_full_path or 'kpi' in request.get_full_path or 'updatecycle' in request.get_full_path %}
     <div class="card-footer " style="border: 1px solid rgba(0,0,0,.125); border-radius: 15px;" >
         <div class="row">
             <!-- <img src="{% static 'img/mps_logo.png' %}" style="width: 75px;
@@ -116,7 +116,7 @@
             <div class="col-sm-3 col-6">
                 <div class="description-block" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
                     <span class="description-percentage text-danger"><i class="fa-solid fa-plane-arrival"></i></span>
-                    <h5 class="description-header">{{planningapproval_info.name}} | V6</h5>
+                    <h5 class="description-header">{{planningapproval_info.name}} | V{{last_version}}</h5>
                     <!-- <span class="description-text">Division</span> -->
                 </div>
             </div>
