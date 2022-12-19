@@ -1,28 +1,26 @@
 {% extends 'base.html' %}
 {% block content %} 
+<!--message alert -->
+{% if messages %}
+{% for message in messages %}
+{%include 'app/alerts/alert.html'%}
+{% endfor %}
+{% endif %}
+<!--return back-->  
+{% include "app/info/return_back.html" %}
+<!-- info -->
+{% include "app/info/info_page.html" %}
+
+<!-- time line (process) -->                                      
+{% include "app/info/timeline.html" %}
+
 <div class="content" id="container">
     <div class="container-fluid">
-        <!--message alert -->
-        {% if messages %}
-            {% for message in messages %}
-                {%include 'app/alerts/alert.html'%}
-            {% endfor %}
-        {% endif %}
-
-        <!--return back-->  
-       {% include "app/info/return_back.html" %}
-       <!-- info -->
-       {% include "app/info/info_page.html" %}
-       
-       <!-- time line (process) -->                                      
-       {% include "app/info/timeline.html" %}
-
         <form method="POST"  action="{% url 'kpi' division product planningapproval %}">
             <!-- Security token by Django -->
             {% csrf_token %}
-            <div class="row">
-                
-                <div class="col-3 offset-3">
+            <div class="row"> 
+                <div class="col-2 offset-3">
                     <div class="card custom-card">
                         <div class="card-header custom-card-header" style="background:linear-gradient(105deg, rgb(254 92 102) 0%, rgb(250 152 79) 100%) !important; color:white;">
                             <h3 class="card-title">
@@ -40,7 +38,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-3">
+                <div class="col-2">
                     <div class="card custom-card">
                         <div class="card-header custom-card-header" style="background:linear-gradient(105deg, rgb(186 78 220) 0%, rgb(244 77 172) 100%) !important; color:white;">
                             <h3 class="card-title">
@@ -51,14 +49,35 @@
                             <div class="select2-primary" >
                                 <select name="smooth_family" id="smooth_family" size="1" class="select2 select2-hidden-accessible" multiple="" data-placeholder="* Multiple" data-dropdown-css-class="select2-primary" style="width: 100%;">
                                 {%for item in list_smooth_family %}                           
-                                    <option value ="{{item}}"{% if item in smooth_family_selected  %} selected {% endif %}>{{item}}</option> 
+                                    <option value ="{{item}}"{% if item in smooth_family_selected  %} selected {% endif %}>{{item}}</option>
                                 {%endfor%}
                                 </select> 
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>   
 
+                <div class="col-2">
+                    <div class="card custom-card">
+                        <div class="card-header custom-card-header" style="background:linear-gradient(105deg, rgb(59 46 219) 0%,rgb(78 141 252) 100%) !important; color:white;">
+                            <h3 class="card-title">
+                                Versions
+                            </h3>
+                        </div>                           
+                        <div class="card-body">
+                            <select name="version_planning"  class="custom-select form-control-border" id="exampleSelectBorder" required>
+                                <option>Select version</option>  
+                                {% for item in planning_versions %}
+                                <!--  convert item to string in the template, you can use -->
+                                <option value="{{item}}" {% if version_selected == item|stringformat:"i" %}  selected {% endif %}>{{item}}</option>
+                                {%empty%}
+                                    <option value="">No versions</option>   
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+   
             </div>
             <br>
             <div class="row">
@@ -79,7 +98,7 @@
             </div>   
             <br>     
         </form>
-        <form  method="POST" action="{% url 'newcycle' division product planningapproval %}">
+        <form  method="POST" action="{% url 'newcycle' division product planningapproval version_selected %}">
             <!-- Security token by Django -->
             {% csrf_token %}
             <div class="col-10 offset-1">
@@ -102,12 +121,14 @@
                             </thead> 
                             <tbody>
                                     
-                                {% for index,cycle in cycle_count.iterrows %}
+                                {% for index,cycle in cycle_count.iterrows%}
                                 <tr>
                                     <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
                                     <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+                                    <input name="version_selected" id="version_selected" type="hidden" class=" form-control" value="{{version_selected}}" required> 
+
                                     
-                                    <td><input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week }}"readonly="readonly"></td> 
+                                    <td><input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week}}"readonly="readonly"></td> 
                                     <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input"  value="{{cycle.smooth_family}}" readonly="readonly"></td> 
                                     <td class="form-row">
                                         <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required="" step="0.01"> 
@@ -260,7 +281,23 @@
     </div>
 </div> 
 
-<!-- Script for Ddemand production graph  -->
+
+
+<!--Share result-->
+<form action="{% url 'kpi' division product planningapproval %}" method="post">
+        <!-- Security token by Django -->
+        {% csrf_token %}
+        <input type="hidden" value="{{version_selected}}" name="version">
+        <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
+        <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+        <center>
+            <button  naame="shareshare" type="submit" class="bn632-hover-upload bn20"><i class="fa-solid fa-arrow-up-right-from-square"></i> Share</button>
+        </center>
+  </form>
+
+
+
+
 <script>
     function myFunction() {
         var text_switch =document.getElementById("text_switch");
@@ -303,7 +340,6 @@
         $('#smooth_family').select2();
     });
 </script> 
-
 
 
 

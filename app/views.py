@@ -106,9 +106,9 @@ def update_product(request):
     if request.method == "POST":
         if form.is_valid():
             form.save()
-            messages.success(request," Product updated successfully!")  
+            messages.success(request,"Product updated successfully!")  
         else:
-            messages.error(request," try again!")        
+            messages.error(request,"Try again!")        
     return redirect(f'./{str(obj.division_id)}/product/')
     
 
@@ -156,7 +156,7 @@ def create_material(request,division,product):
             messages.error(request,"Form not valid! try again")          
     return redirect(f'../{product}/material/')
 
-
+# update object(Material)
 def update_material(request,division):
     #get id
     id = id = request.POST.get('id')
@@ -208,9 +208,12 @@ def material(request,division,product):
 
 def calendar(request,division,product):
     #get smooth family from product
-    smooth_family= Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
+    smooth_family= Material.undeleted_objects.filter(product_id = product).values_list('Smooth_Family',flat=True).distinct().order_by('Smooth_Family')
     # get cycle objects
     cycle=Cycle.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
+    print('***********')
+    print(cycle)
+    print(type(cycle))
     # get product object to display in calendar
     products_data= Product.undeleted_objects.all()
     # get all work data objects to display in Calendar
@@ -352,7 +355,7 @@ def duplicate_calendar(request,division,product):
 #custom calendar
 def custom_calendar(request,division,product):
     #get smooth family
-    smooth_family= Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
+    smooth_family = Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
     #  get cycle data objects
     cycle= Cycle.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
     # material_data=Material.undeleted_objects.filter(product_id = product).values('Smooth_Family').distinct().order_by('Smooth_Family')
@@ -360,10 +363,9 @@ def custom_calendar(request,division,product):
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product , owner = 'marwa') 
     # get all work data objects to display in Calendar    
     work = WorkData.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
-    product_info=Product.objects.all().filter(id=product).first()  
+    product_info = Product.objects.all().filter(id=product).first()  
     return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'smooth_family': smooth_family,'cycle':cycle,'product_info':product_info})
     
-
 #create custom calendar
 def create_custom_calendar(request,division,product):
     # get list of days from dataBase to compare if exist 
@@ -432,7 +434,6 @@ def create_custom_calendar(request,division,product):
                         data = HolidaysCalendar(name=name,holidaysDate=day,product_id =product, owner = owner)
                         data.save()    
     return redirect("../customcalendar")
-
 
 # delete day (holiday or work) for custom
 def delete_day_custom(request,division,product):  
@@ -807,9 +808,9 @@ def create_conf_trait(request,division,product):
     
 
 #update object(CalendarConfigurationTraitement) by id
-def update_conf_trait(request,division):
+def update_conf_trait(request,division):  
     #get id
-    id = id = request.POST.get('id')
+    id = request.POST.get('id')
     # fetch the object related to passed id
     obj = get_object_or_404(CalendarConfigurationTreatement, id = id)
     # pass the object as instance in form
@@ -832,7 +833,6 @@ def delete_conf_trait(request, division ,id):
     messages.success(request,"CalendarConfigurationTraitement deleted successfully!")   
     return redirect(f'../{str(obj.product_id)}/configTrait')
     
-
 # restore object (CalendarConfigurationTraitement) by id
 def restore_conf_trait(request, division ,id):
     # fetch the object related to passed id
@@ -842,7 +842,6 @@ def restore_conf_trait(request, division ,id):
     messages.success(request,"CalendarConfigurationTraitement restored successfully!")   
     return redirect(f'../{str(obj.product_id)}/configTrait')
     
-
 # find all CalendarConfigurationTraitement for product 
 def config_trait(request, division,product):
     #get CalendarConfigurationTraitementForm
@@ -868,11 +867,10 @@ def create_conf_cpordo(request,division,product):
             messages.error(request,"Form not valid! try again")     
     return redirect(f'../{product}/configCpordo')
     
-
 #update object(CalendarConfigurationCpordo) by id
 def update_conf_cpordo(request, division):
     #get id
-    id = id = request.POST.get('id')
+    id = request.POST.get('id')
     # fetch the object related to passed id
     obj = get_object_or_404(CalendarConfigurationCpordo, id = id)
     # pass the object as instance in form
@@ -885,16 +883,14 @@ def update_conf_cpordo(request, division):
             messages.error(request,"try again!")    
     return redirect(f'./{str(obj.product_id)}/configCpordo')
     
-
 # delete object (CalendarConfigurationCpordo) by id
-def delete_conf_cpordo(request,division ,id):
+def delete_conf_cpordo(request,division,id):
     # fetch the object related to passed id
     obj = get_object_or_404(CalendarConfigurationCpordo, id = id)
     # delete object
     obj.soft_delete()
     messages.success(request,"CalendarConfigurationCpordo deleted successfully!")
     return redirect(f'../{str(obj.product_id)}/configCpordo')
-
 
 # restore object (CalendarConfigurationCpordo) by id
 def restore_conf_cpordo(request,division,id):
@@ -905,7 +901,6 @@ def restore_conf_cpordo(request,division,id):
     messages.success(request,"CalendarConfigurationCpordo restored successfully!")
     return redirect(f'../{str(obj.product_id)}/configCpordo')
     
-
 # find all CalendarConfigurationCpordo for product 
 def config_cpordo(request,division,product):
     #get CalendarConfigurationCpordoForm
@@ -915,7 +910,7 @@ def config_cpordo(request,division,product):
     product_info=Product.objects.all().filter(id=product).first()  
     return render(request, "app/CalendarConfigurationCpordo/home_conf_cpordo.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info})
 
-#********************** Home*****************************
+#********************** Home***********************************
 
 def home_page(request):
     divisions = Division.undeleted_objects.all()
@@ -935,7 +930,6 @@ def home_page(request):
         messages.error(request,"User not connected!")     
 
     return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'products':products})
-
 
 #*******************copy calendar*************************
 def copy_calendar(request,division,product):
@@ -973,26 +967,31 @@ def copy_calendar(request,division,product):
         #     custom_cycle.save()  
     return redirect("../calendar")
 
-
 #*********************Planning Approval************************
 
 #All Planning Approval
 def all_planning(request,division,product):
-    product_info=Product.objects.all().filter(id=product).first() 
+    product_info=Product.objects.all().filter(id=product).first()
     all_planning=PlanningApproval.objects.all().filter(product=product)
+    all_planning_test=PlanningApproval.objects.prefetch_related('shopfloor_set').all().filter(product=product)
     
+    for i in all_planning_test:
+        shopfloor_info= i.shopfloor_set.all().filter(planning_approval=i.id).distinct('shared')
+        for shopfloor in shopfloor_info:
+            print(shopfloor.shared)
+              
     return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info})
    
-
 #Save new Planning Approval
 def new_planning(request,division,product):
     product_info=Product.objects.all().filter(id=product).first() 
     data=None
+    # get list of planning name
     planning_approval_name_list=list(PlanningApproval.objects.values_list('name',flat=True).filter(product=product))
 
     if request.method == "POST":
         planning_name=request.POST.get('name')
-
+        # check if name exist don't save else save
         if planning_name not in planning_approval_name_list:
             data= PlanningApproval(name=planning_name,product_id= product)
             data.save()
@@ -1004,14 +1003,21 @@ def new_planning(request,division,product):
     return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product,'product_info':product_info})
 
 
-def palnning_details(request,division,product,planningapproval):
-    # planning approval for info page
-    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
-    versions =Shopfloor.objects.values_list('version', flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('version')
-
+def update_planning(request,division,product,planningapproval):
     
-    return render(request,'app/shopfloor/planning_details.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'versions':versions})  
+    planning_approval_name_list=list(PlanningApproval.objects.values_list('name',flat=True).filter(product=product))
 
+    return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product})
+
+
+def palnning_details(request,division,product,planningapproval):
+    # in planning deltails return filter_kpi
+    # planning approval for info page
+    # planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
+    # versions =Shopfloor.objects.values_list('version', flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('version') 
+    
+    return filter_kpi(request,division,product,planningapproval)
+    # return render(request,'app/shopfloor/planning_details.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'versions':versions})  
 
 
 #*********************Upload To DB COOIS************************
@@ -1021,7 +1027,7 @@ def upload_coois(request,division,product,planningapproval):
     # planning approval for info page
     planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
     if request.method == 'POST' and request.FILES['coois']:
-        #Delete coois data 
+        # Delete coois data 
         coois_data = Coois.undeleted_objects.all().filter(product=product,created_by='Marwa')
         coois_data.delete()
         file=request.FILES['coois']
@@ -1033,7 +1039,6 @@ def upload_coois(request,division,product,planningapproval):
         except Exception:
             messages.error(request,"unable to upload files,not exist or unreadable") 
  
-
     return render(request,'app/files/coois.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'planningapproval':planningapproval,'coois_files':coois_files})  
 
 def import_coois(file,conn,product,planningapproval):
@@ -1293,7 +1298,6 @@ def create_needs(request,division,product,planningapproval):
         closed = request.POST.getlist('closed')
         calendar_type=request.POST.get('calendar')
 
-
         #Convert Input Data to DateFrame
         data={
             'division':division,
@@ -1345,6 +1349,8 @@ def create_needs(request,division,product,planningapproval):
         save_needs(df,product,planningapproval)
         messages.success(request,"Data saved successfully!") 
         return redirect(f'../result/')
+
+
 # @allowed_users(allowed_roles=["Planificateur"]) 
 #  calculate smoothing end date to use in create needs      
 def smoothing_calculate(df_data,calendar_type):
@@ -1379,7 +1385,7 @@ def smoothing_calculate(df_data,calendar_type):
 
     df_closed_false= df_data[df_data['closed']=='False']
     
-
+    
     df_closed_false = df_closed_false.sort_values(['Smooth_Family','Ranking']).reset_index()
     del df_closed_false['index']
     # filter df_data where closed == True
@@ -1606,33 +1612,21 @@ def result(request,division,product,planningapproval):
     return render(request,'app/Shopfloor/result.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version}) 
 
 
-def result_sharing(request):
-    division= profit_center= planning=version=data= None
-    if request.method == "POST":
-        division= request.POST.get('division')
-        profit_center= request.POST.get('profit_center')
-        planning= request.POST.get('planning')
-        version= request.POST.get('version')
-        
-        data=Shopfloor.objects.all().filter(division=division,profit_centre=profit_center,designation=planning)
-        data.update(shared=False)
-        data=Shopfloor.objects.all().filter(division=division,profit_centre=profit_center,designation=planning,version=version)
-        data.update(shared=True)
-    # return redirect("../result")
-    return render(request,'app/Shopfloor/result.html',{'records':data,'division':division,'profit_center':profit_center,'planning':planning,'version':version}) 
-
 #****************************Planning*****************************  
 # filter planning result
 def filter_kpi(request,division,product,planningapproval):
+    # last version for page_info 
     last_version = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
-     # name of planning approval for info page
-    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()
-    #Get data to pass them to the filter
-    material_smooth_family_list=Material.undeleted_objects.all().filter(product=product).order_by('Smooth_Family','material')
+    # name of planning approval for info page
+    planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
+    # Get data to pass them to the filter
+    material_smooth_family_list = Material.undeleted_objects.all().filter(product=product).order_by('Smooth_Family','material')
     # set of Smooth_Family (we use set because no duplicated value)
     list_smooth_family = {data.Smooth_Family for data in material_smooth_family_list}
+    # list of version
+    planning_versions = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
 
-    df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=None
+    df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=version_selected=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
@@ -1647,33 +1641,41 @@ def filter_kpi(request,division,product,planningapproval):
     production_plan_kpi.date_production_month=None
     demand_prod_planning.work_days_count =None
     demand_prod_planning.work_days_count_month=None
-    
-    
+
+
     if request.method == "POST":
         smooth_family_selected = request.POST.getlist('smooth_family')
         material_selected= request.POST.getlist('material')
+        version_selected= request.POST.get('version_planning')
+
         from_date= request.POST.get('from')
         to_date= request.POST.get('to')
 
+        # convert dates input(str) to datetime
         date_from = datetime.strptime(from_date,'%Y-%m-%d')
         date_to = datetime.strptime(to_date,'%Y-%m-%d')
-        
+
         # if filter with material and smooth family
         if material_selected and smooth_family_selected:
             #Get data
-            data=Shopfloor.objects.all().filter(Smooth_Family__in=smooth_family_selected,material__in=material_selected,planning_approval_id=planningapproval,version=last_version)
+            data=Shopfloor.objects.all().filter(Smooth_Family__in=smooth_family_selected,material__in=material_selected,planning_approval_id=planningapproval,version=version_selected)
             cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,smooth_family__in=smooth_family_selected,owner='officiel').distinct()
         else :
             # no filter with material and smooth family
             data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=last_version)
             cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel').distinct()
+
         # get workday to use in calcul 
         work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
+
+
         if not data:
             messages.error(request,"No data with selected filter!") 
             return render(request,'app/kpi.html',{'material_smooth_family_list':material_smooth_family_list,'list_smooth_family':list_smooth_family,
-            'division':division,'product':product,'planningapproval':planningapproval})
+            'division':division,'product':product,'from_date':from_date,'to_date':to_date,'planningapproval':planningapproval,'planningapproval_info':planningapproval_info,'planning_versions':planning_versions,'version_selected':version_selected})
 
+
+        # convert data to dataframe
         df_data=pd.DataFrame(data.values())
         df_cycle=pd.DataFrame(cycle_data.values())
         df_work_days=pd.DataFrame(work_days.values())
@@ -1687,8 +1689,24 @@ def filter_kpi(request,division,product,planningapproval):
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle,date_from,date_to)
 
-
+    # for sharing kpi
+    if request.method == "POST":
+        version= request.POST.get('version')
+        from_date= request.POST.get('from')
+        to_date= request.POST.get('to')
+        data=Shopfloor.objects.all().filter(product= product,planning_approval=planningapproval)
+        data.update(shared=False)
+        # check if version selected
+        if version is None:
+        # update share of last version True
+            data=Shopfloor.objects.all().filter(version=last_version,product= product,planning_approval=planningapproval)
+        else:
+            # update share of selcted version True
+            data=Shopfloor.objects.all().filter(version=version,product= product,planning_approval=planningapproval)
+        data.update(shared=True)
     return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'material_smooth_family_list':material_smooth_family_list,
+    'version_selected':version_selected,
+    'planning_versions':planning_versions,
     'division':division,'product':product,
     'list_smooth_family':list_smooth_family,
     'last_version':last_version,
@@ -1718,20 +1736,17 @@ def filter_kpi(request,division,product,planningapproval):
     })
 
 # Adjust cycle time  
-def update_cycle(request,division,product,planningapproval):
-    
-    from_date=to_date=smooth_family=cycle_time_list=week_cycle=None
+def update_cycle(request,division,product,planningapproval,version_selected):
+    smooth_family_list=cycle_time_list=week_cycle=None
     # to use info page
     last_version = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
-     # name of planning approval for info page
-    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()
-
+    
     if request.method == "POST":
-        smooth_family= request.POST.getlist('smooth_family')
+        smooth_family_list= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
         week_cycle= request.POST.getlist('week_cycle')
-        from_date= request.POST.get('from')
-        to_date= request.POST.get('to')
+        # from_date= request.POST.get('from')
+        # to_date= request.POST.get('to')
        
         for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
             # get year and week from table 
@@ -1741,7 +1756,7 @@ def update_cycle(request,division,product,planningapproval):
             cycle_type_input = request.POST.get('cycle-type-'+date)
 
             #Get Cycle to update
-            cycles=Cycle.objects.all().filter(division=division,product=product,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family,owner = 'officiel') 
+            cycles=Cycle.objects.all().filter(division=division,product=product,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family_list) 
             
             for cycle_to_update in cycles:
                 # get startTime and endTime  
@@ -1755,54 +1770,52 @@ def update_cycle(request,division,product,planningapproval):
                 elif cycle_type_input == 'Hours':
                     cycle_to_update.cycle_time= float(cycle_time)
                 cycle_to_update.save()
+                 # Get DF
+        shopfloor_data=Shopfloor.objects.filter(
+                                                version=version_selected,
+                                                product_id=product,
+                                                planning_approval_id=planningapproval
+                                                ).values(
+                                                        'division',
+                                                        'profit_centre',
+                                                        'order',
+                                                        'material',
+                                                        'designation',
+                                                        'order_type',
+                                                        'order_quantity',
+                                                        'date_start_plan',
+                                                        'date_end_plan' ,
+                                                        'fixation',
+                                                        'date_reordo',
+                                                        'message',
+                                                        'order_stat',
+                                                        'customer_order',
+                                                        'date_end_real', 
+                                                        'AllocatedTime', 
+                                                        'Leadtime', 
+                                                        'workstation',
+                                                        'Allocated_Time_On_Workstation', 
+                                                        'Smooth_Family',
+                                                        'Ranking', 
+                                                        'Freeze_end_date', 
+                                                        'Remain_to_do', 
+                                                        'closed')
+        df_shopfloor_data=pd.DataFrame(shopfloor_data)
+        # get calendar type
+        calendar_type= 'official'
+        # => smoothing_calculate (df, calendar type)
+        df=smoothing_calculate(df_shopfloor_data,calendar_type)
+        # delete key,freezed, key_start_day column
+        del df['key']
+        del df['freezed']
+        del df['key_start_day']
+        # delete index from df
+        df=df.reset_index(drop=True)
+        # =>  save_needs (df, product, planningapproval)
+        save_needs(df,product,planningapproval)
+    return filter_kpi(request,division,product,planningapproval)
                 
-    # get DF
-    shopfloor_data=Shopfloor.objects.filter(
-                                            version=last_version,
-                                            product_id=product,
-                                            planning_approval_id=planningapproval
-                                            ).values(
-                                                    'division',
-                                                    'profit_centre',
-                                                    'order',
-                                                    'material',
-                                                    'designation',
-                                                    'order_type',
-                                                    'order_quantity',
-                                                    'date_start_plan',
-                                                    'date_end_plan' ,
-                                                    'fixation',
-                                                    'date_reordo',
-                                                    'message',
-                                                    'order_stat',
-                                                    'customer_order',
-                                                    'date_end_real', 
-                                                    'AllocatedTime', 
-                                                    'Leadtime', 
-                                                    'workstation',
-                                                    'Allocated_Time_On_Workstation', 
-                                                    'Smooth_Family',
-                                                    'Ranking', 
-                                                    'Freeze_end_date', 
-                                                    'Remain_to_do', 
-                                                    'closed')
-    df_shopfloor_data=pd.DataFrame(shopfloor_data)
-    # get calendar type
-    calendar_type= 'official'
-    # => smoothing_calculate (df, calendar type)
-    df=smoothing_calculate(df_shopfloor_data,calendar_type)
-    # delete key,freezed, key_start_day column
-    del df['key']
-    del df['freezed']
-    del df['key_start_day']
-    # delete index from df
-    df=df.reset_index(drop=True)
-    # =>  save_needs (df, product, planningapproval)
-    save_needs(df,product,planningapproval)
-
-
-
-    return render(request,'app/kpi.html',{'from_date':from_date,'to_date':to_date,'last_version':last_version,'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'division':division,'product':product,'smooth_family':smooth_family,'cycle_time_list':cycle_time_list,'week_cycle':week_cycle})
+    # return render(request,'app/kpi.html',{'from_date':from_date,'to_date':to_date,'last_version':last_version,'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'division':division,'product':product,'smooth_family':smooth_family,'cycle_time_list':cycle_time_list,'week_cycle':week_cycle})   
 
 # calculate nomber of OF and OP ( wek and month)
 def demand_prod_planning(df_data,df_work_days,date_from,date_to):

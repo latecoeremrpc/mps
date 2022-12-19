@@ -77,11 +77,12 @@ urlpatterns = [
     path('division/<division>/product/<product>/planningapproval/<planningapproval>/createneeds/',views.create_needs,name='createneeds'), 
     path('division/<division>/product/<product>/planningapproval/<planningapproval>/result/',views.result,name='result'),
     # path('shopfloor/filter/',views.filter,name='filter'),
-    # path('shopfloor/shared/',views.result_sharing,name='sharing'),
+    # path('division/<division>/product/<product>/planningapproval/<planningapproval>/kpi/shared/',views.result_sharing,name='sharing'),
 
     # urls for planning 
     path('division/<division>/product/<product>/planningapproval/<planningapproval>/kpi/',views.filter_kpi,name='kpi'),
-    path('division/<division>/product/<product>/planningapproval/<planningapproval>/updatecycle',views.update_cycle,name='newcycle'), 
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/version/<version_selected>/updatecycle',views.update_cycle,name='newcycle'), 
+    # path('division/<division>/product/<product>/planningapproval/<planningapproval>/updatecycle',views.update_cycle,name='newcycle'), 
 
 
      
