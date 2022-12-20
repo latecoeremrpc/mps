@@ -211,9 +211,6 @@ def calendar(request,division,product):
     smooth_family= Material.undeleted_objects.filter(product_id = product).values_list('Smooth_Family',flat=True).distinct().order_by('Smooth_Family')
     # get cycle objects
     cycle=Cycle.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
-    print('***********')
-    print(cycle)
-    print(type(cycle))
     # get product object to display in calendar
     products_data= Product.undeleted_objects.all()
     # get all work data objects to display in Calendar
@@ -972,14 +969,7 @@ def copy_calendar(request,division,product):
 #All Planning Approval
 def all_planning(request,division,product):
     product_info=Product.objects.all().filter(id=product).first()
-    all_planning=PlanningApproval.objects.all().filter(product=product)
-    all_planning_test=PlanningApproval.objects.prefetch_related('shopfloor_set').all().filter(product=product)
-    
-    for i in all_planning_test:
-        shopfloor_info= i.shopfloor_set.all().filter(planning_approval=i.id).distinct('shared')
-        for shopfloor in shopfloor_info:
-            print(shopfloor.shared)
-              
+    all_planning=PlanningApproval.objects.all().filter(product=product)      
     return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info})
    
 #Save new Planning Approval
@@ -1013,10 +1003,10 @@ def update_planning(request,division,product,planningapproval):
 def palnning_details(request,division,product,planningapproval):
     # in planning deltails return filter_kpi
     # planning approval for info page
-    # planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
-    # versions =Shopfloor.objects.values_list('version', flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('version') 
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
+    versions =Shopfloor.objects.values_list('version', flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('version') 
     
-    return filter_kpi(request,division,product,planningapproval)
+    return filter_kpi(request,division,product,planningapproval,version_selected)
     # return render(request,'app/shopfloor/planning_details.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'versions':versions})  
 
 
@@ -1350,7 +1340,6 @@ def create_needs(request,division,product,planningapproval):
         messages.success(request,"Data saved successfully!") 
         return redirect(f'../result/')
 
-
 # @allowed_users(allowed_roles=["Planificateur"]) 
 #  calculate smoothing end date to use in create needs      
 def smoothing_calculate(df_data,calendar_type):
@@ -1593,7 +1582,7 @@ def result(request,division,product,planningapproval):
     data= versions= selected_version = None
     product_data=Product.objects.values('Profit_center','planning','division__name').filter(id =product).first()
     last_version = Shopfloor.objects.values_list('version', flat=True).filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],planning_approval_id=planningapproval).order_by('-version').first()
-    
+
     try:
         data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=last_version)
     except Exception:
@@ -1609,20 +1598,19 @@ def result(request,division,product,planningapproval):
     # name of planning approval for info page
     planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()   
 
-    return render(request,'app/Shopfloor/result.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'records':data,'division':division,'product':product,'versions':versions,'selected_version':selected_version,'last_version':last_version}) 
+    return render(request,'app/Shopfloor/result.html',{'planningapproval_info':planningapproval_info,
+    'planningapproval':planningapproval,'records':data,'division':division,'product':product,
+    'versions':versions,'selected_version':selected_version,'last_version':last_version})
 
+    # return render(request,'app/kpi.html',{'division':division,'product':product,'planningapproval':planningapproval,'version_selected':version_selected})  
 
-#****************************Planning*****************************  
 # filter planning result
-def filter_kpi(request,division,product,planningapproval):
+def filter_kpi(request,division,product,planningapproval,version):
     # last version for page_info 
-    last_version = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
+    # print(version)
+    version = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
-    # Get data to pass them to the filter
-    material_smooth_family_list = Material.undeleted_objects.all().filter(product=product).order_by('Smooth_Family','material')
-    # set of Smooth_Family (we use set because no duplicated value)
-    list_smooth_family = {data.Smooth_Family for data in material_smooth_family_list}
     # list of version
     planning_versions = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
 
@@ -1641,39 +1629,36 @@ def filter_kpi(request,division,product,planningapproval):
     production_plan_kpi.date_production_month=None
     demand_prod_planning.work_days_count =None
     demand_prod_planning.work_days_count_month=None
+    
+    if request.method == "POST" :
+        if 'filter_sbumit' in request.POST:
+            version = version_selected = request.POST.get('version_planning')
+            from_date= request.POST.get('from')
+            to_date= request.POST.get('to')
+        if 'update_cycle_sbumit' in request.POST:
+            version_selected = request.POST.get('version_selected')
+            from_date= request.POST.get('from')
+            to_date= request.POST.get('to')
+            #Update Cycle
+            update_cycle(request,division,product,planningapproval,version_selected)
 
-
-    if request.method == "POST":
-        smooth_family_selected = request.POST.getlist('smooth_family')
-        material_selected= request.POST.getlist('material')
-        version_selected= request.POST.get('version_planning')
-
-        from_date= request.POST.get('from')
-        to_date= request.POST.get('to')
-
-        # convert dates input(str) to datetime
+            # convert dates input(str) to datetime
         date_from = datetime.strptime(from_date,'%Y-%m-%d')
         date_to = datetime.strptime(to_date,'%Y-%m-%d')
 
-        # if filter with material and smooth family
-        if material_selected and smooth_family_selected:
-            #Get data
-            data=Shopfloor.objects.all().filter(Smooth_Family__in=smooth_family_selected,material__in=material_selected,planning_approval_id=planningapproval,version=version_selected)
-            cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,smooth_family__in=smooth_family_selected,owner='officiel').distinct()
-        else :
-            # no filter with material and smooth family
-            data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=last_version)
-            cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel').distinct()
+        #  get data for version
+        if version_selected:
+            data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version_selected)
+        else:
+            data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
 
+        cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel').distinct()
         # get workday to use in calcul 
         work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
-
-
+        
         if not data:
-            messages.error(request,"No data with selected filter!") 
-            return render(request,'app/kpi.html',{'material_smooth_family_list':material_smooth_family_list,'list_smooth_family':list_smooth_family,
-            'division':division,'product':product,'from_date':from_date,'to_date':to_date,'planningapproval':planningapproval,'planningapproval_info':planningapproval_info,'planning_versions':planning_versions,'version_selected':version_selected})
-
+                messages.error(request,"No data with selected filter!") 
+                return render(request,'app/kpi.html',{'division':division,'product':product,'from_date':from_date,'to_date':to_date,'planningapproval':planningapproval,'planningapproval_info':planningapproval_info,'planning_versions':planning_versions,'version_selected':version_selected})
 
         # convert data to dataframe
         df_data=pd.DataFrame(data.values())
@@ -1689,27 +1674,23 @@ def filter_kpi(request,division,product,planningapproval):
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle,date_from,date_to)
 
-    # for sharing kpi
-    if request.method == "POST":
-        version= request.POST.get('version')
-        from_date= request.POST.get('from')
-        to_date= request.POST.get('to')
-        data=Shopfloor.objects.all().filter(product= product,planning_approval=planningapproval)
-        data.update(shared=False)
-        # check if version selected
-        if version is None:
-        # update share of last version True
-            data=Shopfloor.objects.all().filter(version=last_version,product= product,planning_approval=planningapproval)
-        else:
-            # update share of selcted version True
-            data=Shopfloor.objects.all().filter(version=version,product= product,planning_approval=planningapproval)
-        data.update(shared=True)
-    return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'material_smooth_family_list':material_smooth_family_list,
+        # for sharing kpi
+        # if request.method == "POST":
+        #     version= request.POST.get('version')
+        #     from_date= request.POST.get('from')
+        #     to_date= request.POST.get('to')
+        #     data=Shopfloor.objects.all().filter(product= product,planning_approval=planningapproval)
+        #     data.update(shared=False)
+        #     # check if version selected
+        #     data=Shopfloor.objects.all().filter(version=version_selected,product= product,planning_approval=planningapproval)
+        #     data.update(shared=True)
+    
+    
+    return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,
     'version_selected':version_selected,
+    'version':version,
     'planning_versions':planning_versions,
     'division':division,'product':product,
-    'list_smooth_family':list_smooth_family,
-    'last_version':last_version,
     'records':df_data,
     'df_cycle':df_cycle,
     'df_work_days':df_work_days,
@@ -1739,7 +1720,11 @@ def filter_kpi(request,division,product,planningapproval):
 def update_cycle(request,division,product,planningapproval,version_selected):
     smooth_family_list=cycle_time_list=week_cycle=None
     # to use info page
-    last_version = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
+    if version_selected == None:
+        pass
+        print('my version:',version_selected)
+    else:
+        version_selected = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     
     if request.method == "POST":
         smooth_family_list= request.POST.getlist('smooth_family')
@@ -1813,7 +1798,7 @@ def update_cycle(request,division,product,planningapproval,version_selected):
         df=df.reset_index(drop=True)
         # =>  save_needs (df, product, planningapproval)
         save_needs(df,product,planningapproval)
-    return filter_kpi(request,division,product,planningapproval)
+    # return filter_kpi(request,division,product,planningapproval,version_selected)
                 
     # return render(request,'app/kpi.html',{'from_date':from_date,'to_date':to_date,'last_version':last_version,'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'division':division,'product':product,'smooth_family':smooth_family,'cycle_time_list':cycle_time_list,'week_cycle':week_cycle})   
 
