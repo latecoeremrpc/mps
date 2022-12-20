@@ -1001,12 +1001,10 @@ def update_planning(request,division,product,planningapproval):
 
 
 def palnning_details(request,division,product,planningapproval):
-    # in planning deltails return filter_kpi
-    # planning approval for info page
-    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
-    versions =Shopfloor.objects.values_list('version', flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('version') 
     
-    return filter_kpi(request,division,product,planningapproval,version_selected)
+    version = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
+    
+    return filter_kpi(request,division,product,planningapproval,version)
     # return render(request,'app/shopfloor/planning_details.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'versions':versions})  
 
 
