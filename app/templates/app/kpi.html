@@ -9,16 +9,17 @@
 <!--return back-->  
 {% include "app/info/return_back.html" %}
 <!-- info -->
-{% include "app/info/info_page.html" %}
+{% include "app/info/info_page.html" %}                  
 
 <!-- time line (process) -->                                      
 {% include "app/info/timeline.html" %}
 
 
+
 <!-- ***************************************************************************************************** -->
 <div class="content" id="container">
     <div class="container-fluid">
-        <form method="POST" action="{% url 'kpi' division product planningapproval version %}">
+        <form method="POST" action="{% url 'kpi' division product planningapproval %}">
             <!-- Security token by Django -->
             {% csrf_token %}
             <div class="row">
@@ -26,11 +27,11 @@
                     <div class="input-group">
                         <span class="input-group-text">Version</span>
                         <!-- <input name="from" id="from" type="select" class=" form-control" value="" required> -->
-                        <select name="version_planning" class="custom-select form-control-border" id="exampleSelectBorder"required>
+                        <select name="version_planning" class="custom-select form-control-border" id="exampleSelectBorder" required>
                             <!-- <option>Select version</option>   -->
                             {% for item in planning_versions %}
                              <!-- convert item to string in the template, you can use -->
-                            <option value="{{item}}" {% if version_selected == item|stringformat:"i" %}  selected {% endif %}>{{item}}</option>
+                            <option value="{{item}}" {% if version_selected == item|stringformat:"i" %} selected {% endif %}>{{item}}</option>
                             {%empty%}
                                 <option value="">No versions</option>   
                             {% endfor %}
@@ -45,14 +46,14 @@
                                 Go!
                             </button>
                         </div>
-                      </div>          
+                    </div>          
                 </div>
             </div>   
             <br>     
         </form>
-        {% if cycle_count.iterrows %}
+        {% if cycle_mean.iterrows %}
             <div>
-                <form  method="POST" action="{% url 'kpi' division product planningapproval version %}">
+                <form  method="POST" action="{% url 'kpi' division product planningapproval %}">
                     <!-- Security token by Django -->
                     {% csrf_token %}
                     <div class="col-10 offset-1">
@@ -63,7 +64,6 @@
                                 </h3>
                             </div>
                             <div class="card-body">
-                                
                                 <table class="table table-bordered text-nowrap table-sm">
                                     <thead >
                                         <tr>
@@ -73,19 +73,21 @@
                                             <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
                                         </tr>
                                     </thead> 
-                                    <tbody>
+                                    <tbody>    
                                             
-                                        {% for index,cycle in cycle_count.iterrows%}
+                                        {% for index,cycle in cycle_mean.iterrows%}
                                         <tr>
                                             <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
                                             <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
                                             <input name="version_selected" id="version_selected" type="hidden" class=" form-control" value="{{version_selected}}" required> 
-
-                                            
-                                            <td><input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week}}"readonly="readonly"></td> 
-                                            <td><input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input" value="{{cycle.smooth_family}}"readonly="readonly"></td>                                     
+                                            <td>
+                                                <input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week}}" readonly="readonly">
+                                            </td> 
+                                            <td>
+                                                <input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input" value="{{cycle.smooth_family}}" readonly="readonly">
+                                            </td>                                     
                                             <td class="form-row">
-                                                <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required="" step="0.01"> 
+                                                <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required step="0.01" > 
                                             </td>
                                             <td>
                                                 <div class="inline-radio-input col-sm-8">
@@ -100,7 +102,6 @@
                                         <td colspan="4">No data !</td>
                                         {%endfor%} 
                                     </tbody>
-                                <!-- <button type="submit" class="btn btn-primary" id="save-work" name ='save-work'>Save</button> -->
                                 </table> 
                                 <br>
                                 <button type="submit" name="update_cycle_sbumit" style="float: right;" class="btn btn-primary">Save</button>
@@ -110,7 +111,7 @@
                 </form>
             </div>
         {%endif%}
-<!---------------------------------------------- Switch Month Week button  ------------------------------------------------------------->
+<!------------------------------------------------  Switch Month Week button  ----------------------------------------------------------------------------->
         <button onclick="myFunction()" id="switch_month_week"  class= "switch_week_month">
             <i  class="fa-solid fa-repeat"></i>
             <b id="text_switch">M</b>
@@ -119,7 +120,7 @@
 </div>
 <br>
 <hr>
-<!---------------------------------------------------------------- KPI--------------------------------------------------------------------- -->
+<!---------------------------------------------------------------- KPI -------------------------------------------------------------------------------------->
 
 <!--Program demand  -->
 <div  class="row">
@@ -132,24 +133,24 @@
                 </h3>
                 <div class="card-tools"> 
                     <ul class="list-group list-group-horizontal" style="height: 35px;">
-                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
-                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked" class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top:0px;">
                             <i class="fas fa-minus"></i></button></li>
-                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li>
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top:0px;margin-bottom:0px;"><i class="fas fa-expand"></i></button></li>
                     </ul>  
                 </div> 
-                </div>
-                <div id="demand_prod_planning_week" style="display:block ;">
-                    {% include 'app/charts/demand_prod_planning_week.html' %}
-                </div>
-                <div id="demand_prod_planning_month" style="display:none ;">
-                    {% include 'app/charts/demand_prod_planning_month.html' %}
-                </div>
+            </div>
+            <div id="demand_prod_planning_week" style="display:block;">
+                {% include 'app/charts/demand_prod_planning_week.html' %}
+            </div>
+            <div id="demand_prod_planning_month" style="display:none;">
+                {% include 'app/charts/demand_prod_planning_month.html' %}
+            </div>
         </div> 
     </div>
 </div> 
     
-<!-- modal -->
+<!-- information modal -->
 <div class="modal" id="test_stocked">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -157,11 +158,9 @@
                 <h4 class="modal-title">Informations</h4>
             </div>
             <div class="modal-body">	
-
             </div>
             <div class="modal-footer">
                 <input type="button" href="" class="btn btn-secondary" data-dismiss="modal" value="Cancel">
-                <!-- <a href="" id='targetlink' class="btn btn-danger" value="Delete">Delete</a>   -->
             </div>
         </div>
     </div>
@@ -177,20 +176,20 @@
                     Cycle Time
                 </h3>
                 <div class="card-tools"> 
-                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                    <ul class="list-group list-group-horizontal" style="height:35px;">
                         <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
                         <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top:0px;">
                             <i class="fas fa-minus"></i></button></li>
-                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li> 
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top:0px;margin-bottom:0px;"><i class="fas fa-expand"></i></button></li> 
                     </ul>  
                 </div> 
-                </div>
-                <div id="cycle_kpi_week" style="display:block ;" >
-                    {% include 'app/charts/week_cycle_count.html' %}
-                </div>
-                <div id="cycle_kpi_month" style="display:none ;" >
-                    {% include 'app/charts/month_cycle_count.html' %}
-                </div>
+            </div>
+            <div id="cycle_kpi_week" style="display:block ;" >
+                {% include 'app/charts/week_cycle_mean.html' %}
+            </div>
+            <div id="cycle_kpi_month" style="display:none ;" >
+                {% include 'app/charts/month_cycle_mean.html' %}
+            </div>
         </div> 
     </div>
 </div> 
@@ -200,9 +199,9 @@
     <div class="col-12">
         <div class="card custom-card">
             <div class="card-header custom-card-header">
-              <h3 class="card-title custom-card-title">
+                <h3 class="card-title custom-card-title">
                 <i class="far fa-chart-bar"></i>
-                   Production Plan
+                    Production Plan
                 </h3>
                 <div class="card-tools"> 
                     <ul class="list-group list-group-horizontal" style="height: 35px;">
@@ -212,33 +211,30 @@
                         <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li> 
                     </ul>  
                 </div> 
-                </div>
-                <div id="production_plan_week" style="display:block ;" >
-                    {% include 'app/charts/week_production_plan.html' %}
-                </div>
-                <div id="production_plan_month" style="display:none ;" >
-                    {% include 'app/charts/month_production_plan.html' %}
-                </div> 
+            </div>
+            <div id="production_plan_week" style="display:block;" >
+                {% include 'app/charts/week_production_plan.html' %}
+            </div>
+            <div id="production_plan_month" style="display:none;" >
+                {% include 'app/charts/month_production_plan.html' %}
+            </div> 
         </div> 
     </div>
 </div> 
 
+<!---------------------------------------------------------------- Share result ------------------------------------------------------->
+<form action="{% url 'kpi' division product planningapproval %}" method="POST">
+    <!-- Security token by Django -->
+    {% csrf_token %}
+    <input type="hidden" value="{{version_selected}}" name="version">
+    <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
+    <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+    <center>
+        <button  name="share" type="submit" class="bn632-hover-upload bn20"><i class="fa-solid fa-arrow-up-right-from-square"></i> Share</button>
+    </center>
+</form>
 
-
-<!----------------------------------------------------------------Share result------------------------------------------------------->
-<form action="{% url 'kpi' division product planningapproval version  %}" method="POST">
-        <!-- Security token by Django -->
-        {% csrf_token %}
-        <input type="hidden" value="{{version_selected}}" name="version">
-        <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
-        <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
-        <center>
-            <button  naame="shareshare" type="submit" class="bn632-hover-upload bn20"><i class="fa-solid fa-arrow-up-right-from-square"></i> Share</button>
-        </center>
-  </form>
-
-
-<!-------------------------------------------- Script for switch month week------------------------------------------------------------>
+<!-------------------------------------------- Script for switch month week ------------------------------------------------------------>
 <script>
     function myFunction() {
         var text_switch =document.getElementById("text_switch");
@@ -251,12 +247,12 @@
         var month_production = document.getElementById("production_plan_month");
         var btn = document.getElementById("switch_month_week");
         
-      if (week_demand.style.display === "block" & week_cycle.style.display === "block" & week_production.style.display === "block" ) {
+      if (week_demand.style.display === "block" & week_cycle.style.display === "block" & week_production.style.display === "block") {
         week_demand.style.display = "none";
         week_cycle.style.display = "none";
         week_production.style.display = "none";
 
-        month_demand.style.display = "block";
+        month_demand.style.display= "block";
         month_cycle.style.display = "block";
         month_production.style.display = "block";
         text_switch.textContent='W';
@@ -266,25 +262,12 @@
         week_cycle.style.display = "block";
         week_production.style.display = "block";
 
-        month_demand.style.display = "none";
+        month_demand.style.display= "none";
         month_cycle.style.display = "none";
         month_production.style.display = "none";
-        text_switch.textContent='M';
+        text_switch.textContent ='M';
       }
     }
 </script>
-
-    <!--JS for select multiple-->
-<!-- <script>
-    $(document).ready(function() {
-        $('#material').select2();
-        $('#smooth_family').select2();
-    });
-</script> 
- -->
-
-
-   
-
 
 {% endblock content%}

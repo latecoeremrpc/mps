@@ -12,43 +12,29 @@
                 {%include 'app/alerts/alert.html'%}
             {% endfor %}
         {% endif %}
-        <!--return back-->
-        <!-- <div style='margin-bottom:10px'>
-            <a href="{%url 'division' %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
-        </div> -->
-        <!-- info -->
-        <div class="card-footer " style="border: 1px solid rgba(0,0,0,.125); border-radius: 15px;">
+
+        <div class="card-footer " style="border: 1px solid rgba(0,0,0,.125); border-radius:15px;">
             <div class="row">
                 <div class="col-sm-12 col-6">
                     <div class="description-block" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
                     <span class="description-percentage text-success"><i class="fa-solid fa-building"></i></span>
                     <h5 class="description-header">{{division_info.name}} | {{division_info.description}}</h5>
-                    <!-- <span class="description-text">Division</span> -->
                     </div>
                 </div>
             </div> 
         </div>
         <br>
-       
         <div class="row">
             <div class="col-12">
                 <div class="card custom-card">
-                    <div class="card-header custom-card-header ui-sortable-handle" >
+                    <div class="card-header custom-card-header ui-sortable-handle">
                         <h5 class="card-title custom-card-title">List of products</h5>
-                        <!-- <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div> -->
                     </div>
                     <div class="card-body table-responsive p-0" style="height: 600px;">
                         <div class="card-body">
-                            <button class="bn632-hover-new bn20" data-target="#create" data-toggle="modal" style="margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> New</button>
+                            <button class="bn632-hover-new bn20" data-target="#create" data-toggle="modal" style="margin-bottom:10px;"><i class="fa-solid fa-plus"></i> New</button>
                             <table id="product" class="table table-striped table-hover table-bordered  text-nowrap">
-                                <thead >
+                                <thead>
                                     <tr>
                                         <th>ID</th>
                                         <th>Program</th>
@@ -60,18 +46,12 @@
                                         <th>Calendar</th>
                                         <th>Calendar Config Treatment</th>
                                         <th>Calendar Config CpOrdo</th>
-                                        <!-- <th>Files</th> -->
-                                        <!-- <th>Needs</th> -->
-                                        <!-- <th>Data</th> -->
                                         <th>Planning</th>
                                         <th>State</th>
                                         <th >Actions</th>
-                                        
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
-                                    
                                         {% for d in data %}
                                             <tr>
                                                 <td>{{ d.id}}</td> 
@@ -82,22 +62,18 @@
                                                 <td>{{d.Profit_center}}</td>
                                                 <td><center><a class="btn data_btn" href="{% url 'material' division d.id  %}" >Material</a></center></td> 
                                                 <td><center><a class="btn data_btn" href="{% url 'calendar' division d.id %}" >Calendar</a></center></td> 
-
-                                                <!-- <td><a href="{% url 'material' division d.id  %}" style="text-decoration: none;">Material</a></td> -->
-                                                <!-- <td><a href="{% url 'calendar' division d.id %}" style="text-decoration: none; ">Calendar</a></td> -->
                                                 {%if d.has_treatement %}
                                                 <td><center><a class="btn data_btn" href="{% url 'configTrait' division d.id %}" >Calendar Config Treatment</a></center></td> 
                                                 <td><center><a class="btn data_btn" href="{% url 'configCpordo' division d.id %}" >Calendar Config CpOrdo</a></center></td> 
-                                                
-                                                <!-- <td><a href="{% url 'configTrait' division d.id %}"style="text-decoration: none; ">Calendar Config Treatment</a></td> -->
-                                                <!-- <td><a href="{% url 'configCpordo' division d.id %}"style="text-decoration: none; ">Calendar Config CpOrdo</a></td> -->
-
                                                 {%else%}
                                                     <td>N/A</td>
                                                     <td>N/A</td>
                                                 {%endif%}
-                                                <td><center><a class="btn data_btn" href="{% url 'allplanning' division d.id %}">Planning</a></center></td> 
-                                                
+                                                <td>
+                                                    <center>
+                                                        <a class="btn data_btn" href="{% url 'allplanning' division d.id %}">Planning</a>
+                                                    </center>
+                                                </td> 
                                                 {% if d.is_deleted%} 
                                                 <td style="color: red;">Deleted</td> 
                                                 {%else%} 
@@ -112,8 +88,10 @@
                                                     {%endif%}
                                                 </td>
                                             </tr>
-                                            {%empty%}
-                                            <tr><td colspan="12"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td></tr> 
+                                        {%empty%}
+                                            <tr>
+                                                <td colspan="12"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
+                                            </tr> 
                                         {% endfor %}
                                 </tbody>               
                             </table>
@@ -126,7 +104,7 @@
 </div>
 
 
-<!--create Product modal-->
+<!--------------------------------------------create Product modal---------------------------------------------->
 <div class="modal" id="create">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -149,7 +127,7 @@
     </div>
 </div>
 
-<!--Update Product modal-->
+<!--------------------------------------Update Product modal--------------------------------------------------->
 <div class="modal" id="update" >
     <div class="modal-dialog">
         <div class="modal-content">
@@ -172,9 +150,7 @@
         </div>
     </div>
 </div>
-
-
-<!--delete Product modal-->
+<!--------------------------------------------delete Product modal------------------------------------------->
 <div class="modal" id="delete" >
     <div class="modal-dialog">
         <div class="modal-content">
@@ -190,8 +166,7 @@
         </div>
     </div>
 </div>
-
-<!--restore Product modal-->
+<!------------------------------------------restore Product modal---------------------------------------------->
 <div class="modal" id="restore" >
     <div class="modal-dialog ">
         <div class="modal-content">
@@ -207,9 +182,11 @@
         </div>
     </div>
 </div>
-<!--******************************************************************************************************************************-->
 
-<!-- Delete Modal  -->
+
+<!--**************************************************************************************************************-->
+
+<!-- Delete Modal-->
 <script>
     $('#delete').on('show.bs.modal', function (event) {
     var id = $(event.relatedTarget).data('id');
@@ -255,9 +232,7 @@
     }else{
         document.getElementById("id_has_treatement").checked=false;
     } 
-
     });
-
 </script>
 
 <!--DataTables-->
@@ -272,7 +247,6 @@
           );  
     });
 </script>
-
 
 
 {% endblock %}

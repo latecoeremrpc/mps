@@ -53,12 +53,10 @@ class SoftDeleteModel(models.Model):
         #Django will not create a database table for this model
         abstract= True
 
-
 #**************************************************************
 
 # Division Model
-class Division(BaseModel,SoftDeleteModel) :
-
+class Division(BaseModel,SoftDeleteModel):
      name = models.CharField(max_length=20 , unique= True)
      description = models.CharField(max_length=200,unique=True)
 
@@ -83,7 +81,7 @@ class Product(BaseModel,SoftDeleteModel):
 
 
 #Material Model 
-class Material(BaseModel,SoftDeleteModel) :
+class Material(BaseModel,SoftDeleteModel):
     material= models.CharField(max_length=200)
     workstation= models.CharField(max_length=200)
     AllocatedTime =models.FloatField()
@@ -101,9 +99,8 @@ class Material(BaseModel,SoftDeleteModel) :
         return self.material
 
 
-
 #HolidayCalendar Model
-class HolidaysCalendar(BaseModel,SoftDeleteModel) :
+class HolidaysCalendar(BaseModel,SoftDeleteModel):
     name= models.CharField(max_length=200, null=False)
     holidaysDate= models.DateField(null= False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True) 
@@ -245,7 +242,6 @@ class Shopfloor(BaseModel,SoftDeleteModel):
     planning_approval = models.ForeignKey(PlanningApproval, on_delete=models.CASCADE,null=True)
 
     
-
     # renames the instances of the Shopfloor
     # with their order
     # def __str__(self):
@@ -261,6 +257,8 @@ class Cycle(BaseModel,SoftDeleteModel):
     workdata=models.ForeignKey(WorkData,on_delete=models.CASCADE,null=True)
     owner = models.CharField(default='officiel',max_length=30)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
+    version=models.IntegerField(null=True)
+    planning_approval = models.ForeignKey(PlanningApproval, on_delete=models.CASCADE,null=True)
 
 
 #Staff Model

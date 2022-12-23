@@ -12,7 +12,8 @@
             <a href="{%url 'product' division %}"><i class="fa-solid fa-arrow-left-long" style="color: rgb(35, 35, 80);"></i></a>
         </div>
          <!-- info -->
-         {% include "app/info/info_page.html" %}
+        {% include "app/info/info_page.html" %}
+        
         <div class="row">
             <div class="col-12">
                 <div class="card custom-card">
@@ -25,12 +26,12 @@
                                 <form method="POST"  action="{% url 'copycalendar' division product %}">
                                     <!-- Security token by Django -->
                                     {% csrf_token %}
-                                    <b>From: </b> 
+                                    <b>From:</b> 
                                     <div class="input-group input-group-sm" style="width:300px">
-                                        <select name="product_copied" size="1" style="height: 40px;"  class="custom-select form-control-border" id="exampleSelectBorder">
+                                        <select name="product_copied" size="1" style="height:40px;" class="custom-select form-control-border" id="exampleSelectBorder">
                                             <!--list of product-->
                                             {% for p in products_data %}
-                                            <option value="{{p.id}}">{{p.division.name}} | {{p.product}} </option>
+                                            <option value="{{p.id}}">{{p.division.name}} | {{p.product}}</option>
                                             {% endfor %}
                                         </select>
                                         <span class="input-group-append">
@@ -47,21 +48,17 @@
                                 </div>    
                             </div>
                         </div>
-                                <!-- <select class="btn-outline-primary dropdown-toggle dropdown-toggle-split" name="product_copied" size="1" >
-                            {% for p in products_data %}
-                                <option value="{{p.id}}">{{p.division.name}} | {{p.product}}  </option>
-                                {% endfor %}
-                            </select> 
-                            <input class="btn btn-outline-primary" type="submit" value="valid"/>  -->
                         <br>
                         <!--Display Calendar-->
                         <div id="calendar" class="calendar" style="display:block;"></div>
                         <!-- Display table -->
                         <div id="table" class="calendar" style="display:none;">
                             <hr>
-                            <p><strong>Work Day Table</strong></p>
+                            <p>
+                                <strong>Work Day Table</strong>
+                            </p>
                             <table id="workday" class="table table-striped table-hover table-bordered  text-nowrap">
-                                <thead >
+                                <thead>
                                     <tr> 
                                         <th>Work Date</th>
                                         <th>Start Time</th>
@@ -77,51 +74,55 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                        {%for day in workdata %}
-                                            <tr>
-                                                <td>{{day.date| date:'d/m/Y'}}</td>
-                                                <td>{{day.startTime |time:"H:i:s"}}</td>  
-                                                <td>{{day.endTime |time:"H:i:s"}}</td>
-                                                <td>{{day.FTEhourByDay}}</td>
-                                                <td>{{day.ExtraHour}}</td>
-                                                <td>{{day.Absenteeism_ratio}}</td>
-                                                <td>{{day.Unproductiveness_ratio}}</td>
-                                                <td>{{day.Efficienty_ratio}}</td>
-                                                {%for item in day.cycle_set.all %} 
-                                                    <td>Cycle time Family <b>{{item.smooth_family}}</b> : {{item.cycle_time}}</td>
-                                                {%endfor%}
-                                        
+                                    {%for day in workdata %}
+                                        <tr>
+                                            <td>{{day.date| date:'d/m/Y'}}</td>
+                                            <td>{{day.startTime |time:"H:i:s"}}</td>  
+                                            <td>{{day.endTime |time:"H:i:s"}}</td>
+                                            <td>{{day.FTEhourByDay}}</td>
+                                            <td>{{day.ExtraHour}}</td>
+                                            <td>{{day.Absenteeism_ratio}}</td>
+                                            <td>{{day.Unproductiveness_ratio}}</td>
+                                            <td>{{day.Efficienty_ratio}}</td>
+                                            {%for item in day.cycle_set.all %} 
+                                            {%if item.version == None and item.plannig_approval == None %}
+                                                <td>Cycle time Family <b>{{item.smooth_family}}</b> : {{item.cycle_time}}</td>
+                                            {%endif%}
+                                            {%endfor%}
+                                    
 
-                                        {%empty%}                        
-                                            <tr>
-                                                <td colspan="10"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
-                                            </tr>
-                                            </tr>
-                                        {% endfor %}             
+                                    {%empty%}                        
+                                        <tr>
+                                            <td colspan="10"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
+                                        </tr>
+                                        </tr>
+                                    {% endfor %}             
                                 </tbody>              
                             </table>
                         </div>
                         <div id="holiday" class="calendar" style="display:none ;">
                             <hr>
-                            <p><strong>Holidays Table</strong></p>
+                            <p>
+                                <strong>Holidays Table</strong>
+                            </p>
                             <table id="holidays" class="table table-striped table-hover table-bordered  text-nowrap">
-                                <thead >
+                                <thead>
                                     <tr> 
                                         <th>Holiday</th>
                                         <th>Name</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                        {%for day in holidays %}
-                                            <tr>
-                                                <td>{{day.holidaysDate| date:'d/m/Y'}}</td>
-                                                <td>{{day.name}}</td>  
-                                        {%empty%}                        
-                                            <tr>
-                                                <td colspan="6"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
-                                            </tr>
-                                            </tr>
-                                        {% endfor %}             
+                                    {%for day in holidays %}
+                                        <tr>
+                                            <td>{{day.holidaysDate| date:'d/m/Y'}}</td>
+                                            <td>{{day.name}}</td>  
+                                    {%empty%}                        
+                                        <tr>
+                                            <td colspan="6"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
+                                        </tr>
+                                        </tr>
+                                    {% endfor %}             
                                 </tbody>              
                             </table>
                         </div>
@@ -133,7 +134,7 @@
 </div>
 
 
-<!--Delete Modal-->
+<!----------------------------------------------Delete Modal------------------------------------------>
 <div class="modal fade" id="delete-modal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -164,7 +165,7 @@
     </div>
 </div>
   
-<!--Save and update Modal -->
+<!----------------------------------Save and update Modal ------------------------------------------->
 <div class="modal fade" id="event-modal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -316,7 +317,7 @@
 
 
 
-<!-- button switch between calendar and table  -->
+<!-----------------------------button switch between calendar and table ----------------------------->
 
 <button onclick="myFunction()" id="switch_calendar_table" class="bn632-hover bn20">
     <i class="fa-solid fa-calendar-days"></i>
@@ -325,7 +326,7 @@
 </button>
 
 
-<!-- scripts for calendar -->
+<!-------------------------------------- scripts for calendar --------------------------------------->
 <script>
    let calendar = null;
 
@@ -678,7 +679,7 @@
     
 </script>
 
-<!-- scripts for switch calendar - table  -->
+<!--------------------------- scripts for switch calendar / table  ---------------------------------->
 <script>
     function myFunction() {
         var text_switch =document.getElementById("text_switch");
@@ -702,7 +703,7 @@
     }
 </script>
 
-<!-- datatable -->
+<!---------------------------------------------- datatable ---------------------------------------->
 <script type="text/javascript" language="javascript">
     jQuery(document).ready(function () {
           $("#workday").dataTable(
