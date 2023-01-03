@@ -23,7 +23,7 @@
                         <h5 class="card-title custom-card-title">
                             Smoothing V  
                                 {% if selected_version %} 
-                                        {% if selected_version != last_version %} 
+                                        {% if selected_version != version %} 
                                             {{selected_version}}
                                             <small class="badge badge-danger"><i class="fa-regular fa-circle-xmark"></i> Not the last version</small>
 
@@ -33,7 +33,7 @@
 
                                         {% endif %}
                                 {% else %}
-                                    {{last_version}}
+                                    {{version}}
                                      <small class="badge badge-success"><i class="fa-solid fa-check-double"></i> Last version</small>
                                 {% endif %}
                         </h5>
