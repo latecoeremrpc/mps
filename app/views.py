@@ -818,7 +818,6 @@ def update_conf_trait(request,division):
           messages.error(request,"try again !")           
     return redirect(f'./{str(obj.product_id)}/configTrait')
     
-
 # delete object (CalendarConfigurationTraitement) by id
 def delete_conf_trait(request, division ,id):
     # fetch the object related to passed id
@@ -1331,6 +1330,8 @@ def create_needs(request,division,product,planningapproval):
         df=df.reset_index(drop=True)
         # save shofloor with version 
         save_needs(df,product,planningapproval)
+        # to save cycle with the same version of shopfloor
+        save_cycle_with_version(product,planningapproval)
         messages.success(request,"Data saved successfully!") 
         return redirect(f'../result/')
 
@@ -1466,8 +1467,8 @@ def save_needs(df,product,planningapproval):
     version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     version = version_number['version']+1 if version_number else 1
     
-    # save cycle with version 
-    save_cycle_with_version(product,planningapproval)
+    # to save cycle with the same version of shopfloor
+    # save_cycle_with_version(product,planningapproval)
 
     #insert base informations into file
     df.insert(0,'created_at',datetime.now())
@@ -1564,7 +1565,7 @@ def save_cycle_with_version(product,planningapproval):
             else:
                 cycle_data =Cycle(division=cycle.division,product=cycle.product,version =1,workdata=cycle.workdata,work_day=cycle.work_day,planning_approval=planningapproval_object,cycle_time=cycle.cycle_time,profit_center=cycle.profit_center,smooth_family=cycle.smooth_family)
             cycle_data.save()
-    return cycles
+    return True
 
 
 # filter by division, profit_center and panning, week to get versions
@@ -1659,7 +1660,8 @@ def filter_kpi(request,division,product,planningapproval):
             to_date= request.POST.get('to')
             #Update Cycle
             update_cycle(request,division,product,planningapproval,version_selected)
-            
+            # to redirect to the last version after update
+            version = planning_versions.first()
             version_selected=version
         # share result   
         if 'share' in request.POST:
@@ -1690,7 +1692,6 @@ def filter_kpi(request,division,product,planningapproval):
                 messages.error(request,"No data with selected filter!") 
                 return render(request,'app/kpi.html',{'division':division,'product':product,'from_date':from_date,'to_date':to_date,'planningapproval':planningapproval,'planningapproval_info':planningapproval_info,'planning_versions':planning_versions,'version_selected':version_selected})
 
-        # convert data to dataframe
         df_data=pd.DataFrame(data.values())
         df_cycle=pd.DataFrame(cycle_data.values())
         df_work_days=pd.DataFrame(work_days.values())
@@ -1737,12 +1738,17 @@ def filter_kpi(request,division,product,planningapproval):
 # Adjust cycle time  
 def update_cycle(request,division,product,planningapproval,version_selected):
     smooth_family_list=cycle_time_list=week_cycle=None
-    # to use info page
-    # if version_selected is None:
-    #     print('my version:',version_selected)
-    # else:
-    #     version_selected = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     
+    # *****************************
+
+    # get all planning approval id from table cycle
+    planningapproval_cycle = Cycle.objects.values_list('planning_approval',flat=True).filter(product=product)
+    # get planningapproval object to add in cycle table when we save with version 
+    planningapproval_object= PlanningApproval.objects.get(id=planningapproval)
+    version_number = Cycle.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
+    version = version_number['version'] + 1 if version_number else 1 
+
+    # ****************************
     if request.method == "POST":
         smooth_family_list= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
@@ -1755,11 +1761,10 @@ def update_cycle(request,division,product,planningapproval,version_selected):
             year=date.split('-W')[0]
             week=date.split('-W')[1]
             #get cycle type hours or days
-            cycle_type_input = request.POST.get('cycle-type-'+date)
+            cycle_type_input = request.POST.get('cycle-type-'+ date)
             #Get Cycle to update
             cycles=Cycle.objects.all().filter(division=division,product=product,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family_list,planning_approval_id=planningapproval,version=version_selected) 
-            df_cycle=pd.DataFrame(cycles.values())
-            df_cycle.to_csv('df_cycle.csv')
+            
             for cycle_to_update in cycles:
                 # get startTime and endTime  
                 startTime = WorkData.objects.values('startTime').filter(id=cycle_to_update.workdata_id).first()
@@ -1772,7 +1777,15 @@ def update_cycle(request,division,product,planningapproval,version_selected):
                     cycle_to_update.cycle_time= float(cycle_time) * work_hours(start_time,end_time)
                 elif cycle_type_input == 'Hours':
                     cycle_to_update.cycle_time= float(cycle_time)
-                cycle_to_update.save()
+                
+                if all(i is None for i in planningapproval_cycle): 
+                    cycle_data =Cycle(division=cycle_to_update.division,product=cycle_to_update.product,version =1,workdata=cycle_to_update.workdata,work_day=cycle_to_update.work_day,planning_approval=planningapproval_object,cycle_time=cycle_to_update.cycle_time,profit_center=cycle_to_update.profit_center,smooth_family=cycle_to_update.smooth_family)
+                if int(planningapproval) in planningapproval_cycle:
+                    cycle_data =Cycle(division=cycle_to_update.division,product=cycle_to_update.product,version =version,workdata=cycle_to_update.workdata,work_day=cycle_to_update.work_day,planning_approval=planningapproval_object,cycle_time=cycle_to_update.cycle_time,profit_center=cycle_to_update.profit_center,smooth_family=cycle_to_update.smooth_family)
+                else:
+                    cycle_data =Cycle(division=cycle_to_update.division,product=cycle_to_update.product,version =1,workdata=cycle_to_update.workdata,work_day=cycle_to_update.work_day,planning_approval=planningapproval_object,cycle_time=cycle_to_update.cycle_to_update_time,profit_center=cycle_to_update.profit_center,smooth_family=cycle_to_update.smooth_family)
+                cycle_data.save()
+                # cycle_to_update.save()
                 
                
         shopfloor_data=Shopfloor.objects.filter(
