@@ -461,7 +461,6 @@ def work_hours(start_time,end_time):
     else:
         return ((end_time+ timedelta(days =1)) - start_time ).total_seconds() / 3600
 
-
 #create work data for calendar
 def work_data(request,division,product):
     work = WorkData.undeleted_objects.all().filter(product_id = product, owner ='officiel') 
@@ -599,7 +598,7 @@ def work_data(request,division,product):
                         for i,j in zip(smooth_family,cycle_time):
                             cycle_type_input = request.POST.get('cycle-type-'+i)
                             if cycle_type_input == 'Days':
-                                new_cycle_time= float(j) * work_hours
+                                new_cycle_time= float(j) * work_hours(start_time,end_time)
                             if cycle_type_input == 'Hours':
                                 new_cycle_time=j
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
@@ -624,7 +623,7 @@ def work_data(request,division,product):
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,product_id = product)
                             cycle_data.save()  
                 return redirect("../calendar")       
-              
+
 #********************custom work data****************************
 
 #create work data for custom calendar
