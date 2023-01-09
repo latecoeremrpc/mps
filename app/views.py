@@ -291,7 +291,7 @@ def create_calendar(request,division,product):
 
 
 # delete day (holiday or workdata and cycle)
-def delete_day(request,division,product): 
+def delete_day(request,division,product):  
     if request.method =="POST"  and 'delete' in request.POST:
         # get id value from form
         id = request.POST.get('date_id')
