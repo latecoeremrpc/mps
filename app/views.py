@@ -1628,9 +1628,9 @@ def filter_kpi(request,division,product,planningapproval):
     # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     # list of version
-    planning_versions = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
+    planning_versions =Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
     version = planning_versions.first()
-    df_data=df_cycle=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=version_selected=None
+    df_data=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=version_selected=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
@@ -1648,15 +1648,22 @@ def filter_kpi(request,division,product,planningapproval):
 
     # to display all 
     data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
-    cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version).distinct()
+    print(version, type(version))
+    print(division)
+    print(product)
+
+    cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
+    
+    print('cycle data',cycle_data)
     # get workday to use in calcul 
     work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
 
     df_data=pd.DataFrame(data.values())
     df_cycle=pd.DataFrame(cycle_data.values())
     df_work_days=pd.DataFrame(work_days.values())
+    df_cycle.to_csv('cycle.csv')
     # date
-    df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
+    # df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     
     # call function demand_prod_planning
     demand_prod_planning(df_data,df_work_days,date_from,date_to)
@@ -1719,7 +1726,7 @@ def filter_kpi(request,division,product,planningapproval):
         df_cycle=pd.DataFrame(cycle_data.values())
         df_work_days=pd.DataFrame(work_days.values())
         # date
-        df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
+        # df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
         # call function demand_prod_planning
         demand_prod_planning(df_data,df_work_days,date_from,date_to)
         # call function demand_prod_planning
@@ -1778,7 +1785,7 @@ def update_cycle(request,division,product,planningapproval,version_selected):
         week_cycle= request.POST.getlist('week_cycle')
         # from_date= request.POST.get('from')
         # to_date= request.POST.get('to')
-
+        print(week_cycle)
         for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
             # get year and week from table 
             year=date.split('-W')[0]
@@ -1858,7 +1865,8 @@ def update_cycle(request,division,product,planningapproval,version_selected):
 # calculate nomber of OF and OP ( wek and month)
 def demand_prod_planning(df_data,df_work_days,date_from,date_to):
 
-
+    df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
+    
     if date_from and date_to:
         # get df between two dates
         df_data_demand_prod_interval=df_data[(df_data['date'] > date_from.date()) & (df_data['date'] <= date_to.date())]
@@ -1956,7 +1964,7 @@ def cycle_time_kpi(df_data,date_from,date_to):
     print(date_from)
     print(date_to)
 
-    if date_from and date_to != 'None':
+    if date_from and date_to:
         df_cycle_time_interval = df_data[(df_data['work_day'] > date_from.date()) & (df_data['work_day'] <= date_to.date())]
     else :
         df_cycle_time_interval= df_data

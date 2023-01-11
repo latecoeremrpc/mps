@@ -63,6 +63,7 @@
                                     Adjust Cycle Time
                                 </h3>
                             </div>
+                            <div  class="card-body table-responsive p-0 " style="height: 250px;"">
                             <div class="card-body">
                                 <table id ="cycleTime" class="table table-bordered text-nowrap table-sm">
                                     <thead >
@@ -102,10 +103,13 @@
                                         <td colspan="4">No data !</td>
                                         {%endfor%} 
                                     </tbody>
-                                </table> 
+                                </table>
+                            </div>
+                            </div> 
+                            <div class="card-footer custom-card-footer">
+                                <button type="submit" name="update_cycle_sbumit" style="float: right; margin-bottom: 10px;" class="btn btn-primary">Save</button>
                                 <br>
-                                <button type="submit" name="update_cycle_sbumit" style="float: right;" class="btn btn-primary">Save</button>
-                            </div>  
+                            </div> 
                         </div>
                     </div>    
                 </form>
@@ -271,15 +275,15 @@
 </script>
 <!-------------------------------------------------------------Scripts for dataTable--------------------------------------------------->
 <script>
-    jQuery(document).ready(function () {
-    $("#cycleTime").dataTable(
-    {"lengthChange":false,
-     "lengthMenu": [[5, 20, 30, -1], [5, 20, 30, "All"]],
-     "responsive": false,  
-     "searching": false,
-  }
-    );  
-});
+//     jQuery(document).ready(function () {
+//     $("#cycleTime").dataTable(
+//     {"lengthChange":false,
+//      "lengthMenu": [[5, 20, 30, -1], [5, 20, 30, "All"]],
+//      "responsive": false,  
+//      "searching": false,
+//   }
+//     );  
+// });
 </script>
 
 
