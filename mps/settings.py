@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'debug_toolbar',
 ]
 
+
+FILE_UPLOAD_HANDLERS = ['django.core.files.uploadhandler.TemporaryFileUploadHandler',] 
+
 INTERNAL_IPS = [
     # ...
     "127.0.0.1",

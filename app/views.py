@@ -1112,10 +1112,17 @@ def upload_zpp(request,division,product,planningapproval):
             messages.error(request,"unable to upload ZPP files,not exist or unreadable") 
 
     return render(request,'app/files/zpp.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'planningapproval':planningapproval, 'zpp_files':zpp_files})  
-    
+
+
 def import_zpp(file,conn,product,planningapproval):
+
     #read file with pandas
-    dc=pd.read_excel(file,names=['material','plan_date','element','data_element_planif','message','needs','qte_available','date_reordo','supplier','customer'])
+    # to read csv because the type of zpp file is text
+    dc=pd.read_csv(file.temporary_file_path(),header=0,skiprows=4,encoding='UTF-16 LE', error_bad_lines=False, sep ='\t', names=['A','material','plan_date','B','element','data_element_planif','message','needs','qte_available','date_reordo','supplier','customer'])
+    # to drop empty columns
+    dc=dc.drop(columns=['A','B',])
+    
+    # dc.rename(columns ={'material','plan_date','element','data_element_planif','message','needs','qte_available','date_reordo','supplier','customer'} , inplace=True)
     #insert informations into file
     dc.insert(0,'created_at',datetime.now())
     dc.insert(1,'updated_at',datetime.now())
@@ -1131,15 +1138,22 @@ def import_zpp(file,conn,product,planningapproval):
 
     
     # delete the slash and the part after the slash
-    dc['data_element_planif']= dc['data_element_planif'].str.split("/").str[0]
+    dc['data_element_planif']= dc['data_element_planif'].astype(str).str.split("/").str[0]
     # delete the zeros on the left
-    dc['data_element_planif']= dc['data_element_planif'].str.lstrip("0")
+    dc['data_element_planif']= dc['data_element_planif'].astype(str).str.lstrip("0")
+
+    dc['needs']= dc['needs'].astype(str).str.split(",").str[0]
+    dc['needs']= dc['needs'].astype(str).str.lstrip("1")
+    dc['qte_available']= dc['qte_available'].astype(str).str.split(",").str[0]
+    dc['qte_available']= dc['qte_available'].astype(str).str.lstrip("1")
+    
+    # dc.to_csv('zpp_test.csv')
     
     # Using the StringIO method to set
     # as file object
     zpp = StringIO()
     #convert file to csv
-    zpp.write(dc.to_csv(index=None , header=None,sep=';'))
+    zpp.write(dc.to_csv(index=None , header=None, sep=';'))
     # This will make the cursor at index 0
     zpp.seek(0)
     with conn.cursor() as c:
@@ -1648,20 +1662,15 @@ def filter_kpi(request,division,product,planningapproval):
 
     # to display all 
     data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
-    print(version, type(version))
-    print(division)
-    print(product)
-
+    
     cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
     
-    print('cycle data',cycle_data)
     # get workday to use in calcul 
     work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
 
     df_data=pd.DataFrame(data.values())
     df_cycle=pd.DataFrame(cycle_data.values())
     df_work_days=pd.DataFrame(work_days.values())
-    df_cycle.to_csv('cycle.csv')
     # date
     # df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     
@@ -1674,8 +1683,7 @@ def filter_kpi(request,division,product,planningapproval):
         cycle_time_kpi(df_cycle,date_from,date_to)   
 
 
-
-    if request.method == "POST" :
+    if request.method == "POST":
         # filter kpi's
         if 'filter_sbumit' in request.POST:
             version_selected = request.POST.get('version_planning')
@@ -1770,7 +1778,6 @@ def update_cycle(request,division,product,planningapproval,version_selected):
     smooth_family_list=cycle_time_list=week_cycle=None
     
     # *****************************
-
     # get all planning approval id from table cycle
     planningapproval_cycle = Cycle.objects.values_list('planning_approval',flat=True).filter(product=product)
     # get planningapproval object to add in cycle table when we save with version 
@@ -1785,6 +1792,7 @@ def update_cycle(request,division,product,planningapproval,version_selected):
         week_cycle= request.POST.getlist('week_cycle')
         # from_date= request.POST.get('from')
         # to_date= request.POST.get('to')
+        print('***************')
         print(week_cycle)
         for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
             # get year and week from table 
@@ -1960,9 +1968,6 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
 # to display Kpi cycle time per smooth family (week and month)
 def cycle_time_kpi(df_data,date_from,date_to):
 
-    print('***************')
-    print(date_from)
-    print(date_to)
 
     if date_from and date_to:
         df_cycle_time_interval = df_data[(df_data['work_day'] > date_from.date()) & (df_data['work_day'] <= date_to.date())]
@@ -2054,4 +2059,6 @@ def production_plan_kpi(df_data,date_from,date_to):
    
     production_plan_kpi.date_production_week =date_production_week
     production_plan_kpi.date_production_month =date_production_month
+
+
 
