@@ -1792,8 +1792,6 @@ def update_cycle(request,division,product,planningapproval,version_selected):
         week_cycle= request.POST.getlist('week_cycle')
         # from_date= request.POST.get('from')
         # to_date= request.POST.get('to')
-        print('***************')
-        print(week_cycle)
         for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
             # get year and week from table 
             year=date.split('-W')[0]
@@ -1881,7 +1879,6 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     else:
         df_data_demand_prod_interval= df_data 
 
-
     # week of date
     df_data_demand_prod_interval['date_week']=pd.to_datetime(df_data_demand_prod_interval['date'], errors='coerce').dt.week
     # month of date
@@ -1897,7 +1894,12 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     # new column contains closed and order nature to display closed 
     df_data_demand_prod_interval['order_nature_closed']=df_data_demand_prod_interval['order_nature'].astype('str')+df_data_demand_prod_interval['closed'].astype('str')
     # use unstack and stack to get duplicate data (for chart js)
-
+    # *******************************
+    #  to use in calcul of logistic stock
+    demand_prod_week=df_data_demand_prod_interval.groupby(['date_year_week'])['id'].count().reset_index()
+    demand_prod_month=df_data_demand_prod_interval.groupby(['date_year_month'])['id'].count().reset_index()
+    
+    # *******************************
     week_count=df_data_demand_prod_interval.groupby(['date_year_week','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
     # get year from date_year_week 
     week_count['year']=week_count['date_year_week'].str.split('-W').str[0].astype(int)
@@ -1919,6 +1921,8 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     demand_prod_planning.week_count_axis_x=week_count_axis_x
     demand_prod_planning.month_count=month_count
     demand_prod_planning.month_count_axis_x=month_count_axis_x
+    demand_prod_planning.demand_prod_week=demand_prod_week
+    demand_prod_planning.demand_prod_month=demand_prod_month
 
     # *********************************************
     # to calculate Demonstrated capacity (week and month)
@@ -1968,7 +1972,6 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
 # to display Kpi cycle time per smooth family (week and month)
 def cycle_time_kpi(df_data,date_from,date_to):
 
-
     if date_from and date_to:
         df_cycle_time_interval = df_data[(df_data['work_day'] > date_from.date()) & (df_data['work_day'] <= date_to.date())]
     else :
@@ -1980,12 +1983,12 @@ def cycle_time_kpi(df_data,date_from,date_to):
     df_cycle_time_interval['work_day_month']=pd.to_datetime(df_cycle_time_interval['work_day'],errors='coerce').dt.month
     # work_day_year
     df_cycle_time_interval['work_day_year']=pd.to_datetime(df_cycle_time_interval['work_day'], errors='coerce').dt.year
-    # concatenate year and week
+    # to concatenate year and week
     df_cycle_time_interval['work_year_week']=df_cycle_time_interval['work_day_year'].astype(str)+'-'+'W'+df_cycle_time_interval['work_day_week'].astype(str)
-    # concatenate year and month
+    #to concatenate year and month
     df_cycle_time_interval['work_year_month']=df_cycle_time_interval['work_day_year'].astype(str)+'-'+'M'+df_cycle_time_interval['work_day_month'].astype(str)
 
-    
+
     cycle_mean= df_cycle_time_interval.groupby(['work_year_week','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
     cycle_mean['year']=cycle_mean['work_year_week'].str.split('-W').str[0].astype(int)
     cycle_mean['week']=cycle_mean['work_year_week'].str.split('-W').str[1].astype(int)
@@ -1994,7 +1997,7 @@ def cycle_time_kpi(df_data,date_from,date_to):
 
     week_cycle_mean_axis_x=cycle_mean['work_year_week'].unique()
     smooth_family= cycle_mean['smooth_family'].unique()
-    
+
 
     cycle_mean_month= df_cycle_time_interval.groupby(['work_year_month','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
     cycle_mean_month['year']=cycle_mean_month['work_year_month'].str.split('-M').str[0].astype(int)
@@ -2002,7 +2005,7 @@ def cycle_time_kpi(df_data,date_from,date_to):
     cycle_mean_month=cycle_mean_month.sort_values(by=['year','week']).reset_index()
     month_cycle_mean_axis_x=cycle_mean_month['work_year_month'].unique()
     smooth_family_month= cycle_mean_month['smooth_family'].unique()
-    
+
     ### for week 
     # list of colors
     colors_list=['#34a0a4','#023e8a','#e9c46a','#ffafcc','#2a9d8f','#e5989b','#e56b6f','#9e2a2b']
@@ -2012,7 +2015,7 @@ def cycle_time_kpi(df_data,date_from,date_to):
     cycle_time_kpi.smooth_family=dict(zip(list(smooth_family),colors))
     cycle_time_kpi.cycle_mean=cycle_mean
     cycle_time_kpi.week_cycle_mean_axis_x=week_cycle_mean_axis_x
-   
+
     ### for month
     colores_list_month=['#34a0a4','#023e8a','#e9c46a','#ffafcc','#2a9d8f','#e5989b','#e56b6f','#9e2a2b']
     # get colors for len smooth_family_month
@@ -2021,20 +2024,24 @@ def cycle_time_kpi(df_data,date_from,date_to):
     cycle_time_kpi.smooth_family_month=dict(zip(list(smooth_family_month),colors_month))
     cycle_time_kpi.cycle_mean_month=cycle_mean_month
     cycle_time_kpi.month_cycle_mean_axis_x=month_cycle_mean_axis_x
-    
+
+   
 
 # to calculate production plan (Freeze_end_date or smoothing_end_date) (week and month)
-def production_plan_kpi(df_data,date_from,date_to):
+def production_plan_kpi(df_data,date_from,date_to): 
 
     if date_from and date_to:
         # get df between two dates
         df_production_plan_kpi_interval= df_data[(df_data['date'] > date_from.date()) & (df_data['date'] <= date_to.date())]
     else:
         df_production_plan_kpi_interval = df_data
-    # date
-    df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['Freeze_end_date'].isna()),(df_production_plan_kpi_interval['smoothing_end_date']),(df_production_plan_kpi_interval['Freeze_end_date']))
+    # to remove time from smoothing end date
+    # df_production_plan_kpi_interval['smoothing_end_date']= pd.to_datetime(df_production_plan_kpi_interval['smoothing_end_date'],errors='coerce').dt.date
+    df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['Freeze_end_date'].isna()),(pd.to_datetime(df_production_plan_kpi_interval['smoothing_end_date'],errors='coerce').dt.date),(df_production_plan_kpi_interval['Freeze_end_date']))
+    
     # replace the nan values of date_production column with date_end_plan values
     df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['date_production'].isna()),(df_production_plan_kpi_interval['date_end_plan']),(df_production_plan_kpi_interval['date_production']))
+    
     # df_production_plan_kpi_interval.date_production=df_production_plan_kpi_interval.date_production.fillna(df_production_plan_kpi_interval.date_end_plan, inplace=True)
     # week of date date_production
     df_production_plan_kpi_interval['date_production_week']=pd.to_datetime(df_production_plan_kpi_interval['date_production'],errors='coerce').dt.week
@@ -2055,6 +2062,8 @@ def production_plan_kpi(df_data,date_from,date_to):
 
     date_production_week=df_production_plan_kpi_interval.groupby(['date_production_year_week'])['id'].count().reset_index()
     date_production_month=df_production_plan_kpi_interval.groupby(['date_production_year_month'])['id'].count().reset_index()
+    # to delete date production when equal 1900-W1
+    date_production_week.drop(date_production_week[date_production_week['date_production_year_week'] == "1900-W1"].index, inplace = True)
 
    
     production_plan_kpi.date_production_week =date_production_week
@@ -2062,3 +2071,48 @@ def production_plan_kpi(df_data,date_from,date_to):
 
 
 
+# to calculate logistic stock per week and per month 
+def logistic_stock_kpi(): 
+    zpp_data = Zpp.objects.values('plan_date','element')
+    zpp_data_df=pd.DataFrame(zpp_data.values())
+    zpp_data_df['element_stock_stkcli']=np.where((zpp_data_df['element'].str.startswith(('Stock','StkCli'))),('true'),('false'))
+    # to filter zpp_data_df column element_stock_stkcli rqual true
+    zpp_data_df= zpp_data_df[zpp_data_df['element_stock_stkcli']=='true']
+    # to get month of plan date
+    zpp_data_df['plan_date_week']=pd.to_datetime(zpp_data_df['plan_date'],errors='coerce').dt.week
+    # to get week of plan date
+    zpp_data_df['plan_date_month']=pd.to_datetime(zpp_data_df['plan_date'],errors='coerce').dt.month
+    zpp_data_df['plan_date_year']=pd.to_datetime(zpp_data_df['plan_date'],errors='coerce').dt.year
+
+    zpp_data_df['plan_date_year_week']=zpp_data_df['plan_date_year'].astype(str)+'-'+'W'+zpp_data_df['plan_date_week'].astype(str)
+    #to concatenate year and month
+    zpp_data_df['plan_date_year_month']=zpp_data_df['plan_date_year'].astype(str)+'-'+'M'+zpp_data_df['plan_date_month'].astype(str)
+
+    week_initial_stock_count=zpp_data_df.groupby(['plan_date_year_week','element_stock_stkcli'])['id'].count().reset_index()
+    month_initial_stock_count=zpp_data_df.groupby(['plan_date_year_month','element_stock_stkcli'])['id'].count().reset_index()
+
+
+    production_plan_kpi.date_production_week.drop(production_plan_kpi.date_production_week[production_plan_kpi.date_production_week['date_production_year_week'] == "0-W0"].index, inplace = True)
+    # to map date_production_year_week and dict_demand_prod_date_id
+    dict_demand_prod_date_id=dict(zip(demand_prod_planning.demand_prod_week['date_year_week'],demand_prod_planning.demand_prod_week['id']))
+    production_plan_kpi.date_production_week['date_demand_prod_id'] = production_plan_kpi.date_production_week['date_production_year_week'].map(dict_demand_prod_date_id).fillna(0)
+
+
+    # to map date_production_year_week and dict_demand_prod_date_id
+    dict_demand_prod_date_id=dict(zip(week_initial_stock_count['plan_date_year_week'],week_initial_stock_count['id']))
+    print(dict_demand_prod_date_id)
+    production_plan_kpi.date_production_week['week-1']= production_plan_kpi.date_production_week['date_production_year_week'].str[6:].astype(int) - 1
+    production_plan_kpi.date_production_week['production_plan_year_week-1'] = (
+        production_plan_kpi.date_production_week['date_production_year_week']
+        .str[:4]
+        .astype(str)
+        + '-'
+        + 'W'
+        + production_plan_kpi.date_production_week['week-1'].astype(str)
+    )
+    production_plan_kpi.date_production_week['plan_date_id'] = production_plan_kpi.date_production_week['production_plan_year_week-1'].map(dict_demand_prod_date_id).fillna(0)
+    
+    logistic_stock_week = production_plan_kpi.date_production_week['plan_date_id'] + production_plan_kpi.date_production_week['id'] - production_plan_kpi.date_production_week['date_demand_prod_id']
+    
+   
+    logistic_stock_kpi.logistic_stock_week = logistic_stock_week
