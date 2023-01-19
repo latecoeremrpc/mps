@@ -1,0 +1,71 @@
+<div class="card-body">
+    {%if records.iterrows%}
+    <div style="height: 400px" >
+            <canvas id="logistic_month" ></canvas>
+            <script>
+                var xValues = [{% for index, data in date_production_month.iterrows %}  '{{data.date_production_year_month}}', {% endfor %}];
+                var data = [{% for index, data in date_production_month.iterrows %} {{data.logistic_stock_month_count}}, {% endfor %}];
+                const logistic_month=new Chart("logistic_month", {
+                    // plugins: [ChartDataLabels],
+                    type: "bar",
+                    data: {
+                            labels: xValues,
+                            datasets: [
+                                {
+                                label: 'QTE Logistic Stock',
+                                // backgroundColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b','#065a60','#006466','#38b000'],
+                                // borderColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b',,'#065a60',"#006466",'#38b000'],
+                                backgroundColor: ['#ffd60a'],
+                                borderColor: ['#ffd60a'], 
+                                borderWidth: 1,
+                                data: data
+                                }
+                            ]
+                            },
+                    options: {
+                        plugins: {
+                                datalabels: {
+                                    // anchor: 'end',
+                                    clamp: true,
+                                    color: 'black',
+                                    
+                                },
+                                legend: {
+                                display: true,
+                                position:'top',
+                                align:'middle',
+                                labels: {
+                                usePointStyle: true,
+                                boxWidth: 6,
+                                },
+                                },
+
+                                title: {
+                                    display: false,
+                                    text: "this is title"
+                                },
+                                
+                            },
+                            scales: {
+                    yAxes: [
+                        {
+                            id: 'y-axis-1',
+                            type: 'linear',
+                            display: true,
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }
+                    ]
+                },
+
+                            responsive: true,
+                            maintainAspectRatio:false, 
+                    }
+                });
+            </script>
+    </div>
+    {%else%}
+     No data with selected filter 
+    {%endif%}
+</div>   

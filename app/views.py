@@ -1659,6 +1659,7 @@ def filter_kpi(request,division,product,planningapproval):
     production_plan_kpi.date_production_month=None
     demand_prod_planning.work_days_count =None
     demand_prod_planning.work_days_count_month=None
+    logistic_stock_kpi.logistic_stock = None
 
     # to display all 
     data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
@@ -1674,14 +1675,15 @@ def filter_kpi(request,division,product,planningapproval):
     # date
     # df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     
-    # call function demand_prod_planning
+    # to call function demand_prod_planning
     demand_prod_planning(df_data,df_work_days,date_from,date_to)
-    # call function demand_prod_planning
+    # to call function demand_prod_planning
     production_plan_kpi(df_data,date_from,date_to)
     if cycle_data:
-        # call function cycle_time_kpi 
+        # to call function cycle_time_kpi 
         cycle_time_kpi(df_cycle,date_from,date_to)   
-
+    # to call function logistic_stock_kpi
+    logistic_stock_kpi()
 
     if request.method == "POST":
         # filter kpi's
@@ -1771,6 +1773,8 @@ def filter_kpi(request,division,product,planningapproval):
     'date_production_month':production_plan_kpi.date_production_month,
     'work_days_count_week': demand_prod_planning.work_days_count,
     'work_days_count_month':demand_prod_planning.work_days_count_month,
+    'logistic_stock':logistic_stock_kpi.logistic_stock,
+    'logistic_stock_month':logistic_stock_kpi.logistic_stock_month,
     })
 
 # Adjust cycle time  
@@ -2040,7 +2044,7 @@ def production_plan_kpi(df_data,date_from,date_to):
     df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['Freeze_end_date'].isna()),(pd.to_datetime(df_production_plan_kpi_interval['smoothing_end_date'],errors='coerce').dt.date),(df_production_plan_kpi_interval['Freeze_end_date']))
     
     # replace the nan values of date_production column with date_end_plan values
-    df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['date_production'].isna()),(df_production_plan_kpi_interval['date_end_plan']),(df_production_plan_kpi_interval['date_production']))
+    # df_production_plan_kpi_interval['date_production']=np.where((df_production_plan_kpi_interval['date_production'].isna()),(df_production_plan_kpi_interval['date_end_plan']),(df_production_plan_kpi_interval['date_production']))
     
     # df_production_plan_kpi_interval.date_production=df_production_plan_kpi_interval.date_production.fillna(df_production_plan_kpi_interval.date_end_plan, inplace=True)
     # week of date date_production
@@ -2064,6 +2068,9 @@ def production_plan_kpi(df_data,date_from,date_to):
     date_production_month=df_production_plan_kpi_interval.groupby(['date_production_year_month'])['id'].count().reset_index()
     # to delete date production when equal 1900-W1
     date_production_week.drop(date_production_week[date_production_week['date_production_year_week'] == "1900-W1"].index, inplace = True)
+    date_production_week.drop(date_production_week[date_production_week['date_production_year_week'] == "0-W0"].index, inplace = True)
+    date_production_month.drop(date_production_month[date_production_month['date_production_year_month'] == "0-M0"].index, inplace = True)
+    date_production_month.drop(date_production_month[date_production_month['date_production_year_month'] == "1900-M1"].index, inplace = True)
 
    
     production_plan_kpi.date_production_week =date_production_week
@@ -2073,29 +2080,39 @@ def production_plan_kpi(df_data,date_from,date_to):
 
 # to calculate logistic stock per week and per month 
 def logistic_stock_kpi(): 
+
     zpp_data = Zpp.objects.values('plan_date','element')
     zpp_data_df=pd.DataFrame(zpp_data.values())
     zpp_data_df['element_stock_stkcli']=np.where((zpp_data_df['element'].str.startswith(('Stock','StkCli'))),('true'),('false'))
+    
     # to filter zpp_data_df column element_stock_stkcli rqual true
     zpp_data_df= zpp_data_df[zpp_data_df['element_stock_stkcli']=='true']
-    # to get month of plan date
+    
+
     zpp_data_df['plan_date_week']=pd.to_datetime(zpp_data_df['plan_date'],errors='coerce').dt.week
-    # to get week of plan date
     zpp_data_df['plan_date_month']=pd.to_datetime(zpp_data_df['plan_date'],errors='coerce').dt.month
     zpp_data_df['plan_date_year']=pd.to_datetime(zpp_data_df['plan_date'],errors='coerce').dt.year
 
+
     zpp_data_df['plan_date_year_week']=zpp_data_df['plan_date_year'].astype(str)+'-'+'W'+zpp_data_df['plan_date_week'].astype(str)
-    #to concatenate year and month
     zpp_data_df['plan_date_year_month']=zpp_data_df['plan_date_year'].astype(str)+'-'+'M'+zpp_data_df['plan_date_month'].astype(str)
+
 
     week_initial_stock_count=zpp_data_df.groupby(['plan_date_year_week','element_stock_stkcli'])['id'].count().reset_index()
     month_initial_stock_count=zpp_data_df.groupby(['plan_date_year_month','element_stock_stkcli'])['id'].count().reset_index()
 
 
     production_plan_kpi.date_production_week.drop(production_plan_kpi.date_production_week[production_plan_kpi.date_production_week['date_production_year_week'] == "0-W0"].index, inplace = True)
-    # to map date_production_year_week and dict_demand_prod_date_id
-    dict_demand_prod_date_id=dict(zip(demand_prod_planning.demand_prod_week['date_year_week'],demand_prod_planning.demand_prod_week['id']))
-    production_plan_kpi.date_production_week['date_demand_prod_id'] = production_plan_kpi.date_production_week['date_production_year_week'].map(dict_demand_prod_date_id).fillna(0)
+    production_plan_kpi.date_production_month.drop(production_plan_kpi.date_production_month[production_plan_kpi.date_production_month['date_production_year_month'] == "0-M0"].index, inplace = True)
+    
+    # to map date_production_year_month and dict_demand_prod_date_id
+    dict_demand_prod_date_week_value=dict(zip(demand_prod_planning.demand_prod_week['date_year_week'],demand_prod_planning.demand_prod_week['id']))
+    production_plan_kpi.date_production_week['date_demand_prod_id'] = production_plan_kpi.date_production_week['date_production_year_week'].map(dict_demand_prod_date_week_value).fillna(0)
+
+    # to map date_production_year_month and dict_demand_prod_date_id
+    dict_demand_prod_date_month_value=dict(zip(demand_prod_planning.demand_prod_month['date_year_month'],demand_prod_planning.demand_prod_month['id']))
+    production_plan_kpi.date_production_month['dict_demand_prod_date_month_value'] = production_plan_kpi.date_production_month['date_production_year_month'].map(dict_demand_prod_date_month_value).fillna(0)
+
 
 
     # to map date_production_year_week and dict_demand_prod_date_id
@@ -2112,7 +2129,33 @@ def logistic_stock_kpi():
     )
     production_plan_kpi.date_production_week['plan_date_id'] = production_plan_kpi.date_production_week['production_plan_year_week-1'].map(dict_demand_prod_date_id).fillna(0)
     
-    logistic_stock_week = production_plan_kpi.date_production_week['plan_date_id'] + production_plan_kpi.date_production_week['id'] - production_plan_kpi.date_production_week['date_demand_prod_id']
+
+
+     # to map date_production_year_month and dict_demand_prod_date_month_value
+    dict_demand_prod_date_month_value=dict(zip(month_initial_stock_count['plan_date_year_month'],month_initial_stock_count['id']))
+    print(dict_demand_prod_date_month_value)
+    production_plan_kpi.date_production_month['month-1']= production_plan_kpi.date_production_month['date_production_year_month'].str[6:].astype(int) - 1
+    production_plan_kpi.date_production_month['production_plan_year_month-1'] = (
+        production_plan_kpi.date_production_month['date_production_year_month']
+        .str[:4]
+        .astype(str)
+        + '-'
+        + 'M'
+        + production_plan_kpi.date_production_month['month-1'].astype(str)
+    )
+    production_plan_kpi.date_production_month['plan_date_value'] = production_plan_kpi.date_production_month['production_plan_year_month-1'].map(dict_demand_prod_date_month_value).fillna(0)
+
     
    
-    logistic_stock_kpi.logistic_stock_week = logistic_stock_week
+    # to calculate logitic stock per week 
+    production_plan_kpi.date_production_week['logistic_stock_week_count'] = production_plan_kpi.date_production_week['plan_date_id'] + production_plan_kpi.date_production_week['id'] - production_plan_kpi.date_production_week['date_demand_prod_id']
+    # to calculate logitic stock per month
+    production_plan_kpi.date_production_month['logistic_stock_month_count'] = production_plan_kpi.date_production_month['plan_date_value'] + production_plan_kpi.date_production_month['id'] - production_plan_kpi.date_production_month['dict_demand_prod_date_month_value']
+
+    production_plan_kpi.date_production_month.to_csv('mytest.csv')
+    
+    logistic_stock= production_plan_kpi.date_production_week
+    logistic_stock_month = production_plan_kpi.date_production_month
+    
+    logistic_stock_kpi.logistic_stock = logistic_stock
+    logistic_stock_kpi.logistic_stock_month = logistic_stock_month

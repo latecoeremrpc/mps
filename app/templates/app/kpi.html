@@ -226,6 +226,34 @@
     </div>
 </div> 
 
+<!-- logistic stock plan-->
+<div  class="row">
+    <div class="col-12">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+                <h3 class="card-title custom-card-title">
+                <i class="far fa-chart-bar"></i>
+                    Logistic Stock
+                </h3>
+                <div class="card-tools"> 
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
+                            <i class="fas fa-minus"></i></button></li>
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li> 
+                    </ul>  
+                </div> 
+            </div>
+            <div id="logistic_stock_week" style="display:block;" >
+                {% include 'app/charts/logistic_stock_week.html' %}
+            </div>
+            <div id="logistic_stock_month" style="display:none;" >
+                {% include 'app/charts/logistic_stock_month.html' %}
+            </div> 
+        </div> 
+    </div>
+</div> 
+
 <!---------------------------------------------------------------- Share result ------------------------------------------------------->
 <form action="{% url 'kpi' division product planningapproval %}" method="POST">
     <!-- Security token by Django -->
@@ -245,45 +273,41 @@
         var week_demand = document.getElementById("demand_prod_planning_week");
         var week_cycle = document.getElementById("cycle_kpi_week");
         var week_production = document.getElementById("production_plan_week");
+        var week_logistic = document.getElementById("logistic_stock_week");
 
         var month_demand = document.getElementById("demand_prod_planning_month");
         var month_cycle = document.getElementById("cycle_kpi_month");
         var month_production = document.getElementById("production_plan_month");
+        var month_logistic = document.getElementById("logistic_stock_month");
         var btn = document.getElementById("switch_month_week");
         
-      if (week_demand.style.display === "block" & week_cycle.style.display === "block" & week_production.style.display === "block") {
+      if (week_demand.style.display === "block" & week_cycle.style.display === "block" & week_production.style.display === "block" & week_logistic.style.display === "block") {
         week_demand.style.display = "none";
         week_cycle.style.display = "none";
         week_production.style.display = "none";
+        week_logistic.style.display = "none";
 
         month_demand.style.display= "block";
         month_cycle.style.display = "block";
         month_production.style.display = "block";
+        month_logistic.style.display = "block";
         text_switch.textContent='W';
       }  
       else {
         week_demand.style.display = "block";
         week_cycle.style.display = "block";
         week_production.style.display = "block";
+        week_logistic.style.display = "block";
+
 
         month_demand.style.display= "none";
         month_cycle.style.display = "none";
         month_production.style.display = "none";
+        month_logistic.style.display = "none";
+
         text_switch.textContent ='M';
       }
     }
-</script>
-<!-------------------------------------------------------------Scripts for dataTable--------------------------------------------------->
-<script>
-//     jQuery(document).ready(function () {
-//     $("#cycleTime").dataTable(
-//     {"lengthChange":false,
-//      "lengthMenu": [[5, 20, 30, -1], [5, 20, 30, "All"]],
-//      "responsive": false,  
-//      "searching": false,
-//   }
-//     );  
-// });
 </script>
 
 
