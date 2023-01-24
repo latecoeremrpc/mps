@@ -3,8 +3,8 @@
     <div style="height: 400px" >
             <canvas id="logistic_week" ></canvas>
             <script>
-                var xValues = [{% for index, data in logistic_stock.iterrows %}  '{{data.date_production_year_week}}', {% endfor %}];
-                var data = [{% for index, data in logistic_stock.iterrows %} {{data.logistic_stock_week_count}}, {% endfor %}];
+                var xValues = [{% for index, data in logistic_stock_week.iterrows %}  '{{data.date_production_year_week}}', {% endfor %}];
+                var data = [{% for index, data in logistic_stock_week.iterrows %} {{data.logistic_stock_week_count}}, {% endfor %}];
                 const logistic_week=new Chart("logistic_week", {
                     // plugins: [ChartDataLabels],
                     type: "bar",
