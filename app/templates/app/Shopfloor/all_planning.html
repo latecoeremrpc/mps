@@ -11,18 +11,20 @@
 {% include "app/info/info_page.html" %}
 
 <section class="page-contain">
-  {% for planning in all_planning %}
-    <a href="{% url 'planningdetails' division product planning.id %}" class="data-card">
-      <h3>{{planning.name}}</h3>
-      <h4>{{planning.created_at | date:'Y-m-d'}}</h4>
+  {% for plannings in planning_informations %}
+  <a href="{% url 'planningdetails' division product plannings.id %}" class="data-card">
+    <h3>{{plannings.name}}</h3>
+      
+      <h4>{{plannings.created_at | date:'Y-m-d'}}</h4>
           <ul>
-              <li>By: {{planning.created_by}}</li>
+              <li>By: {{plannings.created_by}}</li>
               <hr>
               <li>Status: Complete</li>
               <hr>
-              <li>Shared: No</li>
+              <li>Shared:  {{plannings.shared_status}}</li>
               <hr>
-              <li>version: 5</li>
+              <li>Number of versions:  {{plannings.version_count}}</li>
+
           </ul>
         <span class="link-text">
           View details, Edit 
@@ -33,6 +35,8 @@
     </a>
   {% endfor %}
   </section>
+
+  
 
 <!-- button Add new plannig -->
 <a href="{% url 'newplanning' division product %}"><button class="bn632-hover bn20"><i class="fa-solid fa-plus"></i> New Planning</button></a>

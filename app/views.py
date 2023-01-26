@@ -965,8 +965,24 @@ def copy_calendar(request,division,product):
 #All Planning Approval
 def all_planning(request,division,product):
     product_info=Product.objects.all().filter(id=product).first()
-    all_planning=PlanningApproval.objects.all().filter(product=product)      
-    return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info})
+    all_planning=PlanningApproval.objects.all().filter(product=product)
+    #Convert data to dict to get number of versions and shered status and ather informations
+    planning_informations=[]
+    for planning in all_planning:
+        informations = {
+            'id': planning.id,
+            'name': planning.name,
+            'created_at': planning.created_at,
+            'created_by': planning.created_by,
+        }
+
+        for planning in planning.shopfloor_set.all():
+            informations['version_count']= planning.version
+            informations['shared_status']=any({planning.shared})
+        planning_informations.append(informations)
+        print(informations)
+        print(planning_informations)
+    return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info,'planning_informations':planning_informations})
    
 #Save new Planning Approval
 def new_planning(request,division,product):
@@ -1795,6 +1811,7 @@ def update_cycle(request,division,product,planningapproval,version_selected):
     planningapproval_cycle = Cycle.objects.values_list('planning_approval',flat=True).filter(product=product)
     # get planningapproval object to add in cycle table when we save with version 
     planningapproval_object= PlanningApproval.objects.get(id=planningapproval)
+    # to increment version
     version_number = Cycle.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     version = version_number['version'] + 1 if version_number else 1 
 
@@ -1803,6 +1820,9 @@ def update_cycle(request,division,product,planningapproval,version_selected):
         smooth_family_list= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
         week_cycle= request.POST.getlist('week_cycle')
+        print('********************')
+        print('week_cycle')
+        print(week_cycle)
         # from_date= request.POST.get('from')
         # to_date= request.POST.get('to')
         for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
