@@ -72,7 +72,6 @@ urlpatterns = [
     #urls for shopfloor
     path('division/<division>/product/<product>/allplanning/',views.all_planning,name='allplanning'),
     path('division/<division>/product/<product>/newplanning/',views.new_planning,name='newplanning'),
-    path('division/<division>/product/<product>/planningapproval/<planningapproval>/planningdetails/',views.palnning_details,name='planningdetails'),
     path('division/<division>/product/<product>/planningapproval/<planningapproval>/needs/',views.needs,name='needs'),
     path('division/<division>/product/<product>/planningapproval/<planningapproval>/createneeds/',views.create_needs,name='createneeds'), 
     path('division/<division>/product/<product>/planningapproval/<planningapproval>/result/',views.result,name='result'),

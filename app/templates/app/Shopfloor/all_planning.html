@@ -12,7 +12,7 @@
 
 <section class="page-contain">
   {% for plannings in planning_informations %}
-  <a href="{% url 'planningdetails' division product plannings.id %}" class="data-card">
+  <a href="{% url 'kpi' division product plannings.id %}" class="data-card">
     <h3>{{plannings.name}}</h3>
       
       <h4>{{plannings.created_at | date:'Y-m-d'}}</h4>

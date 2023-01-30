@@ -1008,19 +1008,12 @@ def new_planning(request,division,product):
             return redirect('../newplanning')
     return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product,'product_info':product_info})
 
-
+#To DO
 def update_planning(request,division,product,planningapproval):
     
     planning_approval_name_list=list(PlanningApproval.objects.values_list('name',flat=True).filter(product=product))
 
     return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product})
-
-
-def palnning_details(request,division,product,planningapproval):
-    
-    # version = Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
-    
-    return filter_kpi(request,division,product,planningapproval)
 
 
 #*********************Upload To DB COOIS************************
