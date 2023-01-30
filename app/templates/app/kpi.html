@@ -34,7 +34,7 @@
                             <option value="{{item}}" {% if version_selected == item|stringformat:"i" %} selected {% endif %}>{{item}}</option>
                             {%empty%}
                                 <option value="">No versions</option>   
-                            {% endfor %}
+                            {% endfor %}                                        
                         </select>
                         <span class="input-group-text">From</span>
                         <input name="from" id="from" type="date" class=" form-control" value="{{from_date}}">

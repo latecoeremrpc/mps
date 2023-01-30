@@ -969,19 +969,23 @@ def all_planning(request,division,product):
     #Convert data to dict to get number of versions and shered status and ather informations
     planning_informations=[]
     for planning in all_planning:
-        informations = {
-            'id': planning.id,
-            'name': planning.name,
-            'created_at': planning.created_at,
-            'created_by': planning.created_by,
-        }
+        informations=dict()
+        version_count=[]
+        shared_status=[]
+        informations['id']=planning.id
+        informations['name']=planning.name
+        informations['created_at']=planning.created_at
+        informations['created_by']=planning.created_by
 
         for planning in planning.shopfloor_set.all():
-            informations['version_count']= planning.version
-            informations['shared_status']=any({planning.shared})
+            version_count.append(planning.version)
+            shared_status.append(planning.shared)
+
+            informations['version_count']= len(set(version_count))
+            informations['shared_status']=any(set(shared_status))
+        
         planning_informations.append(informations)
-        print(informations)
-        print(planning_informations)
+        
     return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info,'planning_informations':planning_informations})
    
 #Save new Planning Approval
@@ -1655,11 +1659,19 @@ def result(request,division,product,planningapproval):
 
 # filter planning result
 def filter_kpi(request,division,product,planningapproval):
+    planning_version_shared = None
     # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     # list of version
     planning_versions =Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
-    version = planning_versions.first()
+    version_shared = Shopfloor.objects.values('version', 'shared').filter(shared='True',product=product,planning_approval_id=planningapproval).first()
+    
+    if version_shared:
+        planning_version_shared = version_shared['version']
+        version = planning_version_shared
+    else:
+        version = planning_versions.first()
+        
     df_data=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=version_selected=date_from_year_week =  date_to_year_week=date_from_year_month=date_to_year_month=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
@@ -1682,16 +1694,16 @@ def filter_kpi(request,division,product,planningapproval):
     data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
     
     cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
-    
     # get workday to use in calcul 
     work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
 
+    # to convert data to dataframe
     df_data=pd.DataFrame(data.values())
     df_cycle=pd.DataFrame(cycle_data.values())
     df_work_days=pd.DataFrame(work_days.values())
-    # date
-    # df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
-    
+   
+
+    # ********to call functions***********************
     # to call function demand_prod_planning
     demand_prod_planning(df_data,df_work_days,date_from,date_to)
     # to call function demand_prod_planning
@@ -1701,6 +1713,8 @@ def filter_kpi(request,division,product,planningapproval):
         cycle_time_kpi(df_cycle,date_from,date_to)   
     # to call function logistic_stock_kpi
     logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
+
+    # *******************Form **************************
 
     if request.method == "POST":
         # filter kpi's
@@ -1714,13 +1728,14 @@ def filter_kpi(request,division,product,planningapproval):
             version_selected = request.POST.get('version_selected')
             from_date= request.POST.get('from')
             to_date= request.POST.get('to')
-            version = planning_versions.first()
             if version_selected == 'None':
                 version_selected=version 
             #Update Cycle
             update_cycle(request,division,product,planningapproval,version_selected)
             # to redirect to the last version after update
             version_selected=version
+        
+        
         # share result   
         if 'share' in request.POST:
             my_version= request.POST.get('version')
@@ -1728,8 +1743,6 @@ def filter_kpi(request,division,product,planningapproval):
             to_date= request.POST.get('to')
             data=Shopfloor.objects.all().filter(product= product,planning_approval=planningapproval)
             data.update(shared=False)
-            version = planning_versions.first()
-
             if my_version == 'None':
                 my_version = version 
 
@@ -1751,9 +1764,11 @@ def filter_kpi(request,division,product,planningapproval):
             data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version_selected)
             cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version_selected).distinct()
         
+
         if not data:
                 messages.error(request,"No data with selected filter!") 
                 return render(request,'app/kpi.html',{'division':division,'product':product,'from_date':from_date,'to_date':to_date,'planningapproval':planningapproval,'planningapproval_info':planningapproval_info,'planning_versions':planning_versions,'version_selected':version_selected})
+
 
         df_data=pd.DataFrame(data.values())
         df_cycle=pd.DataFrame(cycle_data.values())
@@ -1769,8 +1784,12 @@ def filter_kpi(request,division,product,planningapproval):
         if cycle_data:
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle,date_from,date_to)
-        
+    
+
+
     return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,
+    'planning_version_shared':planning_version_shared,
+    'version_shared':version_shared,
     'version_selected':version_selected,
     'version':version,
     'planning_versions':planning_versions,
@@ -1900,9 +1919,10 @@ def update_cycle(request,division,product,planningapproval,version_selected):
 
 # calculate nomber of OF and OP ( wek and month)
 def demand_prod_planning(df_data,df_work_days,date_from,date_to):
-
+   
     df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     
+        
     if date_from and date_to:
         # get df between two dates
         df_data_demand_prod_interval=df_data[(df_data['date'] >= date_from.date()) & (df_data['date'] <= date_to.date())]
