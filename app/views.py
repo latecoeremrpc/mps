@@ -1594,6 +1594,7 @@ def save_cycle_with_version(product,planningapproval):
     return True
 
 
+#To Delete
 # filter by division, profit_center and panning, week to get versions
 def filter(request):
     divisions_list= Division.undeleted_objects.values('name').distinct().order_by('name')
@@ -1652,18 +1653,21 @@ def result(request,division,product,planningapproval):
 
 # filter planning result
 def filter_kpi(request,division,product,planningapproval):
-    planning_version_shared = None
+
     # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     # list of version
-    planning_versions =Shopfloor.objects.values_list('version',flat=True).filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
-    version_shared = Shopfloor.objects.values('version', 'shared').filter(shared='True',product=product,planning_approval_id=planningapproval).first()
+    planning_versions_shared =Shopfloor.objects.values('version', 'shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
     
-    if version_shared:
-        planning_version_shared = version_shared['version']
-        version = planning_version_shared
-    else:
-        version = planning_versions.first()
+    planning_versions=[]
+    for item in planning_versions_shared:
+        planning_versions.append(item['version'])
+        #Check if exist a shared version
+        if item['shared']:
+            version= item['version']
+
+    if not version:
+            version = max(planning_versions)
         
     df_data=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=version_selected=date_from_year_week =  date_to_year_week=date_from_year_month=date_to_year_month=None
     demand_prod_planning.week_count=None
@@ -1781,9 +1785,8 @@ def filter_kpi(request,division,product,planningapproval):
 
 
     return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,
-    'planning_version_shared':planning_version_shared,
-    'version_shared':version_shared,
     'version_selected':version_selected,
+    'planning_versions_shared':planning_versions_shared,
     'version':version,
     'planning_versions':planning_versions,
     'division':division,'product':product,
