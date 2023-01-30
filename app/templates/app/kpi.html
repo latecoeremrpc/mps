@@ -66,42 +66,49 @@
                             <div  class="card-body table-responsive p-0 " style="height: 250px;"">
                             <div class="card-body">
                                 <table id ="cycleTime" class="table table-bordered text-nowrap table-sm">
-                                    <thead >
-                                        <tr>
-                                            <th><label for="week_cycle" class="col-sm-4 control-label">Week</label></th>
-                                            <th><label for="smooth_family" class="col-sm-4 control-label">Smooth Family</label></th>
-                                            <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
-                                            <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
-                                        </tr>
-                                    </thead> 
                                     <tbody>    
-                                            
-                                        {% for index,cycle in cycle_mean.iterrows%}
-                                        <tr>
-                                            <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
-                                            <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
-                                            <input name="version_selected" id="version_selected" type="hidden" class=" form-control" value="{{version_selected}}" required> 
-                                            <td>
-                                                <input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week}}" readonly="readonly">
-                                            </td> 
-                                            <td>
-                                                <input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input" value="{{cycle.smooth_family}}" readonly="readonly">
-                                            </td>                                     
-                                            <td class="form-row">
-                                                <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required step="0.01" > 
-                                            </td>
-                                            <td>
-                                                <div class="inline-radio-input col-sm-8">
-                                                    <input style="margin:10px ;" type="radio" id="hour" name="cycle-type-{{cycle.work_year_week}}" value="Hours" checked>
-                                                    <label style="margin:10px ;" for="hour">Hours</label>
-                                                    <input style="margin:10px ;" type="radio" id="day" name="cycle-type-{{cycle.work_year_week}}" value="Days">
-                                                    <label style="margin:10px ;" for="day">Days</label><br>
-                                                </div> 
-                                            </td>
-                                        </tr>
-                                        {%empty%}
-                                        <td colspan="4">No data !</td>
-                                        {%endfor%} 
+                                            <tr>
+                                                <th><label for="week_cycle" class="col-sm-4 control-label">Week</label></th>
+                                                {% for index,cycle in cycle_mean.iterrows%}
+                                                <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
+                                                <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+                                                <input name="version_selected" id="version_selected" type="hidden" class=" form-control" value="{{version_selected}}" required> 
+                                                <td>
+                                                    <input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_year_week}}" readonly="readonly">
+                                                </td> 
+                                                {%endfor%} 
+                                            </tr>
+
+                                            <tr>
+                                                <th><label for="smooth_family" class="col-sm-4 control-label">Smooth Family</label></th>
+                                                {% for index,cycle in cycle_mean.iterrows%}
+                                                <td>
+                                                    <input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input" value="{{cycle.smooth_family}}" readonly="readonly">
+                                                </td> 
+                                                {%endfor%} 
+                                            </tr>
+
+                                            <tr>
+                                                <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
+                                                {% for index,cycle in cycle_mean.iterrows%}
+                                                <td>
+                                                    <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required step="0.01" > 
+                                                </td>
+                                                {%endfor%} 
+                                            </tr>
+                                            <tr>
+                                                <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
+                                                {% for index,cycle in cycle_mean.iterrows%}
+                                                <td>
+                                                    <div class="inline-radio-input col-sm-8">
+                                                        <input style="margin:10px ;" type="radio" id="hour" name="cycle-type-{{cycle.work_year_week}}" value="Hours" checked>
+                                                        <label style="margin:10px ;" for="hour">Hours</label>
+                                                        <input style="margin:10px ;" type="radio" id="day" name="cycle-type-{{cycle.work_year_week}}" value="Days">
+                                                        <label style="margin:10px ;" for="day">Days</label><br>
+                                                    </div> 
+                                                </td>
+                                                {%endfor%} 
+                                            </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -244,11 +251,11 @@
                     </ul>  
                 </div> 
             </div>
-            <div id="logistic_stock_week" style="display:block;" >
-                {% include 'app/charts/logistic_stock_week.html' %}
+            <div id="logistic_stock_week" style="display:block;">
+                {% include 'app/charts/logistic_stock_week.html'%}
             </div>
-            <div id="logistic_stock_month" style="display:none;" >
-                {% include 'app/charts/logistic_stock_month.html' %}
+            <div id="logistic_stock_month" style="display:none;">
+                {% include 'app/charts/logistic_stock_month.html'%}
             </div> 
         </div> 
     </div>

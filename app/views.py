@@ -1820,9 +1820,6 @@ def update_cycle(request,division,product,planningapproval,version_selected):
         smooth_family_list= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
         week_cycle= request.POST.getlist('week_cycle')
-        print('********************')
-        print('week_cycle')
-        print(week_cycle)
         # from_date= request.POST.get('from')
         # to_date= request.POST.get('to')
         for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
@@ -1908,7 +1905,7 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     
     if date_from and date_to:
         # get df between two dates
-        df_data_demand_prod_interval=df_data[(df_data['date'] > date_from.date()) & (df_data['date'] <= date_to.date())]
+        df_data_demand_prod_interval=df_data[(df_data['date'] >= date_from.date()) & (df_data['date'] <= date_to.date())]
     else:
         df_data_demand_prod_interval= df_data 
 
@@ -2006,7 +2003,7 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
 def cycle_time_kpi(df_data,date_from,date_to):
 
     if date_from and date_to:
-        df_cycle_time_interval = df_data[(df_data['work_day'] > date_from.date()) & (df_data['work_day'] <= date_to.date())]
+        df_cycle_time_interval = df_data[(df_data['work_day'] >= date_from.date()) & (df_data['work_day'] <= date_to.date())]
     else :
         df_cycle_time_interval= df_data
 
@@ -2104,10 +2101,11 @@ def production_plan_kpi(df_data,date_from,date_to):
 # to calculate logistic stock per week and per month 
 def logistic_stock_kpi(date_from_year_week, date_to_year_week, date_from_year_month, date_to_year_month): 
     
+    # to reate new dataframes 
     Df_calcul_logistic_stock_week = production_plan_kpi.date_production_week[['date_production_year_week','id']].copy()
     Df_calcul_logistic_stock_month = production_plan_kpi.date_production_month[['date_production_year_month','id']].copy()
     
-
+    # to filter data frame between two dates
     if date_from_year_week and date_to_year_week and date_from_year_month and date_to_year_month:
         monday_date_from_year_week = datetime.strptime(date_from_year_week+'-1','%Y-W%W-%w')
         monday_date_to_year_week = datetime.strptime(date_to_year_week+'-1','%Y-W%W-%w')
@@ -2126,7 +2124,7 @@ def logistic_stock_kpi(date_from_year_week, date_to_year_week, date_from_year_mo
         Df_calcul_logistic_stock_week
         Df_calcul_logistic_stock_month
         
-
+    # to get data from zpp
     zpp_data=Zpp.objects.values('plan_date','element')
     zpp_data_df=pd.DataFrame(zpp_data.values())
     zpp_data_df['element_stock_stkcli']=np.where((zpp_data_df['element'].str.startswith(('Stock','StkCli'))),('true'),('false'))
@@ -2150,7 +2148,7 @@ def logistic_stock_kpi(date_from_year_week, date_to_year_week, date_from_year_mo
 
     # to map date_production_year_month and dict_demand_prod_date_id
     dict_demand_prod_date_week_value=dict(zip(demand_prod_planning.demand_prod_week['date_year_week'],demand_prod_planning.demand_prod_week['id']))
-    Df_calcul_logistic_stock_week['date_demand_prod_id'] =Df_calcul_logistic_stock_week['date_production_year_week'].map(dict_demand_prod_date_week_value).fillna(0)
+    Df_calcul_logistic_stock_week['date_demand_prod_value'] =Df_calcul_logistic_stock_week['date_production_year_week'].map(dict_demand_prod_date_week_value).fillna(0)
 
 
     # to map date_production_year_month and dict_demand_prod_date_id
@@ -2159,39 +2157,37 @@ def logistic_stock_kpi(date_from_year_week, date_to_year_week, date_from_year_mo
 
 
     # to map date_production_year_week and dict_demand_prod_date_id
-    dict_demand_prod_date_id=dict(zip(week_initial_stock_count['plan_date_year_week'],week_initial_stock_count['id']))
+    dict_demand_prod_date_id=dict(zip(week_initial_stock_count['plan_date_year_week'],week_initial_stock_count['id'])) 
     Df_calcul_logistic_stock_week['week-1']= Df_calcul_logistic_stock_week['date_production_year_week'].str[6:].astype(int) - 1
-    Df_calcul_logistic_stock_week['production_plan_year_week-1'] = (
-        Df_calcul_logistic_stock_week['date_production_year_week']
-        .str[:4]
-        .astype(str)
-        + '-'
-        + 'W'
-        + Df_calcul_logistic_stock_week['week-1'].astype(str)
-    )
-    Df_calcul_logistic_stock_week['plan_date_id'] = Df_calcul_logistic_stock_week['production_plan_year_week-1'].map(dict_demand_prod_date_id).fillna(0)
+    Df_calcul_logistic_stock_week['year'] = Df_calcul_logistic_stock_week['date_production_year_week'].str[:4].astype(str)
+    
+    # to replace week 0 to 52 and year to year -1 
+    Df_calcul_logistic_stock_week['year-1'] = np.where(Df_calcul_logistic_stock_week['week-1'] == 0, (Df_calcul_logistic_stock_week['year'].astype(int) - 1), Df_calcul_logistic_stock_week['year'])
+    Df_calcul_logistic_stock_week['week-1'] = np.where(Df_calcul_logistic_stock_week['week-1'] == 0, (52), Df_calcul_logistic_stock_week['week-1'])
+    
+
+    Df_calcul_logistic_stock_week['production_plan_year_week-1'] = (Df_calcul_logistic_stock_week['year-1'].astype(str)+ '-'+ 'W'+ Df_calcul_logistic_stock_week['week-1'].astype(str))    
+    Df_calcul_logistic_stock_week['plan_date_value'] = Df_calcul_logistic_stock_week['production_plan_year_week-1'].map(dict_demand_prod_date_id).fillna(0)
     
 
 
-     # to map date_production_year_month and dict_demand_prod_date_month_value
+    # to map date_production_year_month and dict_demand_prod_date_month_value
     dict_demand_prod_date_month_value=dict(zip(month_initial_stock_count['plan_date_year_month'],month_initial_stock_count['id']))
     Df_calcul_logistic_stock_month['month-1']= Df_calcul_logistic_stock_month['date_production_year_month'].str[6:].astype(int) - 1
-    Df_calcul_logistic_stock_month['production_plan_year_month-1'] = (
-        Df_calcul_logistic_stock_month['date_production_year_month']
-        .str[:4]
-        .astype(str)
-        + '-'
-        + 'M'
-        + Df_calcul_logistic_stock_month['month-1'].astype(str)
-    )
+    Df_calcul_logistic_stock_month['year'] = Df_calcul_logistic_stock_month['date_production_year_month'].str[:4].astype(str)
+    Df_calcul_logistic_stock_month['year-1'] = np.where(Df_calcul_logistic_stock_month['month-1'] == 0, (Df_calcul_logistic_stock_month['year'].astype(int) - 1), Df_calcul_logistic_stock_month['year'])
+    Df_calcul_logistic_stock_month['month-1'] = np.where(Df_calcul_logistic_stock_month['month-1'] == 0, (12), Df_calcul_logistic_stock_month['month-1'])
+    
+    Df_calcul_logistic_stock_month['production_plan_year_month-1'] = Df_calcul_logistic_stock_month['year-1'].astype(str)+ '-'+ 'M' + Df_calcul_logistic_stock_month['month-1'].astype(str)
+    
     Df_calcul_logistic_stock_month['plan_date_value'] = Df_calcul_logistic_stock_month['production_plan_year_month-1'].map(dict_demand_prod_date_month_value).fillna(0)
+
 
    
     # to calculate logitic stock per week 
-    Df_calcul_logistic_stock_week['logistic_stock_week_count'] = Df_calcul_logistic_stock_week['plan_date_id'] + Df_calcul_logistic_stock_week['id'] - Df_calcul_logistic_stock_week['date_demand_prod_id']
+    Df_calcul_logistic_stock_week['logistic_stock_week_count'] = Df_calcul_logistic_stock_week['plan_date_value'] + Df_calcul_logistic_stock_week['id'] - Df_calcul_logistic_stock_week['date_demand_prod_value']
     # to calculate logitic stock per month
     Df_calcul_logistic_stock_month['logistic_stock_month_count'] = Df_calcul_logistic_stock_month['plan_date_value'] + Df_calcul_logistic_stock_month['id'] - Df_calcul_logistic_stock_month['dict_demand_prod_date_month_value']
-
 
     
     logistic_stock_kpi.logistic_stock_week = Df_calcul_logistic_stock_week

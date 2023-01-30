@@ -5,6 +5,8 @@
             <script>
                 var xValues = [{% for index, data in logistic_stock_month.iterrows %}  '{{data.date_production_year_month}}', {% endfor %}];
                 var data = [{% for index, data in logistic_stock_month.iterrows %} {{data.logistic_stock_month_count}}, {% endfor %}];
+                const colors = data.map((value) => value < 0 ? '#e84747' : '#1a936f'); 
+
                 const logistic_month=new Chart("logistic_month", {
                     // plugins: [ChartDataLabels],
                     type: "bar",
@@ -15,8 +17,8 @@
                                 label: 'QTE Logistic Stock',
                                 // backgroundColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b','#065a60','#006466','#38b000'],
                                 // borderColor:  ['#c9184a','#ff758f','#ffb3c1','#FF9671','#FFC75F','#ffd60a','#34a0a4','#99d98c','#0b525b',,'#065a60',"#006466",'#38b000'],
-                                backgroundColor: ['#ffd60a'],
-                                borderColor: ['#ffd60a'], 
+                                backgroundColor: colors,
+                                borderColor: colors, 
                                 borderWidth: 1,
                                 data: data
                                 }
