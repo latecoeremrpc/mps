@@ -1214,6 +1214,7 @@ def needs(request,division,product,planningapproval):
     # name of planning approval for info page
     planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()  
     # data for merge
+    #To do! Add Filter, w sa7a lik jme3a lihne
     zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
     material_data=Material.undeleted_objects.values('material','product__Profit_center','product__planning','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
@@ -1653,20 +1654,33 @@ def result(request,division,product,planningapproval):
 
 # filter planning result
 def filter_kpi(request,division,product,planningapproval):
+    '''Check planning state:  '''
+    check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
+    check_zpp = Zpp.objects.filter(planning_approval=planningapproval).all()
+    check_shopfloor = Shopfloor.objects.filter(planning_approval=planningapproval).all()
 
+    if not check_coois:
+        return redirect(upload_coois,division=division,product=product,planningapproval=planningapproval)
+    if not check_zpp:
+        return redirect(upload_zpp,division=division,product=product,planningapproval=planningapproval)
+    if not check_shopfloor:
+        return redirect(needs,division=division,product=product,planningapproval=planningapproval)
+    '''End Check planning state:  '''
+
+    version= None
     # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     # list of version
     planning_versions_shared =Shopfloor.objects.values('version', 'shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
-    
+    print('***************************************')
+    print(planning_versions_shared)
     planning_versions=[]
     for item in planning_versions_shared:
         planning_versions.append(item['version'])
         #Check if exist a shared version
         if item['shared']:
             version= item['version']
-
-    if not version:
+        else:
             version = max(planning_versions)
         
     df_data=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=version_selected=date_from_year_week =  date_to_year_week=date_from_year_month=date_to_year_month=None
@@ -1686,31 +1700,36 @@ def filter_kpi(request,division,product,planningapproval):
     demand_prod_planning.work_days_count_month=None
     logistic_stock_kpi.logistic_stock_week = None
     logistic_stock_kpi.logistic_stock_month =None
-
-    # to display all 
-    data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
     
-    cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
-    # get workday to use in calcul 
-    work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
+    if version: 
+        # to display all 
+        data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
+        
+        cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
+        # get workday to use in calcul 
+        work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
 
-    # to convert data to dataframe
-    df_data=pd.DataFrame(data.values())
-    df_cycle=pd.DataFrame(cycle_data.values())
-    df_work_days=pd.DataFrame(work_days.values())
+        # to convert data to dataframe
+        df_data=pd.DataFrame(data.values())
+        df_cycle=pd.DataFrame(cycle_data.values())
+        df_work_days=pd.DataFrame(work_days.values())
+    else:
+        messages.error(request,"No version!") 
+
+
+
+
+        # ********to call functions***********************
+        # to call function demand_prod_planning
+        demand_prod_planning(df_data,df_work_days,date_from,date_to)
+        # to call function demand_prod_planning
+        production_plan_kpi(df_data,date_from,date_to)
+        if cycle_data:
+            # to call function cycle_time_kpi 
+            cycle_time_kpi(df_cycle,date_from,date_to)   
+        # to call function logistic_stock_kpi
+        logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
    
-
-    # ********to call functions***********************
-    # to call function demand_prod_planning
-    demand_prod_planning(df_data,df_work_days,date_from,date_to)
-    # to call function demand_prod_planning
-    production_plan_kpi(df_data,date_from,date_to)
-    if cycle_data:
-        # to call function cycle_time_kpi 
-        cycle_time_kpi(df_cycle,date_from,date_to)   
-    # to call function logistic_stock_kpi
-    logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
-
     # *******************Form **************************
 
     if request.method == "POST":
@@ -1782,7 +1801,14 @@ def filter_kpi(request,division,product,planningapproval):
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle,date_from,date_to)
     
-
+    print(version)
+    print(version_selected)
+    print(type(version))
+    print(type(version_selected))
+    if not version_selected:
+        version_selected = version
+    else:
+        version_selected = int(version_selected)
 
     return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,
     'version_selected':version_selected,

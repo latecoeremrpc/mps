@@ -507,11 +507,12 @@ transform: translateY(-50%);
 /* badge  */
 .badge_shared {
   display: inline-block;
-  background-color: #f66;
+  background-color: #E91E63;
   border-radius: 50%;
   color: #fff;
-  padding: 0.5em 0.75em;
+  padding: 0.2em 0.2em;
   position: relative;
+  margin-left: 9px;
 }
 .pulsate::before {
   content: '';
@@ -523,7 +524,7 @@ transform: translateY(-50%);
   bottom: 0;
   animation: pulse 1s ease infinite;
   border-radius: 50%;
-  border: 4px double #f66;
+  border: 4px double #E91E63;
 }
 @keyframes pulse {
   0% {

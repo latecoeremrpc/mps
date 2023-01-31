@@ -87,7 +87,6 @@
             <!-- <img src="{% static 'img/mps_logo.png' %}" style="width: 75px;
               margin-top: 5px;
               margin-left: -13px"> -->
-            
 
             <div class="col-sm-3 col-6">
                 <div class="description-block border-right" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
@@ -116,11 +115,10 @@
             <div class="col-sm-3 col-6">
                 <div class="description-block" style="flex-wrap: wrap;justify-content: space-between;margin:0 !important;">
                     <span class="description-percentage text-danger"><i class="fa-solid fa-plane-arrival"></i></span>
-                    <h5 class="description-header">{{planningapproval_info.name}} | V {%if version_selected %}{{version_selected}} {% elif version %} {{version}} {% else%} (No version)  {% endif%}   </h5>
+                    <h5 class="description-header">{{planningapproval_info.name}} | V {%if version_selected %} {{version_selected}} {% elif version %} {{version}} {% else%} (No version) {% endif%} {%for item in planning_versions_shared%} {% if item.version == version_selected and item.shared  %} <p class="badge_shared pulsate">Shared</p> {%endif%} {%endfor%}</h5>
                     <!-- <p class="badge_shared pulsate">Shared</p> -->
                     <!-- <h5 class="description-header">{{planningapproval_info.name}} | V {{version}}</h5> -->
                     <!-- <span class="description-text">Division</span> -->
-                   
                 </div>
             </div>
         </div> 
@@ -129,10 +127,9 @@
     {% endif %}
 
 {{version_selected}}
-{{version}}
-{{planning_version_shared}}
 
-   
+{{version}}
+
 
 
 {% endblock %} 
