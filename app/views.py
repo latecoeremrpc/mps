@@ -1215,63 +1215,68 @@ def needs(request,division,product,planningapproval):
     planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()  
     # data for merge
     #To do! Add Filter, w sa7a lik jme3a lihne
-    zpp_data=Zpp.objects.filter(created_by= 'Marwa').values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
-    coois_data= Coois.objects.all().filter(created_by= 'Marwa').values()
-    material_data=Material.undeleted_objects.values('material','product__Profit_center','product__planning','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family')
-
-    #Convert data to DataFrame
-    df_zpp=pd.DataFrame(list(zpp_data))
-    df_coois=pd.DataFrame(list(coois_data))
-    df_material=pd.DataFrame(list(material_data))
+    zpp_data=Zpp.objects.filter(created_by= 'Marwa',product=product,planning_approval_id=planningapproval).values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
+    coois_data= Coois.objects.all().filter(created_by= 'Marwa',product=product,planning_approval_id=planningapproval).values()
+    material_data=Material.undeleted_objects.values('material','product__Profit_center','product__planning','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family').filter(product=product)
     
-    # rename df_material column 
-    df_material=df_material.rename(columns={'product__planning':'planning','product__division__name':'division','product__Profit_center':'profit_center'})
-     # rename df_zpp column 
-    df_zpp=df_zpp.rename(columns={'product__division__name':'division','product__Profit_center':'profit_center'})
-    
-    #add column key for zpp (concatinate  material and data_element_planif and created_by  )
-    df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['division'].astype(str)+df_zpp['profit_center'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str)
-    #add column key for coois (concatinate material, order, created_by )    
-    df_coois['key']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
+    if zpp_data and coois_data and material_data :
+       
+        #Convert data to DataFrame
+        df_zpp=pd.DataFrame(list(zpp_data))
+        df_coois=pd.DataFrame(list(coois_data))
+        df_material=pd.DataFrame(list(material_data))
+        
+        # rename df_material column 
+        df_material=df_material.rename(columns={'product__planning':'planning','product__division__name':'division','product__Profit_center':'profit_center'})
+        # rename df_zpp column 
+        df_zpp=df_zpp.rename(columns={'product__division__name':'division','product__Profit_center':'profit_center'})
+        
+        # add column key for zpp (concatinate  material and data_element_planif and created_by)
+        df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['division'].astype(str)+df_zpp['profit_center'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str)
+        #add column key for coois (concatinate material, order, created_by)    
+        df_coois['key']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
 
-    #add column key for material (concatinate material, created_by )  
-    df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)++df_material['profit_center'].astype(str)+df_material['created_by'].astype(str)+df_material['planning'].astype(str)
-    #add column key for coois (concatinate material,division,profit_centre, created_by )    
-    df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['created_by'].astype(str)+df_coois['designation'].astype(str)
-    
-    #Convert df_zpp to dict
-    df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
-    df_zpp_dict_date_reordo=dict(zip(df_zpp.key, df_zpp.date_reordo))
+        # add column key for material (concatinate material, created_by)  
+        df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)++df_material['profit_center'].astype(str)+df_material['created_by'].astype(str)+df_material['planning'].astype(str)
+        #add column key for coois (concatinate material,division,profit_centre, created_by )    
+        df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['created_by'].astype(str)+df_coois['designation'].astype(str)
+        
+        #Convert df_zpp to dict
+        df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
+        df_zpp_dict_date_reordo=dict(zip(df_zpp.key, df_zpp.date_reordo))
 
-    #Merge ZPP and COOIS with keys
-    df_coois['message']=df_coois['key'].map(df_zpp_dict_message)
-    df_coois['date_reordo']=df_coois['key'].map(df_zpp_dict_date_reordo)
+        #Merge ZPP and COOIS with keys
+        df_coois['message']=df_coois['key'].map(df_zpp_dict_message)
+        df_coois['date_reordo']=df_coois['key'].map(df_zpp_dict_date_reordo)
 
-    #convert df_material to dict
-    df_material_dict_AllocatedTime= dict((zip(df_material.key,df_material.AllocatedTime)))
-    df_material_dict_Leadtime= dict((zip(df_material.key,df_material.Leadtime)))
-    df_material_dict_workstation= dict((zip(df_material.key,df_material.workstation)))
-    df_material_dict_Allocated_Time_On_Workstation= dict((zip(df_material.key,df_material.Allocated_Time_On_Workstation)))
-    df_material_dict_Smooth_Family= dict((zip(df_material.key,df_material.Smooth_Family)))
+        #convert df_material to dict
+        df_material_dict_AllocatedTime= dict((zip(df_material.key,df_material.AllocatedTime)))
+        df_material_dict_Leadtime= dict((zip(df_material.key,df_material.Leadtime)))
+        df_material_dict_workstation= dict((zip(df_material.key,df_material.workstation)))
+        df_material_dict_Allocated_Time_On_Workstation= dict((zip(df_material.key,df_material.Allocated_Time_On_Workstation)))
+        df_material_dict_Smooth_Family= dict((zip(df_material.key,df_material.Smooth_Family)))
 
-    #Merge coois and material with keys
-    df_coois['AllocatedTime']=df_coois['key2'].map(df_material_dict_AllocatedTime)
-    df_coois['Leadtime']=df_coois['key2'].map(df_material_dict_Leadtime)
-    df_coois['workstation']=df_coois['key2'].map(df_material_dict_workstation)
-    df_coois['Allocated_Time_On_Workstation']=df_coois['key2'].map(df_material_dict_Allocated_Time_On_Workstation)
-    df_coois['Smooth_Family']=df_coois['key2'].map(df_material_dict_Smooth_Family)
+        #Merge coois and material with keys
+        df_coois['AllocatedTime']=df_coois['key2'].map(df_material_dict_AllocatedTime)
+        df_coois['Leadtime']=df_coois['key2'].map(df_material_dict_Leadtime)
+        df_coois['workstation']=df_coois['key2'].map(df_material_dict_workstation)
+        df_coois['Allocated_Time_On_Workstation']=df_coois['key2'].map(df_material_dict_Allocated_Time_On_Workstation)
+        df_coois['Smooth_Family']=df_coois['key2'].map(df_material_dict_Smooth_Family)
 
-    # add conditions :
-    # 1: for Ranking : equal date reordo if exist else equal date end plan
-    df_coois['Ranking']=np.where((df_coois['date_reordo'].isna()),(pd.to_datetime(df_coois['date_end_plan'])),(pd.to_datetime(df_coois['date_reordo'])))
-    # 2: for closed  : equal true where order_stat containes TCLO ou LIVR
-    df_coois['closed']=np.where(df_coois['order_stat'].str.contains('TCLO|LIVR'),True,False)
-    filter_product_info= Product.undeleted_objects.values('Profit_center','planning','division__name').filter(id = product).first()
+        # add conditions :
+        # 1: for Ranking : equal date reordo if exist else equal date end plan
+        df_coois['Ranking']=np.where((df_coois['date_reordo'].isna()),(pd.to_datetime(df_coois['date_end_plan'])),(pd.to_datetime(df_coois['date_reordo'])))
+        # 2: for closed  : equal true where order_stat containes TCLO ou LIVR
+        df_coois['closed']=np.where(df_coois['order_stat'].str.contains('TCLO|LIVR'),True,False)
+        filter_product_info= Product.undeleted_objects.values('Profit_center','planning','division__name').filter(id = product).first()
 
-    # filter df_coois by division and product
-    df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == filter_product_info['Profit_center']) & (df_coois['division'] == int(filter_product_info['division__name'])) & (df_coois['designation'] == filter_product_info['planning'])]
-    records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
-    
+        # filter df_coois by division and product
+        df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == filter_product_info['Profit_center']) & (df_coois['division'] == int(filter_product_info['division__name'])) & (df_coois['designation'] == filter_product_info['planning'])]
+        records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
+    else :
+        messages.error(request,"Import files and Input Materials Please !") 
+        return render(request,'app/Shopfloor/Shopfloor.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'division':division,'product':product}) 
+        
     return render(request,'app/Shopfloor/Shopfloor.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'records': records,'division':division,'product':product}) 
 
 #create needs
@@ -1667,13 +1672,11 @@ def filter_kpi(request,division,product,planningapproval):
         return redirect(needs,division=division,product=product,planningapproval=planningapproval)
     '''End Check planning state:  '''
 
-    version= None
     # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     # list of version
     planning_versions_shared =Shopfloor.objects.values('version', 'shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
-    print('***************************************')
-    print(planning_versions_shared)
+    
     planning_versions=[]
     for item in planning_versions_shared:
         planning_versions.append(item['version'])
@@ -1701,35 +1704,28 @@ def filter_kpi(request,division,product,planningapproval):
     logistic_stock_kpi.logistic_stock_week = None
     logistic_stock_kpi.logistic_stock_month =None
     
-    if version: 
-        # to display all 
-        data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
-        
-        cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
-        # get workday to use in calcul 
-        work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
+    
+    # to display all 
+    data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
+    cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
+    # get workday to use in calcul 
+    work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
+    # to convert data to dataframe
+    df_data=pd.DataFrame(data.values())
+    df_cycle=pd.DataFrame(cycle_data.values())
+    df_work_days=pd.DataFrame(work_days.values())
 
-        # to convert data to dataframe
-        df_data=pd.DataFrame(data.values())
-        df_cycle=pd.DataFrame(cycle_data.values())
-        df_work_days=pd.DataFrame(work_days.values())
-    else:
-        messages.error(request,"No version!") 
+    # ********to call functions***********************
+    # to call function demand_prod_planning
+    demand_prod_planning(df_data,df_work_days,date_from,date_to)
+    # to call function demand_prod_planning
+    production_plan_kpi(df_data,date_from,date_to)
+    if cycle_data:
+        # to call function cycle_time_kpi 
+        cycle_time_kpi(df_cycle,date_from,date_to)   
+    # to call function logistic_stock_kpi
+    logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
 
-
-
-
-        # ********to call functions***********************
-        # to call function demand_prod_planning
-        demand_prod_planning(df_data,df_work_days,date_from,date_to)
-        # to call function demand_prod_planning
-        production_plan_kpi(df_data,date_from,date_to)
-        if cycle_data:
-            # to call function cycle_time_kpi 
-            cycle_time_kpi(df_cycle,date_from,date_to)   
-        # to call function logistic_stock_kpi
-        logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
-   
     # *******************Form **************************
 
     if request.method == "POST":
