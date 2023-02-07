@@ -5,7 +5,7 @@
             <script>
                 var xValues = [{% for index, data in logistic_stock_month.iterrows %}  '{{data.date_production_year_month}}', {% endfor %}];
                 var data = [{% for index, data in logistic_stock_month.iterrows %} {{data.logistic_stock_month_count}}, {% endfor %}];
-                const colors = data.map((value) => value < 0 ? '#e84747' : '#1a936f'); 
+                const colors = data.map((value) => value < 0 ? '#EC6462' : '#68C1B6'); 
 
                 const logistic_month=new Chart("logistic_month", {
                     // plugins: [ChartDataLabels],

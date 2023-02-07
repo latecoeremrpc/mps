@@ -206,17 +206,17 @@ def material(request,division,product):
 
 def calendar(request,division,product):
     #get smooth family from product
-    smooth_family= Material.undeleted_objects.filter(product_id = product).values_list('Smooth_Family',flat=True).distinct().order_by('Smooth_Family')
+    smooth_family = Material.undeleted_objects.filter(product_id = product).values_list('Smooth_Family',flat=True).distinct().order_by('Smooth_Family')
     # get cycle objects
     cycle=Cycle.undeleted_objects.all().filter(product_id = product, owner = 'officiel',planning_approval__isnull=True, version__isnull=True)
     # get product object to display in calendar
-    products_data= Product.undeleted_objects.all()
+    products_data = Product.undeleted_objects.all()
     # get all work data objects to display in Calendar
     workdata = WorkData.undeleted_objects.all().filter(product_id = product, owner = 'officiel')
     # get all holiday objects to display in Calendar
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
     # get cycle ifo and workdata infos to display in Calendar
-    product_info=Product.objects.all().filter(id=product).first()  
+    product_info = Product.objects.all().filter(id=product).first()  
     return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'smooth_family': smooth_family,'cycle': cycle,'product_info':product_info})
 
 
@@ -236,7 +236,7 @@ def create_calendar(request,division,product):
         if id:
             #get object HolidaysCalendar
             #first : to get object not queryset 
-            holiday=HolidaysCalendar.objects.all().filter(id=id).first()  #intilisation object
+            holiday=HolidaysCalendar.objects.all().filter(id=id).first() 
             if startDate == endDate:
                 startDate= datetime.strptime(startDate,'%m/%d/%Y')
                 endDate= datetime.strptime(endDate,'%m/%d/%Y')
@@ -246,7 +246,7 @@ def create_calendar(request,division,product):
                 #save
                 holiday.save()
         else:
-        # add one day in database
+        # add new one day in database
             if startDate == endDate:
                 startDate= datetime.strptime(startDate,'%m/%d/%Y')
                 endDate= datetime.strptime(endDate,'%m/%d/%Y')
@@ -910,7 +910,7 @@ def home_page(request):
     division=products=None
     current_user = request.user
     try:
-        staff_connected = Staff.objects.values_list('division',flat=True).filter(username = current_user.username).first()
+        staff_connected = Staff.objects.values_list('division',flat=True).filter(username ='L0030959').first()
         products= Product.undeleted_objects.all().filter(division__id= staff_connected)
         division= staff_connected
 
@@ -920,7 +920,8 @@ def home_page(request):
             products= Product.undeleted_objects.all().filter(division__id= divisionId['id'])
             division=divisionId['id']
     except Exception:
-        messages.error(request,"User not connected!")     
+        messages.error(request,"User not connected!")  
+
 
     return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'products':products})
 
@@ -1004,7 +1005,7 @@ def new_planning(request,division,product):
             messages.success(request,"Name saved successfully!")
             return redirect(f'../planningapproval/{data.id}/files/uploadcoois')
         else:
-            messages.error(request,"Name exit! try again")
+            messages.error(request,"Name exist! try again")
             return redirect('../newplanning')
     return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product,'product_info':product_info})
 
@@ -1024,7 +1025,7 @@ def upload_coois(request,division,product,planningapproval):
     planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first() 
     if request.method == 'POST' and request.FILES['coois']:
         # Delete coois data 
-        coois_data = Coois.undeleted_objects.all().filter(product=product,created_by='Marwa')
+        coois_data = Coois.undeleted_objects.all().filter(product=product,created_by='Marwa',planning_approval_id=planningapproval)
         coois_data.delete()
         file=request.FILES['coois']
         try:
@@ -1113,7 +1114,7 @@ def upload_zpp(request,division,product,planningapproval):
     if request.method == 'POST' and request.FILES['zpp']:
         file=request.FILES['zpp']
         #Delete zpp data 
-        zpp_data = Zpp.undeleted_objects.all().filter(product=product,created_by='Marwa')
+        zpp_data = Zpp.undeleted_objects.all().filter(product=product,created_by='Marwa',planning_approval_id=planningapproval)
         zpp_data.delete()
         #Save file to DB
         try:
@@ -1214,14 +1215,13 @@ def needs(request,division,product,planningapproval):
     # name of planning approval for info page
     planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()  
     # data for merge
-    #To do! Add Filter, w sa7a lik jme3a lihne
     zpp_data=Zpp.objects.filter(created_by= 'Marwa',product=product,planning_approval_id=planningapproval).values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa',product=product,planning_approval_id=planningapproval).values()
     material_data=Material.undeleted_objects.values('material','product__Profit_center','product__planning','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family').filter(product=product)
-    
-    if zpp_data and coois_data and material_data :
+    #  check if data existe
+    if zpp_data and coois_data and material_data:
        
-        #Convert data to DataFrame
+        #to Convert data to DataFrame
         df_zpp=pd.DataFrame(list(zpp_data))
         df_coois=pd.DataFrame(list(coois_data))
         df_material=pd.DataFrame(list(material_data))
@@ -1269,7 +1269,6 @@ def needs(request,division,product,planningapproval):
         # 2: for closed  : equal true where order_stat containes TCLO ou LIVR
         df_coois['closed']=np.where(df_coois['order_stat'].str.contains('TCLO|LIVR'),True,False)
         filter_product_info= Product.undeleted_objects.values('Profit_center','planning','division__name').filter(id = product).first()
-
         # filter df_coois by division and product
         df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == filter_product_info['Profit_center']) & (df_coois['division'] == int(filter_product_info['division__name'])) & (df_coois['designation'] == filter_product_info['planning'])]
         records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
@@ -1659,6 +1658,7 @@ def result(request,division,product,planningapproval):
 
 # filter planning result
 def filter_kpi(request,division,product,planningapproval):
+    version_to_share = None
     '''Check planning state:  '''
     check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
     check_zpp = Zpp.objects.filter(planning_approval=planningapproval).all()
@@ -1676,16 +1676,17 @@ def filter_kpi(request,division,product,planningapproval):
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     # list of version
     planning_versions_shared =Shopfloor.objects.values('version', 'shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
-    
     planning_versions=[]
+    version=None
+
     for item in planning_versions_shared:
         planning_versions.append(item['version'])
         #Check if exist a shared version
         if item['shared']:
             version= item['version']
-        else:
-            version = max(planning_versions)
-        
+    if not version:
+        version = max(planning_versions)
+
     df_data=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=version_selected=date_from_year_week =  date_to_year_week=date_from_year_month=date_to_year_month=None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
@@ -1703,7 +1704,6 @@ def filter_kpi(request,division,product,planningapproval):
     demand_prod_planning.work_days_count_month=None
     logistic_stock_kpi.logistic_stock_week = None
     logistic_stock_kpi.logistic_stock_month =None
-    
     
     # to display all 
     data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
@@ -1733,33 +1733,36 @@ def filter_kpi(request,division,product,planningapproval):
         if 'filter_sbumit' in request.POST:
             version_selected = request.POST.get('version_planning')
             from_date= request.POST.get('from')
-            to_date= request.POST.get('to')
-
+            to_date= request.POST.get('to')  
         # update cycle
         if 'update_cycle_sbumit' in request.POST:
             version_selected = request.POST.get('version_selected')
             from_date= request.POST.get('from')
             to_date= request.POST.get('to')
             if version_selected == 'None':
-                version_selected=version 
+                version_selected = version 
             #Update Cycle
             update_cycle(request,division,product,planningapproval,version_selected)
             # to redirect to the last version after update
-            version_selected=version
-        
-        
+            planning_versions_shared =Shopfloor.objects.values('version','shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
+            planning_versions=[]
+            for item in planning_versions_shared:
+                planning_versions.append(item['version'])
+            version_selected = max(planning_versions)
         # share result   
         if 'share' in request.POST:
-            my_version= request.POST.get('version')
+            version_to_share= request.POST.get('version')
             from_date= request.POST.get('from')
             to_date= request.POST.get('to')
             data=Shopfloor.objects.all().filter(product= product,planning_approval=planningapproval)
             data.update(shared=False)
-            if my_version == 'None':
-                my_version = version 
-
-            data=Shopfloor.objects.all().filter(version=my_version,product= product,planning_approval=planningapproval)    
+            if version_to_share == 'None':
+                version_to_share = version 
+            print(version_to_share)
+            data=Shopfloor.objects.all().filter(version=version_to_share,product= product,planning_approval=planningapproval)    
             data.update(shared=True)
+            version = version_to_share
+    
         
         if  from_date and  to_date != 'None': 
             date_from = datetime.strptime(from_date,'%Y-%m-%d')
@@ -1796,17 +1799,12 @@ def filter_kpi(request,division,product,planningapproval):
         if cycle_data:
             # call function cycle_time_kpi 
             cycle_time_kpi(df_cycle,date_from,date_to)
-    
-    print(version)
-    print(version_selected)
-    print(type(version))
-    print(type(version_selected))
     if not version_selected:
         version_selected = version
     else:
         version_selected = int(version_selected)
-
     return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,
+    'version_to_share':version_to_share,
     'version_selected':version_selected,
     'planning_versions_shared':planning_versions_shared,
     'version':version,
@@ -1842,7 +1840,6 @@ def filter_kpi(request,division,product,planningapproval):
 # Adjust cycle time  
 def update_cycle(request,division,product,planningapproval,version_selected):
     smooth_family_list=cycle_time_list=week_cycle=None
-    
     # *****************************
     # get all planning approval id from table cycle
     planningapproval_cycle = Cycle.objects.values_list('planning_approval',flat=True).filter(product=product)
@@ -1851,7 +1848,7 @@ def update_cycle(request,division,product,planningapproval,version_selected):
     # to increment version
     version_number = Cycle.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     version = version_number['version'] + 1 if version_number else 1 
-
+       
     # ****************************
     if request.method == "POST":
         smooth_family_list= request.POST.getlist('smooth_family')
@@ -1992,10 +1989,15 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     demand_prod_planning.demand_prod_week=demand_prod_week
     demand_prod_planning.demand_prod_month=demand_prod_month
 
-    # *********************************************
-    # to calculate Demonstrated capacity (week and month)
+    # ********************to calculate Demonstrated capacity (week and month)*************************
+
     # get current_date 
+    # current_date = datetime.now()
     current_date = datetime.now()
+    # previous month
+    # first = current_date.replace(day=1)
+    # last_month = first - timedelta(days=1)
+    
     # get previous_month
     previous_month =current_date - relativedelta(months=1)
     df_prev_month = df_data[(df_data['date'] > previous_month.date()) & (df_data['date'] <= current_date.date())]
@@ -2003,20 +2005,18 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     #  calcul sum of closed in previous_month
     df_prev_month_closed=df_prev_month[df_prev_month['closed']==True]
     previous_month_closed_count=df_prev_month_closed.shape[0]
-
+   
     #calcul number of work_days in previous_month
     work_days_in_previous_month = df_work_days[(df_work_days['date'] >= previous_month.date()) & (df_work_days['date'] <= current_date.date())]
     work_days_in_previous_month_count = work_days_in_previous_month.shape[0]
-    
-
+   
     # calcul number of work_days in period(week)
     df_work_days['date_week']=pd.to_datetime(df_work_days['date'], errors='coerce').dt.week
     df_work_days['date_year']=pd.to_datetime(df_work_days['date'], errors='coerce').dt.year
     work_days_count=df_work_days.groupby(['date_week','date_year'])['id'].count().reset_index()
+    
     work_days_count['date_year_week']= work_days_count['date_year'].astype(str)+'-'+'W'+work_days_count['date_week'].astype(str)
     work_days_count = work_days_count[work_days_count['date_year_week'].isin(week_count_axis_x)]
-    
-
     # calcul number of work_days in period(month)
     df_work_days['date_month']=pd.to_datetime(df_work_days['date'], errors='coerce').dt.month
     work_days_count_month=df_work_days.groupby(['date_month','date_year'])['id'].count().reset_index()
@@ -2032,7 +2032,7 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
         work_days_count['result_demonstrated_capacity'] = work_days_count['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
         work_days_count_month['result_demonstrated_capacity'] = work_days_count_month['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
 
-
+   
     demand_prod_planning.work_days_count=work_days_count
     demand_prod_planning.work_days_count_month=work_days_count_month
 
@@ -2076,7 +2076,7 @@ def cycle_time_kpi(df_data,date_from,date_to):
 
     ### for week 
     # list of colors
-    colors_list=['#34a0a4','#023e8a','#e9c46a','#ffafcc','#2a9d8f','#e5989b','#e56b6f','#9e2a2b']
+    colors_list=['#f39763','#0b2659','#1A9DD9','#E8E8DE','#68C1B6','#EC6462','#F2E8B8','#9e2a2b']
     # get colors for len smooth_family
     colors = [colors_list[color] for color in range(len(list(smooth_family)))]
     # dict of smooth_family(keys) and color (values)
@@ -2085,7 +2085,7 @@ def cycle_time_kpi(df_data,date_from,date_to):
     cycle_time_kpi.week_cycle_mean_axis_x=week_cycle_mean_axis_x
 
     ### for month
-    colores_list_month=['#34a0a4','#023e8a','#e9c46a','#ffafcc','#2a9d8f','#e5989b','#e56b6f','#9e2a2b']
+    colores_list_month=['#f39763','#0b2659','#1A9DD9','#E8E8DE','#68C1B6','#EC6462','#F2E8B8','#9e2a2b']
     # get colors for len smooth_family_month
     colors_month = [colores_list_month[color] for color in range(len(list(smooth_family_month)))]
     # dict of smooth_family_month(keys) and color (values)
@@ -2094,7 +2094,6 @@ def cycle_time_kpi(df_data,date_from,date_to):
     cycle_time_kpi.month_cycle_mean_axis_x=month_cycle_mean_axis_x
 
    
-
 # to calculate production plan (Freeze_end_date or smoothing_end_date) (week and month)
 def production_plan_kpi(df_data,date_from,date_to): 
 

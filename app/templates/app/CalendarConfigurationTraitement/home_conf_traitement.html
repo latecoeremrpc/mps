@@ -36,25 +36,23 @@
                     <div class="card-body table-responsive p-0" style="height: 600px;" >
                       <div class="card-body">
                         <button class="bn632-hover-new bn20" data-target="#create" data-toggle="modal"  style="margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> New</button>
-                        
-                        <table id="treatment" class="table table-striped table-hover table-bordered  text-nowrap">
-                            <thead >
-                                <tr>
-                                    
-                                    <th>Id </th>
-                                    <th>Version</th>
-                                    <th>Treatment Number</th>
-                                    <th>End date</th>
-                                    <th>State</th>
-                                    <th >Actions</th>
-                                    
-                                </tr>
-                            </thead>
-                            <tbody>
-                                
-                                   
-                                {% for d in data %}
+                        {%if data%}
+                            <table id="treatment" class="table table-striped table-hover table-bordered  text-nowrap">
+                                <thead >
                                     <tr>
+                                        <th>Id </th>
+                                        <th>Version</th>
+                                        <th>Treatment Number</th>
+                                        <th>End date</th>
+                                        <th>State</th>
+                                        <th >Actions</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    {% for d in data %}
+                                        <tr>
                                             <td>{{ d.id}}</td>  
                                             <td>{{ d.Version}}</td>
                                             <td>{{ d.TreatementNumber}}</td>
@@ -66,7 +64,6 @@
                                                 <p>Active</p>
                                                 {%endif%}
                                             </td>
-                                            
                                             <td>
                                                 {% if d.is_deleted%}  
                                                 <button class="btn" data-toggle="modal" data-target="#restore" data-id="{{d.id}}" data-version="{{d.Version}}"><i class="fa-solid fa-arrow-rotate-left" style="color: #0d6efd;"></i></button>
@@ -75,17 +72,15 @@
                                                 <button class="btn" data-toggle="modal" data-target="#delete" data-id="{{d.id}}" data-version="{{d.Version}}"><i class="fa-solid fa-trash" style="color: #dc3545;"></i></button>
                                                 {%endif%}
                                             </td>
-                                        {%empty%}
-                                            <tr>
-                                                
-                                                <td colspan="6"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
-                                        </tr> 
-                                    </tr>
-                                {% endfor %}            
-                            </tbody>               
-                        </table>
+                                        </tr>
+                                    {% endfor %}            
+                                </tbody>               
+                            </table>
+                        {%else%}
+                            <center><img src="{% static 'img/empty_data_test.png'%}" alt="notFound" style="width:500px"></center>
+                        {%endif%}
+
                       </div>
-                      
                     </div>
                 </div>
             </div>

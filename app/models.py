@@ -156,12 +156,16 @@ class CalendarConfigurationCpordo(BaseModel,SoftDeleteModel):
     # with their msn
     def __str__(self):
         return  str(self.msn)
+
+
 # Planning model 
 class PlanningApproval(BaseModel,SoftDeleteModel):
     name=models.CharField(max_length=200)
     product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
     def __str__(self):
         return  str(self.name)
+
+
 #Coois Model    
 class Coois(BaseModel,SoftDeleteModel):
     division=models.IntegerField(null=True)
@@ -243,9 +247,9 @@ class Shopfloor(BaseModel,SoftDeleteModel):
 
     
     # renames the instances of the Shopfloor
-    # with their order
-    # def __str__(self):
-    #     return  str(self.order)   
+    # with their version
+    def __str__(self):
+        return  str(self.version)  
 
 #Cycle Model
 class Cycle(BaseModel,SoftDeleteModel):
@@ -260,11 +264,21 @@ class Cycle(BaseModel,SoftDeleteModel):
     version=models.IntegerField(null=True)
     planning_approval = models.ForeignKey(PlanningApproval, on_delete=models.CASCADE,null=True)
 
+    # renames the instances of the Cycle
+    # with their profit_center
+    def __str__(self):
+        return  str(self.profit_center)   
+
 
 #Staff Model
 class Staff(BaseModel,SoftDeleteModel,User):
     function=models.CharField(max_length=50)
     division= models.ForeignKey(Division, on_delete=models.CASCADE)
+
+    # renames the instances of the Staff
+    # with their function
+    def __str__(self):
+        return  str(self.function)   
 
 
 

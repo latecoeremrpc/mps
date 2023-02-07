@@ -57,74 +57,78 @@
                             <p>
                                 <strong>Work Day Table</strong>
                             </p>
-                            <table id="workday" class="table table-striped table-hover table-bordered  text-nowrap">
-                                <thead>
-                                    <tr> 
-                                        <th>Work Date</th>
-                                        <th>Start Time</th>
-                                        <th>End Time</th>
-                                        <th>FTE hour by day</th>
-                                        <th>Extra Hour</th>
-                                        <th>Absenteeism ratio</th>
-                                        <th>Unproductiveness ratio</th>
-                                        <th>Efficienty ratio</th>
-                                        {%for smooth in smooth_family %} 
-                                            <th>Cycle time Family {{smooth}}</th>
-                                        {%endfor%}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {%for day in workdata %}
-                                        <tr>
-                                            <td>{{day.date| date:'d/m/Y'}}</td>
-                                            <td>{{day.startTime |time:"H:i:s"}}</td>  
-                                            <td>{{day.endTime |time:"H:i:s"}}</td>
-                                            <td>{{day.FTEhourByDay}}</td>
-                                            <td>{{day.ExtraHour}}</td>
-                                            <td>{{day.Absenteeism_ratio}}</td>
-                                            <td>{{day.Unproductiveness_ratio}}</td>
-                                            <td>{{day.Efficienty_ratio}}</td>
-                                            {%for item in day.cycle_set.all %} 
-                                            {%if item.version == None and item.plannig_approval == None %}
-                                                <td>Cycle time Family <b>{{item.smooth_family}}</b> : {{item.cycle_time}}</td>
-                                            {%endif%}
+                            {% if workdata %}
+                                <table id="workday" class="table table-striped table-hover table-bordered  text-nowrap">
+                                    <thead>
+                                        <tr> 
+                                            <th>Work Date</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>FTE hour by day</th>
+                                            <th>Extra Hour</th>
+                                            <th>Absenteeism ratio</th>
+                                            <th>Unproductiveness ratio</th>
+                                            <th>Efficienty ratio</th>
+                                            {%for smooth in smooth_family %} 
+                                                <th>Cycle time Family {{smooth}}</th>
                                             {%endfor%}
-                                    
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {%for day in workdata %}
+                                            <tr>
+                                                <td>{{day.date| date:'d/m/Y'}}</td>
+                                                <td>{{day.startTime |time:"H:i:s"}}</td>  
+                                                <td>{{day.endTime |time:"H:i:s"}}</td>
+                                                <td>{{day.FTEhourByDay}}</td>
+                                                <td>{{day.ExtraHour}}</td>
+                                                <td>{{day.Absenteeism_ratio}}</td>
+                                                <td>{{day.Unproductiveness_ratio}}</td>
+                                                <td>{{day.Efficienty_ratio}}</td>
+                                                {%for item in day.cycle_set.all %} 
+                                                {%if item.version == None and item.plannig_approval == None %}
+                                                    <td>Cycle time Family <b>{{item.smooth_family}}</b> : {{item.cycle_time}}</td>
+                                                {%endif%}
+                                                {%endfor%}
+                                        
 
-                                    {%empty%}                        
-                                        <tr>
-                                            <td colspan="10"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
-                                        </tr>
-                                        </tr>
-                                    {% endfor %}             
-                                </tbody>              
-                            </table>
+                                        {%empty%}                        
+                                            <tr>
+                                                <td colspan="10"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
+                                            </tr>
+                                            </tr>
+                                        {% endfor %}             
+                                    </tbody>              
+                                </table>
+                            {%else%}
+                                <center><img src="{% static 'img/empty_data_test.png'%}" alt="notFound" style="width:300px"></center>
+                            {%endif%}
                         </div>
                         <div id="holiday" class="calendar" style="display:none ;">
                             <hr>
                             <p>
                                 <strong>Holidays Table</strong>
                             </p>
-                            <table id="holidays" class="table table-striped table-hover table-bordered  text-nowrap">
-                                <thead>
-                                    <tr> 
-                                        <th>Holiday</th>
-                                        <th>Name</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {%for day in holidays %}
-                                        <tr>
-                                            <td>{{day.holidaysDate| date:'d/m/Y'}}</td>
-                                            <td>{{day.name}}</td>  
-                                    {%empty%}                        
-                                        <tr>
-                                            <td colspan="6"><img src="{% static 'img/notFound.png' %}" alt="notFound" class="center_img_not_found"></td>
+                            {% if holidays %}
+                                <table id="holidays" class="table table-striped table-hover table-bordered  text-nowrap">
+                                    <thead>
+                                        <tr> 
+                                            <th>Holiday</th>
+                                            <th>Name</th>
                                         </tr>
-                                        </tr>
-                                    {% endfor %}             
-                                </tbody>              
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {%for day in holidays %}
+                                            <tr>
+                                                <td>{{day.holidaysDate| date:'d/m/Y'}}</td>
+                                                <td>{{day.name}}</td>  
+                                            </tr>
+                                        {% endfor %}             
+                                    </tbody>              
+                                </table>
+                            {%else%}
+                                <center><img src="{% static 'img/empty_data_test.png'%}" alt="notFound" style="width:300px"></center>
+                            {%endif%}
                         </div>
                     </div>
                 </div>

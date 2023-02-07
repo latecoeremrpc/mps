@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="{% static 'timeline/css/owl.css' %}">
 
   <!-- icon -->
-  <link href="{% static 'img/Lettre_M_.png' %}" rel="icon">
+  <link href="{% static 'img/m.png' %}" rel="icon">
   <!------------------ styles------------------>
   <!--Data Table-->
   <link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
@@ -115,17 +115,16 @@
     <!-- /.navbar -->
 
     <!-- Main Sidebar Container -->
-    <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(198, 65%, 34%, 1) 0%, hsla(178, 44%, 32%, 1) 100%);"> -->
-      <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(198, 65%, 34%, 1) 0%, hsla(178, 44%, 32%, 1) 100%);"> -->
-      <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background-image: linear-gradient( 135deg, #088dc3 30%,  #059e96  100%);">
+        <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background-color: #0b2659">
     <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4" style = "background: black"> -->
 
-      {% comment %} <aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%);"> {% endcomment %}
+      {% comment %}<aside class="main-sidebar sidebar-dark-primary elevation-4" style ="background: -webkit-linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%);"> {% endcomment %}
       
       <!-- Brand Logo -->
       <a href="" class="brand-link"  style="text-decoration: none; ">
-        <img src="{% static 'img/Lettre_M_.png' %}" alt="mps"  style="margin-left: 1px;:opacity:.5;width:29px">
+        <img src="{% static 'img/m.png' %}" alt="mps"  style="margin-left: 1px;:opacity:.5;width:34px;margin-top:-10px">
         <i class="badge" style="font-weight:100"><b>Master Production Schedule</b></i>
+        <!-- <hr style="margin-top: -5.3px; margin-left: 35px;width: 84%;background-color: #f29663;opacity: 0.99 !important;height: 1.7px;"> -->
       </a>
 
       <!-- Sidebar -->
@@ -136,7 +135,7 @@
             <img src="{% static 'img/avatar.png' %}" class="img-circle elevation-2">
           </div>
           <div class="info">
-            <a href="#" class="d-block" style="text-decoration: none; ">Marwa Noomene</a>
+            <a href="#" class="d-block" style="text-decoration: none;">Marwa Noomene</a>
           </div>
         </div>
 
@@ -146,42 +145,34 @@
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" >
             <!-- Add icons to the links using the .nav-icon class
                 with font-awesome or any other icon font library -->
-                <li class="nav-item">
-                  <a href="{% url 'home' %}" class="nav-link">
-                    <i class="nav-icon fas fa-house"></i>
-                    <span style="font-size: 15px;">Home</span>
-                  </a>
-                </li>
-                <!-- <li class="nav-item">
-                  <a href="" class="nav-link">
-                    <i class="fa-solid fa-chart-line  nav-icon"></i>
-                    <span style="font-size: 15px;">Planning</span>
-                  </a>
-                </li> -->
-            <li class="nav-item has-treeview menu-open" >
+            <li class="nav-item">
+              <a href="{% url 'home' %}" class="nav-link">
+                <i class="nav-icon fas fa-house"></i>
+                <p style="color: #adb5bd;">Home</p>
+              </a>
+            </li>
+            <li class="nav-item has-treeview menu-open">
               <a href="#" class="nav-link active" style="background-color: #adb5bd;">
                 <i class="nav-icon fas fa-solid fa-gears"></i>
-                <span style="font-size: 15px;">
+                <p style="color: white;">
                   Configuration
-                  <i class="right fas fa-angle-left" ></i>
-                </span>
+                  <i class="fas fa-angle-left right"></i>
+                </p>
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
                 <a href="/admin" class="nav-link">
                   <i class="fa-solid fa-user-gear nav-icon"></i>
-                  <span style="font-size: 15px;">Administration</span>
+                  <p style="color: #adb5bd;">Administration</p>
                   </a>
                 </li>  
                 <li class="nav-item">
                   <a href="{% url 'division' %}" class="nav-link">
                     <i class="nav-icon fas fa-th"></i>
-                  <span style="font-size: 15px;">Divisions</span>
+                  <p style="color: #adb5bd;">Divisions</p>
                     <!-- <p>Divisions</p> -->
                   </a>
                 </li>  
-
-                
               </ul>
             </li>
           </ul>
@@ -200,17 +191,13 @@
             <div class="col-sm-6">
             <!-- <h1 class="m-0"><a href="{% url 'home' %}" class="nav-link" style="color:#0a3197 !important">MPS </a></h1> -->
             <a href="{% url 'home' %}" class="nav-link active" style="color:#0a3197 !important;width: 75px;">
-            <img src="{% static 'img/mps_logo.png' %}" style="width: 75px;
+            <img src="{% static 'img/mps_logo_blue.png' %}" style="width: 75px;
               margin-top: 5px;
               margin-left: -13px"> </a>
             </div><!-- /.col -->
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right" style="margin-top: 10px;"> 
                 <!-- {{request.get_full_path}} -->
-
-
-
-
               </ol>
             </div><!-- /.col -->
           </div><!-- /.row -->

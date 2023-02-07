@@ -30,10 +30,12 @@
 
 .center_img_not_found {
   display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 200px;
+  /* margin-left: auto; */
+  /* margin-right: auto;  */
+  width: 300px;
+  height: 200px;
   text-align: center;
+  /* background-color: white; */
 }
 
 .switch_week_month {
@@ -47,7 +49,7 @@
   text-align: center;
   line-height: 50px;
   border-radius: 50%;
-  background-color: #E91E63;
+  background-color: #f39763;
   /* background-image: linear-gradient(
     to right,
     #33ccc5,
@@ -63,7 +65,7 @@
 
 .data_btn{
 color: #fff !important;
-background-color: #61a5c2 !important;
+background-color: #f39763 !important;
 border-radius: 10em;
 padding: .5rem 1.6rem;
 font-size: .64rem;
@@ -239,7 +241,7 @@ transform: translateY(-50%);
   line-height: 1;
   padding-bottom: 0.5em;
   margin: 0 0 0.142857143em;
-  border-bottom: 2px solid #753bbd;
+  border-bottom: 2px solid #0b2659;
   transition: color 0.45s ease, border 0.45s ease;
 }
 .data-card h4 {
@@ -281,7 +283,7 @@ transform: translateY(-50%);
 }
 .data-card .link-text {
   display: block;
-  color: #753bbd;
+  color: #0b2659;
   font-size: 1.125em;
   font-weight: 600;
   line-height: 1.2;
@@ -302,7 +304,7 @@ transform: translateY(-50%);
 }
 .data-card:hover h3 {
   color: #ffffff;
-  border-bottom-color: #a754c4;
+  border-bottom-color: #0b2659;
 }
 .data-card:hover h4 {
   color: #ffffff;
@@ -507,7 +509,7 @@ transform: translateY(-50%);
 /* badge  */
 .badge_shared {
   display: inline-block;
-  background-color: #E91E63;
+  background-color: #f39763;
   border-radius: 50%;
   color: #fff;
   padding: 0.2em 0.2em;
@@ -524,7 +526,7 @@ transform: translateY(-50%);
   bottom: 0;
   animation: pulse 1s ease infinite;
   border-radius: 50%;
-  border: 4px double #E91E63;
+  border: 4px double #f39763;
 }
 @keyframes pulse {
   0% {
