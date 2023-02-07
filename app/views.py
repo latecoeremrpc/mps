@@ -1029,7 +1029,7 @@ def upload_coois(request,division,product,planningapproval):
         coois_data.delete()
         file=request.FILES['coois']
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
             import_coois(file,conn,product,planningapproval)
             messages.success(request,"COOIS file uploaded successfully!") 
             return redirect('./uploadzpp')
@@ -1118,7 +1118,7 @@ def upload_zpp(request,division,product,planningapproval):
         zpp_data.delete()
         #Save file to DB
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
             import_zpp(file,conn,product,planningapproval)
             messages.success(request,"ZPP file uploaded successfully!") 
             return redirect("../needs")    
@@ -1493,7 +1493,7 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
 # save shoploor to use in create_needs
 def save_needs(df,product,planningapproval):
    
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
     # get version_data 
     version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     version = version_number['version']+1 if version_number else 1

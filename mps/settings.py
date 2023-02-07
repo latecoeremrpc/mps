@@ -95,9 +95,9 @@ WSGI_APPLICATION = 'mps.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mps_database',
+        'NAME': 'mps_db',
         'USER': 'postgres',
-        'PASSWORD': 'admin',
+        'PASSWORD': '054Ibiza',
         'HOST': 'localhost',
         'PORT': '5432',
     }

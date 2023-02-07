@@ -39,7 +39,7 @@
 }
 
 .switch_week_month {
-  border: 1px solid rgba(0,0,0,.125);
+  border: 1px solid #ff516a;
   position: fixed;
   z-index: 9999;
   right: 50px;
@@ -49,7 +49,7 @@
   text-align: center;
   line-height: 50px;
   border-radius: 50%;
-  background-color: #f39763;
+  background-color: #ff516a;
   /* background-image: linear-gradient(
     to right,
     #33ccc5,
