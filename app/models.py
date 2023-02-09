@@ -263,6 +263,8 @@ class Cycle(BaseModel,SoftDeleteModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)
     version=models.IntegerField(null=True)
     planning_approval = models.ForeignKey(PlanningApproval, on_delete=models.CASCADE,null=True)
+    shared=models.BooleanField(default=True,null=True)
+
 
     # renames the instances of the Cycle
     # with their profit_center
