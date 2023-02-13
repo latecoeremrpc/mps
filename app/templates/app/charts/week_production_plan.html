@@ -1,7 +1,7 @@
 <div class="card-body">
     {%if records.iterrows%}
     <div style="height: 400px" >
-            <canvas id="week_production_plan_count" ></canvas>
+            <canvas id="week_production_plan_count" ></canvas>   
             <script>
                 var xValues = [{% for index, data in date_production_week.iterrows %}  '{{data.date_production_year_week}}', {% endfor %}];
                 var data = [{% for index, data in date_production_week.iterrows %} {{data.id}}, {% endfor %}];

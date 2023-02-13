@@ -52,7 +52,7 @@
 <!-- Form Update  -->
 <form method="POST" action="{% url 'kpis' division product planningapproval 'form_after_update_cycle' version_number %}">
     {% csrf_token %}
-    <input type="text" name="version_number" value={{version_number}}>
+    <input type="hidden" name="version_number" value={{version_number}}>
     <div class="col-10 offset-1">
         <div class="card custom-card">
             <div class="card-header custom-card-header">
@@ -119,16 +119,14 @@
 </form>
 
 <!------------------------------------------------  Switch Month Week button  ----------------------------------------------------------------------------->
+
 <button onclick="myFunction()" id="switch_month_week"  class= "switch_week_month">
     <i  class="fa-solid fa-repeat"></i>
     <b id="text_switch">M</b>
 </button>
-</div>
-</div>
-<br>
-<hr>
 
 <!---------------------------------------------------------------- KPI's -------------------------------------------------------------------------------------->
+<hr>
 <!--Program demand  -->
 <div  class="row">
     <div class="col-12">
@@ -220,10 +218,10 @@
                 </div> 
             </div>
             <div id="production_plan_week" style="display:block;" >
-                {% include 'app/charts/week_production_plan.html' %}
+                {% include 'app/charts/week_production_plan.html'%}
             </div>
             <div id="production_plan_month" style="display:none;" >
-                {% include 'app/charts/month_production_plan.html' %}
+                {% include 'app/charts/month_production_plan.html'%}
             </div> 
         </div> 
     </div>
@@ -256,7 +254,17 @@
         </div> 
     </div>
 </div> 
-
+<!---------------------------------------------------------------- Share result ------------------------------------------------------->
+<form action="" method="POST">
+    <!-- Security token by Django -->
+    {% csrf_token %}
+    <input type="hidden" value="{{version_selected}}" name="version">
+    <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
+    <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+    <center>
+        <button name="share" type="submit" class="share"><i class="fa-solid fa-arrow-up-right-from-square"></i> Share</button>
+    </center>
+</form>
 
 <!-------------------------------------------- Script for switch month week ------------------------------------------------------------>
 <script>

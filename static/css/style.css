@@ -39,17 +39,17 @@
 }
 
 .switch_week_month {
-  border: 1px solid #ff516a;
+  border: 1px solid #30c7c5;
   position: fixed;
   z-index: 9999;
   right: 50px;
   bottom: 50px;
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   text-align: center;
   line-height: 50px;
   border-radius: 50%;
-  background-color: #ff516a;
+  background-color: #30c7c5;
   /* background-image: linear-gradient(
     to right,
     #33ccc5,
@@ -541,6 +541,22 @@ transform: translateY(-50%);
     transform: scale(1.4);
     opacity: 0;
   }
+}
+
+/* style for share button  */
+.share {
+  border: 1px solid #30c7c5;
+  position: fixed;
+  z-index: 9999;
+  left: 300px;
+  bottom: 50px;
+  width: 70px;
+  height: 70px;
+  text-align: center;
+  line-height: 50px;
+  border-radius: 50%;
+  background-color: #30c7c5;
+  color: white;
 }
 
 

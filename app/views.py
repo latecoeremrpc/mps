@@ -1629,7 +1629,7 @@ def save_cycle_with_version(product,planningapproval,version):
     del df_cycles['id']
     cycle_data = StringIO()
     #convert file to csv
-    cycle_data.write(df_cycles.to_csv(index=False , header=None,sep=';'))
+    cycle_data.write(df_cycles.to_csv(index=False ,header=None,sep=';'))
     # This will make the cursor at index 0
     cycle_data.seek(0)
     with conn.cursor() as c:
@@ -1729,6 +1729,25 @@ def result(request,division,product,planningapproval):
 
 
 def kpis(request,division,product,planningapproval,come_from,version_number):
+
+    # initialization
+    demand_prod_planning.week_count=None
+    demand_prod_planning.week_count_axis_x=None
+    demand_prod_planning.month_count=None
+    demand_prod_planning.month_count_axis_x=None
+    cycle_time_kpi.cycle_mean=None
+    cycle_time_kpi.week_cycle_mean_axis_x=None
+    cycle_time_kpi.smooth_family=None
+    cycle_time_kpi.smooth_family_month=None
+    cycle_time_kpi.cycle_mean_month=None
+    cycle_time_kpi.month_cycle_mean_axis_x=None
+    production_plan_kpi.date_production_week=None
+    production_plan_kpi.date_production_month=None
+    demand_prod_planning.work_days_count =None
+    demand_prod_planning.work_days_count_month=None
+    logistic_stock_kpi.logistic_stock_week = None
+    logistic_stock_kpi.logistic_stock_month =None
+
     '''Check planning state:  '''
     check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
     check_zpp = Zpp.objects.filter(planning_approval=planningapproval).all()
@@ -1747,8 +1766,14 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     
 
     cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval)
+    shopfloor_data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval)
+    # get workday to use in calcul of demonstrated capacity
+    work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
+    
     df_cycles_data=pd.DataFrame(cycles_data.values())
-
+    df_shopfloor_data=pd.DataFrame(shopfloor_data.values())
+    df_work_days=pd.DataFrame(work_days.values())
+    
     df_cycles_data['work_day_week']=pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
     df_cycles_data['work_day_year']=pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
     df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
@@ -1759,31 +1784,16 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
 
 
-    print(come_from)
+    
     if come_from == 'planning_list':
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
-        return render(request,'app/kpi_test.html',{
-        'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
-        'cycles_data':df_cycles_data,
-        'cycle_mean':cycle_mean,
-        'division':division,
-        'product':product,
-        'planningapproval':planningapproval,
-        'planningapproval_info':planningapproval_info,
-        })
-
-    if come_from == 'result' :
-        df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(grater_version)]
-        return render(request,'app/kpi_test.html',{
-        'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
-        'cycles_data':df_cycles_data,
-        'cycle_mean':cycle_mean,
-        'division':division,
-        'product':product,
-        'planningapproval':planningapproval,
-        'planningapproval_info':planningapproval_info,
-        })
+        df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
         
+
+    if come_from == 'result':
+        df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(grater_version)]
+        df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(grater_version)]
+        #shopfloor
 
     if come_from == 'form_after_update_cycle' and request.method == "POST":
 
@@ -1903,31 +1913,52 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         df=df.reset_index(drop=True)
         # =>  save_needs (df, product, planningapproval)
         save_needs(df,product,planningapproval,grater_version+1)
-        return render(request,'app/kpi_test.html',{
-        'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version+1,
-        'cycles_data':df_cycles_data,
-        'cycle_mean':cycle_mean,
-        'division':division,
-        'product':product,
-        'planningapproval':planningapproval,
-        'planningapproval_info':planningapproval_info,
-        })
 
     if come_from == 'form_filter_date_version' and request.method == "POST":
             version_selected = request.POST.get('version_selected')
             version_number=version_selected
             df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
             cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
-            
-            return render(request,'app/kpi_test.html',{
-                'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
-                'cycles_data':df_cycles_data,
-                'cycle_mean':cycle_mean,
-                'division':division,
-                'product':product,
-                'planningapproval':planningapproval,
-                'planningapproval_info':planningapproval_info,
-                })
+
+            df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
+
+
+    #********** Call here functions ************
+
+    demand_prod_planning(df_shopfloor_data,df_work_days)
+    production_plan_kpi(df_shopfloor_data)
+    logistic_stock_kpi()
+    cycle_time_kpi(df_cycles_data)   
+   
+
+    return render(request,'app/kpi_test.html',{
+    'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
+    'cycles_data':df_cycles_data,
+    'cycle_mean':cycle_mean,
+    'records':df_shopfloor_data,
+    'division':division,
+    'product':product,
+    'planningapproval':planningapproval,
+    'planningapproval_info':planningapproval_info,
+    'week_count':demand_prod_planning.week_count,
+    'week_count_axis_x':demand_prod_planning.week_count_axis_x,
+    'month_count':demand_prod_planning.month_count,
+    'month_count_axis_x':demand_prod_planning.month_count_axis_x,
+    'date_production_week':production_plan_kpi.date_production_week,
+    'date_production_month':production_plan_kpi.date_production_month,
+    'work_days_count_week': demand_prod_planning.work_days_count,
+    'work_days_count_month':demand_prod_planning.work_days_count_month,
+    'logistic_stock_week':logistic_stock_kpi.logistic_stock_week,
+    'logistic_stock_month':logistic_stock_kpi.logistic_stock_month,
+    'cycle_mean':cycle_time_kpi.cycle_mean,
+    'week_cycle_mean_axis_x':cycle_time_kpi.week_cycle_mean_axis_x,
+    'smooth_family': cycle_time_kpi.smooth_family,
+    'cycle_mean_month':cycle_time_kpi.cycle_mean_month,
+    'month_cycle_mean_axis_x':cycle_time_kpi.month_cycle_mean_axis_x,
+    'smooth_family_month':cycle_time_kpi.smooth_family_month,
+    })
+    
+
 
     # if come_from == 'after_share':
     #     # cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
@@ -1940,7 +1971,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 def filter_kpi(request,division,product,planningapproval):
     version_to_share = None
 
-    '''Check planning state:  '''
+    ''' Check planning state:  '''
     check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
     check_zpp = Zpp.objects.filter(planning_approval=planningapproval).all()
     check_shopfloor = Shopfloor.objects.filter(planning_approval=planningapproval).all()
@@ -2165,16 +2196,16 @@ def update_cycle(data):
 
 
 # calculate nomber of OF and OP ( wek and month)
-def demand_prod_planning(df_data,df_work_days,date_from,date_to):
+def demand_prod_planning(df_data,df_work_days):
    
     df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     
         
-    if date_from and date_to:
-        # get df between two dates
-        df_data_demand_prod_interval=df_data[(df_data['date'] >= date_from.date()) & (df_data['date'] <= date_to.date())]
-    else:
-        df_data_demand_prod_interval= df_data 
+    # if date_from and date_to:
+    #     # get df between two dates
+    #     df_data_demand_prod_interval=df_data[(df_data['date'] >= date_from.date()) & (df_data['date'] <= date_to.date())]
+    # else:
+    df_data_demand_prod_interval= df_data 
 
     # week of date
     df_data_demand_prod_interval['date_week']=pd.to_datetime(df_data_demand_prod_interval['date'], errors='coerce').dt.week
@@ -2229,7 +2260,6 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     # previous month
     # first = current_date.replace(day=1)
     # last_month = first - timedelta(days=1)
-    
     # get previous_month
     previous_month =current_date - relativedelta(months=1)
     df_prev_month = df_data[(df_data['date'] > previous_month.date()) & (df_data['date'] <= current_date.date())]
@@ -2270,12 +2300,12 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
 
 
 # to display Kpi cycle time per smooth family (week and month)
-def cycle_time_kpi(df_data,date_from,date_to):
+def cycle_time_kpi(df_data):
 
-    if date_from and date_to:
-        df_cycle_time_interval = df_data[(df_data['work_day'] >= date_from.date()) & (df_data['work_day'] <= date_to.date())]
-    else :
-        df_cycle_time_interval= df_data
+    # if date_from and date_to:
+    #     df_cycle_time_interval = df_data[(df_data['work_day'] >= date_from.date()) & (df_data['work_day'] <= date_to.date())]
+    # else :
+    df_cycle_time_interval= df_data
 
     # work_day_week
     df_cycle_time_interval['work_day_week']=pd.to_datetime(df_cycle_time_interval['work_day'],errors='coerce').dt.week
@@ -2328,15 +2358,15 @@ def cycle_time_kpi(df_data,date_from,date_to):
 
    
 # to calculate production plan (Freeze_end_date or smoothing_end_date) (week and month)
-def production_plan_kpi(df_data,date_from,date_to): 
+def production_plan_kpi(df_data): 
 
     df_data['date_production']=np.where((pd.to_datetime(df_data['Freeze_end_date'],errors='coerce').dt.date),(pd.to_datetime(df_data['smoothing_end_date'],errors='coerce').dt.date),(pd.to_datetime(df_data['Freeze_end_date'],errors='coerce').dt.date))
     # df_data['date_production']=np.where(((pd.to_datetime(df_data['Freeze_end_date'],errors='coerce')).dt.date).isna(),(pd.to_datetime(df_data['smoothing_end_date'],errors='coerce').dt.date),(df_data['Freeze_end_date']))
-    if date_from and date_to:
-        # get df between two dates
-        df_production_plan_kpi_interval= df_data[(df_data['date_production'] >= date_from.date()) & (df_data['date_production'] <= date_to.date())]
-    else:
-        df_production_plan_kpi_interval = df_data
+    # if date_from and date_to:
+    #     # get df between two dates
+    #     df_production_plan_kpi_interval= df_data[(df_data['date_production'] >= date_from.date()) & (df_data['date_production'] <= date_to.date())]
+    # else:
+    df_production_plan_kpi_interval = df_data
     
     
     # week of date date_production
@@ -2362,38 +2392,38 @@ def production_plan_kpi(df_data,date_from,date_to):
     date_production_week.drop(date_production_week[date_production_week['date_production_year_week'] == "0-W0"].index, inplace = True)
     date_production_month.drop(date_production_month[date_production_month['date_production_year_month'] == "0-M0"].index, inplace = True)
     date_production_month.drop(date_production_month[date_production_month['date_production_year_month'] == "1900-M1"].index, inplace = True)
-
+    
     
     production_plan_kpi.date_production_week =date_production_week
     production_plan_kpi.date_production_month =date_production_month
    
 
 # to calculate logistic stock per week and per month 
-def logistic_stock_kpi(date_from_year_week, date_to_year_week, date_from_year_month, date_to_year_month): 
+def logistic_stock_kpi(): 
     
     # to reate new dataframes 
     Df_calcul_logistic_stock_week = production_plan_kpi.date_production_week[['date_production_year_week','id']].copy()
     Df_calcul_logistic_stock_month = production_plan_kpi.date_production_month[['date_production_year_month','id']].copy()
     
     # to filter data frame between two dates
-    if date_from_year_week and date_to_year_week and date_from_year_month and date_to_year_month:
-        monday_date_from_year_week = datetime.strptime(date_from_year_week+'-1','%Y-W%W-%w')
-        monday_date_to_year_week = datetime.strptime(date_to_year_week+'-1','%Y-W%W-%w')
+    # if date_from_year_week and date_to_year_week and date_from_year_month and date_to_year_month:
+    #     monday_date_from_year_week = datetime.strptime(date_from_year_week+'-1','%Y-W%W-%w')
+    #     monday_date_to_year_week = datetime.strptime(date_to_year_week+'-1','%Y-W%W-%w')
         
-        first_day_date_from_year_month = datetime.strptime(date_from_year_month+'-1','%Y-M%m-%w')
-        first_date_to_year_month = datetime.strptime(date_to_year_month+'-1','%Y-M%m-%w')
+    #     first_day_date_from_year_month = datetime.strptime(date_from_year_month+'-1','%Y-M%m-%w')
+    #     first_date_to_year_month = datetime.strptime(date_to_year_month+'-1','%Y-M%m-%w')
 
 
-        Df_calcul_logistic_stock_week['monday_date_production_year_week']= pd.to_datetime(Df_calcul_logistic_stock_week['date_production_year_week'].astype(str) + "-1", format= '%Y-W%W-%w')
-        Df_calcul_logistic_stock_month['first_date_production_year_month']= pd.to_datetime(Df_calcul_logistic_stock_month['date_production_year_month'].astype(str) + "-1", format= '%Y-M%m-%w')
+    #     Df_calcul_logistic_stock_week['monday_date_production_year_week']= pd.to_datetime(Df_calcul_logistic_stock_week['date_production_year_week'].astype(str) + "-1", format= '%Y-W%W-%w')
+    #     Df_calcul_logistic_stock_month['first_date_production_year_month']= pd.to_datetime(Df_calcul_logistic_stock_month['date_production_year_month'].astype(str) + "-1", format= '%Y-M%m-%w')
         
 
-        Df_calcul_logistic_stock_week=Df_calcul_logistic_stock_week[(Df_calcul_logistic_stock_week['monday_date_production_year_week'] >= monday_date_from_year_week) & (Df_calcul_logistic_stock_week['monday_date_production_year_week'] <= monday_date_to_year_week)]
-        Df_calcul_logistic_stock_month=Df_calcul_logistic_stock_month[(Df_calcul_logistic_stock_month['first_date_production_year_month'] >= first_day_date_from_year_month) & (Df_calcul_logistic_stock_month['first_date_production_year_month'] <= first_date_to_year_month)]
-    else:
-        Df_calcul_logistic_stock_week
-        Df_calcul_logistic_stock_month
-        
+    #     Df_calcul_logistic_stock_week=Df_calcul_logistic_stock_week[(Df_calcul_logistic_stock_week['monday_date_production_year_week'] >= monday_date_from_year_week) & (Df_calcul_logistic_stock_week['monday_date_production_year_week'] <= monday_date_to_year_week)]
+    #     Df_calcul_logistic_stock_month=Df_calcul_logistic_stock_month[(Df_calcul_logistic_stock_month['first_date_production_year_month'] >= first_day_date_from_year_month) & (Df_calcul_logistic_stock_month['first_date_production_year_month'] <= first_date_to_year_month)]
+    # else:
+    Df_calcul_logistic_stock_week
+    Df_calcul_logistic_stock_month
+    
     # to get data from zpp
     zpp_data=Zpp.objects.values('plan_date','element')
     zpp_data_df=pd.DataFrame(zpp_data.values())

@@ -1,8 +1,7 @@
 <div class="card-body">
-    {%if df_cycle.iterrows%}
+    {%if cycles_data.iterrows%}
     <div style="height: 400px" >
         <canvas id="week_cycle_mean"></canvas>
-
         <script>
             var xValues = [{% for weeks in week_cycle_mean_axis_x %} '{{weeks}}', {% endfor %}];
             var data = [{% for index, data in cycle_mean.iterrows %} {{data.0|floatformat:2}}, {% endfor %}];
