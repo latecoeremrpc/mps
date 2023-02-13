@@ -1758,9 +1758,26 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     print(come_from)
     if come_from == 'planning_list':
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
+        return render(request,'app/kpi_test.html',{
+        'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
+        'cycles_data':df_cycles_data,
+        'cycle_mean':cycle_mean,
+        'division':division,
+        'product':product,
+        'planningapproval':planningapproval,
+        })
 
     if come_from == 'result' :
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(grater_version)]
+        return render(request,'app/kpi_test.html',{
+        'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
+        'cycles_data':df_cycles_data,
+        'cycle_mean':cycle_mean,
+        'division':division,
+        'product':product,
+        'planningapproval':planningapproval,
+        })
+        
 
     if come_from == 'form_after_update_cycle' and request.method == "POST":
 
@@ -1890,12 +1907,11 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         })
 
     if come_from == 'form_filter_date_version' and request.method == "POST":
-            print('im here')
             version_selected = request.POST.get('version_selected')
-            print(version_selected)
             version_number=version_selected
-            print(version_number)
             df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
+            cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+            
             return render(request,'app/kpi_test.html',{
                 'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
                 'cycles_data':df_cycles_data,
@@ -1909,14 +1925,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     #     # cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
 
 
-    return render(request,'app/kpi_test.html',{
-        'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
-        'cycles_data':df_cycles_data,
-        'cycle_mean':cycle_mean,
-        'division':division,
-        'product':product,
-        'planningapproval':planningapproval,
-        })
+
 
 
 # filter planning result
