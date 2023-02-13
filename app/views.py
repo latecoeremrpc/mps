@@ -1742,6 +1742,10 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         return redirect(needs,division=division,product=product,planningapproval=planningapproval)
     '''End Check planning state:  '''
 
+     # name of planning approval for info page
+    planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
+    
+
     cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval)
     df_cycles_data=pd.DataFrame(cycles_data.values())
 
@@ -1765,6 +1769,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         'division':division,
         'product':product,
         'planningapproval':planningapproval,
+        'planningapproval_info':planningapproval_info,
         })
 
     if come_from == 'result' :
@@ -1776,6 +1781,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         'division':division,
         'product':product,
         'planningapproval':planningapproval,
+        'planningapproval_info':planningapproval_info,
         })
         
 
@@ -1904,6 +1910,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         'division':division,
         'product':product,
         'planningapproval':planningapproval,
+        'planningapproval_info':planningapproval_info,
         })
 
     if come_from == 'form_filter_date_version' and request.method == "POST":
@@ -1919,6 +1926,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
                 'division':division,
                 'product':product,
                 'planningapproval':planningapproval,
+                'planningapproval_info':planningapproval_info,
                 })
 
     # if come_from == 'after_share':
