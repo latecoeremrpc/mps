@@ -12,18 +12,26 @@
 
 <section class="page-contain">
   {% for plannings in planning_informations %}
-  <a href="{% url 'kpi' division product plannings.id %}" class="data-card">
+    {% if plannings.shared_version %}
+      <a href="{% url 'kpis' division product plannings.id 'planning_list' plannings.shared_version %}" class="data-card">
+    {% elif plannings.last_version %}
+      <a href="{% url 'kpis' division product plannings.id 'planning_list' plannings.last_version %}" class="data-card">
+    {% else %}
+        <a href="{% url 'kpis' division product plannings.id 'planning_list' 'no_version' %}" class="data-card">
+    {% endif %}
+    
     <h3>{{plannings.name}}</h3>
       
       <h4>{{plannings.created_at | date:'Y-m-d'}}</h4>
           <ul>
               <li>By: {{plannings.created_by}}</li>
               <hr>
-              <li>Status: Complete</li>
+              <li>Status: Incomplete</li>
               <hr>
-              <li>Shared:  {{plannings.shared_status}}</li>
+              <li>Shared:  {{plannings.shared_status}} {% if plannings.shared_version %} : V {{plannings.shared_version}} {% endif %}</li>
               <hr>
               <li>Number of versions:  {{plannings.version_count}}</li>
+
 
           </ul>
         <span class="link-text">

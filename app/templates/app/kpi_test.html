@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% block content %} 
+<!--message alert -->
+{% if messages %}
+{% for message in messages %}
+{%include 'app/alerts/alert.html'%}
+{% endfor %}
+{% endif %}
+<!--return back-->  
+{% include "app/info/return_back.html" %}
+<!-- info -->
+{% include "app/info/info_page.html" %}                  
+
+<!-- time line (process) -->                                      
+{% include "app/info/timeline.html" %}
+
+<!-- ***************************************************************************************************** -->
+
+<!-- Form Filter  -->
+<form method="POST" action="{% url 'kpis' division product planningapproval 'form_filter_date_version' version_number %}">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-6 offset-3">
+            <div class="input-group">
+                <span class="input-group-text">Version</span>
+                <select name="version_selected" class="custom-select form-control-border" id="exampleSelectBorder" required>
+                    <!-- <option>Select version</option>   -->
+                    {% for item in available_versions %}
+                        <!-- convert item to string in the template, you can use -->
+                    <option value="{{item}}" {% if item == version_number %} selected {% endif %}>{{item}}</option>
+                    {%empty%}
+                        <option value="">No versions</option>   
+                    {% endfor %}    
+                </select>
+                <span class="input-group-text">From</span>
+                <input name="from" id="from" type="date" class=" form-control" value="{{from_date}}">
+                <span class="input-group-text">To</span>
+                <input name="to" id="to" type="date" class=" form-control" value="{{to_date}}"> 
+                <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-default" name="filter_sbumit" style="color:#4285f4;border-radius: 0 8px 8px 0;background-color: white;border: 1px solid #ced4da;"> 
+                        <i class="fa-solid fa-magnifying-glass" style="color:#4285f4;"></i>
+                        Go!
+                    </button>
+                </div>
+            </div>          
+        </div>
+    </div>   
+    <br>     
+</form>
+
+
+<!-- Form Update  -->
+<form method="POST" action="{% url 'kpis' division product planningapproval 'form_after_update_cycle' version_number %}">
+    {% csrf_token %}
+    <input type="text" name="version_number" value={{version_number}}>
+    <div class="col-10 offset-1">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+                <h3 class="card-title custom-card-title">
+                    Adjust Cycle Time
+                </h3>
+            </div>
+            <div  class="card-body table-responsive p-0 " style="height: 250px;"">
+                <div class="card-body">
+                    <table id ="cycleTime" class="table table-bordered text-nowrap table-sm">
+                        <tbody>    
+                                <tr>
+                                    <th><label for="week_cycle" class="col-sm-4 control-label">Week</label></th>
+                                    {% for index,cycle in cycle_mean.iterrows%}
+                                    <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
+                                    <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
+                                    <input name="version_selected" id="version_selected" type="hidden" class=" form-control" value="{{version_selected}}" required> 
+                                    <td>
+                                        <input id="week_cycle" name="week_cycle" type="text" class="form-control custom-input" value="{{cycle.work_day_week_year}}" readonly="readonly">
+                                    </td> 
+                                    {%endfor%} 
+                                </tr>
+
+                                <tr>
+                                    <th><label for="smooth_family" class="col-sm-4 control-label">Smooth Family</label></th>
+                                    {% for index,cycle in cycle_mean.iterrows%}
+                                    <td>
+                                        <input id="smooth_family" name="smooth_family" type="text" class="form-control custom-input" value="{{cycle.smooth_family}}" readonly="readonly">
+                                    </td> 
+                                    {%endfor%} 
+                                </tr>
+
+                                <tr>
+                                    <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
+                                    {% for index,cycle in cycle_mean.iterrows%}
+                                    <td>
+                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required step="0.01" > 
+                                    </td>
+                                    {%endfor%} 
+                                </tr>
+                                <tr>
+                                    <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
+                                    {% for index,cycle in cycle_mean.iterrows%}
+                                    <td>
+                                        <div class="inline-radio-input col-sm-8">
+                                            <input style="margin:10px ;" type="radio" id="hour" name="cycle-type-{{cycle.work_day_week_year}}" value="Hours" checked>
+                                            <label style="margin:10px ;" for="hour">Hours</label>
+                                            <input style="margin:10px ;" type="radio" id="day" name="cycle-type-{{cycle.work_day_week_year}}" value="Days">
+                                            <label style="margin:10px ;" for="day">Days</label><br>
+                                        </div> 
+                                    </td>
+                                    {%endfor%} 
+                                </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div> 
+            <div class="card-footer custom-card-footer">
+                <button type="submit"> Update Cycle</button>
+                <br>
+            </div> 
+        </div>
+    </div>   
+</form>
+
+<!------------------------------------------------  Switch Month Week button  ----------------------------------------------------------------------------->
+<button onclick="myFunction()" id="switch_month_week"  class= "switch_week_month">
+    <i  class="fa-solid fa-repeat"></i>
+    <b id="text_switch">M</b>
+</button>
+</div>
+</div>
+<br>
+<hr>
+
+<!---------------------------------------------------------------- KPI's -------------------------------------------------------------------------------------->
+<!--Program demand  -->
+<div  class="row">
+    <div class="col-12">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+              <h3 class="card-title custom-card-title">
+                <i class="far fa-chart-bar"></i>
+                    Demand | Production
+                </h3>
+                <div class="card-tools"> 
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked" class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top:0px;">
+                            <i class="fas fa-minus"></i></button></li>
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top:0px;margin-bottom:0px;"><i class="fas fa-expand"></i></button></li>
+                    </ul>  
+                </div> 
+            </div>
+            <div id="demand_prod_planning_week" style="display:block;">
+                {% include 'app/charts/demand_prod_planning_week.html' %}
+            </div>
+            <div id="demand_prod_planning_month" style="display:none;">
+                {% include 'app/charts/demand_prod_planning_month.html' %}
+            </div>
+        </div> 
+    </div>
+</div> 
+    
+<!-- information modal -->
+<div class="modal" id="test_stocked">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">						
+                <h4 class="modal-title">Informations</h4>
+            </div>
+            <div class="modal-body">	
+            </div>
+            <div class="modal-footer">
+                <input type="button" href="" class="btn btn-secondary" data-dismiss="modal" value="Cancel">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Cycle time -->
+<div  class="row">
+    <div class="col-12">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+              <h3 class="card-title custom-card-title">
+                <i class="far fa-chart-bar"></i>
+                    Cycle Time
+                </h3>
+                <div class="card-tools"> 
+                    <ul class="list-group list-group-horizontal" style="height:35px;">
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top:0px;">
+                            <i class="fas fa-minus"></i></button></li>
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top:0px;margin-bottom:0px;"><i class="fas fa-expand"></i></button></li> 
+                    </ul>  
+                </div> 
+            </div>
+            <div id="cycle_kpi_week" style="display:block ;" >
+                {% include 'app/charts/week_cycle_mean.html'%}
+            </div>
+            <div id="cycle_kpi_month" style="display:none ;" >
+                {% include 'app/charts/month_cycle_mean.html'%}
+            </div>
+        </div> 
+    </div>
+</div> 
+
+<!-- Production plan-->
+<div class="row">
+    <div class="col-12">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+                <h3 class="card-title custom-card-title">
+                <i class="far fa-chart-bar"></i>
+                    Production Plan
+                </h3>
+                <div class="card-tools"> 
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
+                            <i class="fas fa-minus"></i></button></li>
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li> 
+                    </ul>  
+                </div> 
+            </div>
+            <div id="production_plan_week" style="display:block;" >
+                {% include 'app/charts/week_production_plan.html' %}
+            </div>
+            <div id="production_plan_month" style="display:none;" >
+                {% include 'app/charts/month_production_plan.html' %}
+            </div> 
+        </div> 
+    </div>
+</div> 
+
+<!-- logistic stock plan-->
+<div class="row">
+    <div class="col-12">
+        <div class="card custom-card">
+            <div class="card-header custom-card-header">
+                <h3 class="card-title custom-card-title">
+                <i class="far fa-chart-bar"></i>
+                    Logistic Stock
+                </h3>
+                <div class="card-tools"> 
+                    <ul class="list-group list-group-horizontal" style="height: 35px;">
+                        <li class="list-group-item" style="padding:4px;"><i type="button" data-toggle="modal" data-target="#test_stocked " class="info fas fa-info-circle" style="margin-bottom:7px;"></i></li>
+                        <li class="list-group-item" style="padding:3px;"><button type="button" class="btn btn-tool" data-card-widget="collapse" style="padding:3px;padding-top: 0px;">
+                            <i class="fas fa-minus"></i></button></li>
+                        <li class="list-group-item" style="padding:8px;"><button type="bpxutton" class="btn btn-tool" data-card-widget="maximize" style="padding:3px;padding-top: 0px;margin-bottom: 0px;"><i class="fas fa-expand"></i></button></li> 
+                    </ul>  
+                </div> 
+            </div>
+            <div id="logistic_stock_week" style="display:block;">
+                {% include 'app/charts/logistic_stock_week.html'%}
+            </div>
+            <div id="logistic_stock_month" style="display:none;">
+                {% include 'app/charts/logistic_stock_month.html'%}
+            </div> 
+        </div> 
+    </div>
+</div> 
+
+
+<!-------------------------------------------- Script for switch month week ------------------------------------------------------------>
+<script>
+    function myFunction() {
+        var text_switch =document.getElementById("text_switch");
+        var week_demand = document.getElementById("demand_prod_planning_week");
+        var week_cycle = document.getElementById("cycle_kpi_week");
+        var week_production = document.getElementById("production_plan_week");
+        var week_logistic = document.getElementById("logistic_stock_week");
+
+        var month_demand = document.getElementById("demand_prod_planning_month");
+        var month_cycle = document.getElementById("cycle_kpi_month");
+        var month_production = document.getElementById("production_plan_month");
+        var month_logistic = document.getElementById("logistic_stock_month");
+        var btn = document.getElementById("switch_month_week");
+        
+      if (week_demand.style.display === "block" & week_cycle.style.display === "block" & week_production.style.display === "block" & week_logistic.style.display === "block") {
+        week_demand.style.display = "none";
+        week_cycle.style.display = "none";
+        week_production.style.display = "none";
+        week_logistic.style.display = "none";
+
+        month_demand.style.display= "block";
+        month_cycle.style.display = "block";
+        month_production.style.display = "block";
+        month_logistic.style.display = "block";
+        text_switch.textContent='W';
+      }  
+      else {
+        week_demand.style.display = "block";
+        week_cycle.style.display = "block";
+        week_production.style.display = "block";
+        week_logistic.style.display = "block";
+
+
+        month_demand.style.display= "none";
+        month_cycle.style.display = "none";
+        month_production.style.display = "none";
+        month_logistic.style.display = "none";
+
+        text_switch.textContent ='M';
+      }
+    }
+</script>
+
+{% endblock content%}

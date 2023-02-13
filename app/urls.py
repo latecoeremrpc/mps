@@ -88,6 +88,10 @@ urlpatterns = [
 
      
     
+
+
+    path('division/<division>/product/<product>/planningapproval/<planningapproval>/kpis/<come_from>/<version_number>/',views.kpis,name='kpis'),
+
      
     
     

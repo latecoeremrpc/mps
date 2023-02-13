@@ -3,6 +3,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 import psycopg2
+from django.db.models import Max
 from app.decorators import allowed_users
 from app.forms import (CalendarConfigurationCpordoForm,
                        CalendarConfigurationTreatementForm, DivisionForm,
@@ -979,15 +980,19 @@ def all_planning(request,division,product):
         informations['created_at']=planning.created_at
         informations['created_by']=planning.created_by
 
+
+
         for planning in planning.shopfloor_set.all():
+            if planning.shared == True:
+                informations['shared_version']=planning.version
             version_count.append(planning.version)
             shared_status.append(planning.shared)
-
             informations['version_count']= len(set(version_count))
             informations['shared_status']=any(set(shared_status))
-        
+            informations['last_version']=max(set(version_count))
+
         planning_informations.append(informations)
-        
+    print(planning_informations)
     return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info,'planning_informations':planning_informations})
    
 #Save new Planning Approval
@@ -1030,7 +1035,7 @@ def upload_coois(request,division,product,planningapproval):
         coois_data.delete()
         file=request.FILES['coois']
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
             import_coois(file,conn,product,planningapproval)
             messages.success(request,"COOIS file uploaded successfully!") 
             return redirect('./uploadzpp')
@@ -1119,7 +1124,7 @@ def upload_zpp(request,division,product,planningapproval):
         zpp_data.delete()
         #Save file to DB
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
             import_zpp(file,conn,product,planningapproval)
             messages.success(request,"ZPP file uploaded successfully!") 
             return redirect("../needs")    
@@ -1504,7 +1509,7 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
 # save shoploor to use in create_needs
 def save_needs(df,product,planningapproval,version):
    
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
     # # get version_data 
     # version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     # version = version_number['version']+1 if version_number else 1
@@ -1609,7 +1614,7 @@ def save_cycle_with_version_test(product,planningapproval):
     return True
 
 def save_cycle_with_version(product,planningapproval,version):
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
     #Get last cycle data shared
     if version == 1:
         cycles= Cycle.objects.all().filter(product=product,owner='officiel',shared=True)
@@ -1720,6 +1725,198 @@ def result(request,division,product,planningapproval):
     return render(request,'app/Shopfloor/result.html',{'planningapproval_info':planningapproval_info,
     'planningapproval':planningapproval,'records':data,'division':division,'product':product,
     'versions':versions,'selected_version':selected_version,'version':version})
+
+
+
+def kpis(request,division,product,planningapproval,come_from,version_number):
+    '''Check planning state:  '''
+    check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
+    check_zpp = Zpp.objects.filter(planning_approval=planningapproval).all()
+    check_shopfloor = Shopfloor.objects.filter(planning_approval=planningapproval).all()
+
+    if not check_coois:
+        return redirect(upload_coois,division=division,product=product,planningapproval=planningapproval)
+    if not check_zpp:
+        return redirect(upload_zpp,division=division,product=product,planningapproval=planningapproval)
+    if not check_shopfloor:
+        return redirect(needs,division=division,product=product,planningapproval=planningapproval)
+    '''End Check planning state:  '''
+
+    cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval)
+    df_cycles_data=pd.DataFrame(cycles_data.values())
+
+    df_cycles_data['work_day_week']=pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+    df_cycles_data['work_day_year']=pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+    df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
+
+    grater_version=df_cycles_data['version'].max()
+    available_versions=df_cycles_data['version'].unique()
+    #Mean of cycle time to show them in front table adjust cycle
+    cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+
+
+    print(come_from)
+    if come_from == 'planning_list':
+        df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
+
+    if come_from == 'result' :
+        df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(grater_version)]
+
+    if come_from == 'form_after_update_cycle' and request.method == "POST":
+
+        version_number = request.POST.get('version_number')
+        smooth_family_list= request.POST.getlist('smooth_family')
+        cycle_time_list= request.POST.getlist('cycle_time')
+        week_cycle_list= request.POST.getlist('week_cycle')
+        
+        cycle_type=[]
+        for date in week_cycle_list:
+            cycle_type.append(request.POST.get('cycle-type-'+ date))
+
+        data = {
+        "smooth_family": smooth_family_list,
+        "cycle_time": cycle_time_list,
+        "week_cycle": week_cycle_list,
+        "cycle_type":cycle_type
+        }
+        df_cycle_input = pd.DataFrame(data)
+
+        df_cycle_input['year']= df_cycle_input['week_cycle'].str.split('-W').str[0]
+        df_cycle_input['week']= df_cycle_input['week_cycle'].str.split('-W').str[1]
+        df_cycle_input['key']=df_cycle_input['week_cycle'].astype(str)+df_cycle_input['smooth_family'].astype(str)
+        df_cycle_input_dict_cycle_time=dict(zip(df_cycle_input['key'],df_cycle_input['cycle_time']))
+        df_cycle_input_dict_cycle_type=dict(zip(df_cycle_input['key'],df_cycle_input['cycle_type']))
+
+        df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
+        df_cycles_data['key']=df_cycles_data['work_day_week_year'].astype(str)+df_cycles_data['smooth_family'].astype(str)
+
+        df_cycles_data['cycle_time']=df_cycles_data['key'].map(df_cycle_input_dict_cycle_time)
+
+        df_cycles_data['cycle_type']=df_cycles_data['key'].map(df_cycle_input_dict_cycle_type)
+        work_data=WorkData.undeleted_objects.all().filter(product=product)
+        df_work_data=pd.DataFrame(work_data.values())
+        df_work_data_dict_start_time=dict(zip(df_work_data['date'],df_work_data['startTime'])) 
+        df_work_data_dict_end_time=dict(zip(df_work_data['date'],df_work_data['endTime'])) 
+        df_cycles_data['start_time']= df_cycles_data['work_day'].map(df_work_data_dict_start_time)
+        df_cycles_data['end_time']= df_cycles_data['work_day'].map(df_work_data_dict_end_time)
+        df_cycles_data['work_hours']=(pd.to_datetime(df_cycles_data['end_time'],format='%H:%M:%S') - pd.to_datetime(df_cycles_data['start_time'],format='%H:%M:%S'))/ pd.Timedelta(hours=1)
+        
+        df_cycles_data['cycle_time']=np.where(df_cycles_data['cycle_type'] == 'Days',df_cycles_data['cycle_time'].astype(float) * df_cycles_data['work_hours'].astype(float),df_cycles_data['cycle_time'])
+        
+        #Prepar DF to upload into DB
+        df_cycles_data['version']=grater_version+1
+        df_cycles_data['shared']=False
+        df_cycles_data['created_at']=datetime.now()
+        df_cycles_data['updated_at']=datetime.now()
+        df_cycles_data['created_by']='Marwa'
+        df_cycles_data['updated_by']='Marwa'
+        df_cycles_data['is_deleted']=False
+        df_cycles_data['deleted_by']=None
+        df_cycles_data['deleted_at']=None
+        df_cycles_data['restored_at']=None
+        df_cycles_data['restored_by']=None
+        df_cycles_data=df_cycles_data[['created_at',
+                                        'updated_at',
+                                        'created_by',
+                                        'updated_by',
+                                        'is_deleted',
+                                        'deleted_by',
+                                        'deleted_at',
+                                        'restored_at',
+                                        'restored_by',
+                                        'division',
+                                        'profit_center',
+                                        'work_day',
+                                        'smooth_family',
+                                        'cycle_time',
+                                        'workdata_id',
+                                        'owner',
+                                        'product_id',
+                                        'version',
+                                        'planning_approval_id',
+                                        'shared',]]
+        
+        update_cycle(df_cycles_data)
+
+        shopfloor_data=Shopfloor.objects.filter(
+                                                version=version_number,
+                                                product_id=product,
+                                                planning_approval_id=planningapproval
+                                                ).values(
+                                                        'division',
+                                                        'profit_centre',
+                                                        'order',
+                                                        'material',
+                                                        'designation',
+                                                        'order_type',
+                                                        'order_quantity',
+                                                        'date_start_plan',
+                                                        'date_end_plan' ,
+                                                        'fixation',
+                                                        'date_reordo',
+                                                        'message',
+                                                        'order_stat',
+                                                        'customer_order',
+                                                        'date_end_real', 
+                                                        'AllocatedTime', 
+                                                        'Leadtime', 
+                                                        'workstation',
+                                                        'Allocated_Time_On_Workstation', 
+                                                        'Smooth_Family',
+                                                        'Ranking', 
+                                                        'Freeze_end_date', 
+                                                        'Remain_to_do', 
+                                                        'closed')
+        df_shopfloor_data=pd.DataFrame(shopfloor_data)
+        # get calendar type
+        calendar_type= 'official'
+        # => smoothing_calculate (df, calendar type)
+        df=smoothing_calculate(df_shopfloor_data,calendar_type,product)
+        # delete key,freezed, key_start_day column
+        del df['key']
+        del df['freezed']
+        del df['key_start_day']
+        # delete index from df
+        df=df.reset_index(drop=True)
+        # =>  save_needs (df, product, planningapproval)
+        save_needs(df,product,planningapproval,grater_version+1)
+        return render(request,'app/kpi_test.html',{
+        'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version+1,
+        'cycles_data':df_cycles_data,
+        'cycle_mean':cycle_mean,
+        'division':division,
+        'product':product,
+        'planningapproval':planningapproval,
+        })
+
+    if come_from == 'form_filter_date_version' and request.method == "POST":
+            print('im here')
+            version_selected = request.POST.get('version_selected')
+            print(version_selected)
+            version_number=version_selected
+            print(version_number)
+            df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
+            return render(request,'app/kpi_test.html',{
+                'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
+                'cycles_data':df_cycles_data,
+                'cycle_mean':cycle_mean,
+                'division':division,
+                'product':product,
+                'planningapproval':planningapproval,
+                })
+
+    # if come_from == 'after_share':
+    #     # cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
+
+
+    return render(request,'app/kpi_test.html',{
+        'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
+        'cycles_data':df_cycles_data,
+        'cycle_mean':cycle_mean,
+        'division':division,
+        'product':product,
+        'planningapproval':planningapproval,
+        })
 
 
 # filter planning result
@@ -1906,160 +2103,47 @@ def filter_kpi(request,division,product,planningapproval):
     })
 
 # Adjust cycle time  
-def update_cycle(request,division,product,planningapproval,version_selected):
-   
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
-    smooth_family_list=cycle_time_list=week_cycle=None
-    # *****************************
-    # get all planning approval id from table cycle
-    planningapproval_cycle = Cycle.objects.values_list('planning_approval',flat=True).filter(product=product)
-    # get planningapproval object to add in cycle table when we save with version 
-    planningapproval_object= PlanningApproval.objects.get(id=planningapproval)
-    # to increment version
-    version_number = Cycle.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
-    version = version_number['version'] + 1 if version_number else 1 
-       
-    # ****************************
-    if request.method == "POST":
-        smooth_family_list= request.POST.getlist('smooth_family')
-        cycle_time_list= request.POST.getlist('cycle_time')
-        week_cycle= request.POST.getlist('week_cycle')
-        
-        cycle_type=[]
-        for date in week_cycle:
-            cycle_type.append(request.POST.get('cycle-type-'+ date))
+def update_cycle(data):
 
-        data = {
-        "smooth_family": smooth_family_list,
-        "cycle_time": cycle_time_list,
-        "week_cycle": week_cycle,
-        "cycle_type":cycle_type
-        }
-        df_cycle_input = pd.DataFrame(data)
-        df_cycle_input['year']= df_cycle_input['week_cycle'].str.split('-W').str[0]
-        df_cycle_input['week']= df_cycle_input['week_cycle'].str.split('-W').str[1]
-        print(product,planningapproval,version_selected)
-        cycles=Cycle.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version_selected)
-        print(cycles)
-        print(df_cycle_input)
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    cycle_data = StringIO()
+    #convert file to csv
+    cycle_data.write(data.to_csv(index=False , header=None,sep=';'))
+    # This will make the cursor at index 0
+    cycle_data.seek(0)
+    with conn.cursor() as c:
+        c.copy_from(
+            file=cycle_data,
+            #file name in DB
+            table="app_cycle",
+            columns=[
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                    'is_deleted',
+                    'deleted_by',
+                    'deleted_at',
+                    'restored_at',
+                    'restored_by',
+                    'division',
+                    'profit_center',
+                    'work_day',
+                    'smooth_family',
+                    'cycle_time',
+                    'workdata_id',
+                    'owner',
+                    'product_id',
+                    'version',
+                    'planning_approval_id',
+                    'shared',
+                    ],
 
+            null="",
+            sep=";",
+        )
+    conn.commit()
 
-
-        # #Saving new cycle data
-        # cycle_data = StringIO()
-        # #convert file to csv
-        # cycle_data.write(df_cycle_input.to_csv(index=False , header=None,sep=';'))
-        # # This will make the cursor at index 0
-        # cycle_data.seek(0)
-        # with conn.cursor() as c:
-        #     c.copy_from(
-        #         file=cycle_data,
-        #         #file name in DB
-        #         table="app_cycle",
-        #         columns=[
-        #                 'created_at',
-        #                 'updated_at',
-        #                 'created_by',
-        #                 'updated_by',
-        #                 'is_deleted',
-        #                 'deleted_by',
-        #                 'deleted_at',
-        #                 'restored_at',
-        #                 'restored_by',
-        #                 'division',
-        #                 'profit_center',
-        #                 'work_day',
-        #                 'smooth_family',
-        #                 'cycle_time',
-        #                 'workdata_id',
-        #                 'owner',
-        #                 'product_id',
-        #                 'version',
-        #                 'planning_approval_id',
-        #                 'shared',
-        #                 ],
-
-        #         null="",
-        #         sep=";",
-        #     )
-        # conn.commit()
-
-        # from_date= request.POST.get('from')
-        # to_date= request.POST.get('to')
-        # for date ,cycle_time in dict(zip(week_cycle,cycle_time_list)).items():
-        #     # get year and week from table 
-        #     year=date.split('-W')[0]
-        #     week=date.split('-W')[1]
-        #     #get cycle type hours or days
-        #     cycle_type_input = request.POST.get('cycle-type-'+ date)
-        #     #Get Cycle to update
-        #     cycles=Cycle.objects.all().filter(division=division,product=product,work_day__year=year,work_day__week=week,smooth_family__in=smooth_family_list,planning_approval_id=planningapproval,version=version_selected) 
-            
-        #     for cycle_to_update in cycles:
-        #         # get startTime and endTime  
-        #         startTime = WorkData.objects.values('startTime').filter(id=cycle_to_update.workdata_id).first()
-        #         endTime = WorkData.objects.values('endTime').filter(id=cycle_to_update.workdata_id).first()
-        #         # convert startTime and endTime(datetime.time) to datetime.datetime
-        #         start_time = datetime(1, 1, 1,startTime['startTime'].hour,startTime['startTime'].minute)
-        #         end_time = datetime(1, 1, 1,endTime['endTime'].hour,endTime['endTime'].minute)
-                
-        #         if cycle_type_input == 'Days':
-        #             cycle_to_update.cycle_time= float(cycle_time) * work_hours(start_time,end_time)
-        #         elif cycle_type_input == 'Hours':
-        #             cycle_to_update.cycle_time= float(cycle_time)
-                
-        #         if all(i is None for i in planningapproval_cycle): 
-        #             cycle_data =Cycle(division=cycle_to_update.division,product=cycle_to_update.product,version =1,workdata=cycle_to_update.workdata,work_day=cycle_to_update.work_day,planning_approval=planningapproval_object,cycle_time=cycle_to_update.cycle_time,profit_center=cycle_to_update.profit_center,smooth_family=cycle_to_update.smooth_family)
-        #         if int(planningapproval) in planningapproval_cycle:
-        #             cycle_data =Cycle(division=cycle_to_update.division,product=cycle_to_update.product,version =version,workdata=cycle_to_update.workdata,work_day=cycle_to_update.work_day,planning_approval=planningapproval_object,cycle_time=cycle_to_update.cycle_time,profit_center=cycle_to_update.profit_center,smooth_family=cycle_to_update.smooth_family)
-        #         else:
-        #             cycle_data =Cycle(division=cycle_to_update.division,product=cycle_to_update.product,version =1,workdata=cycle_to_update.workdata,work_day=cycle_to_update.work_day,planning_approval=planningapproval_object,cycle_time=cycle_to_update.cycle_to_update_time,profit_center=cycle_to_update.profit_center,smooth_family=cycle_to_update.smooth_family)
-        #         cycle_data.save()
-        #         # cycle_to_update.save()
-                
-               
-        # shopfloor_data=Shopfloor.objects.filter(
-        #                                         version=version_selected,
-        #                                         product_id=product,
-        #                                         planning_approval_id=planningapproval
-        #                                         ).values(
-        #                                                 'division',
-        #                                                 'profit_centre',
-        #                                                 'order',
-        #                                                 'material',
-        #                                                 'designation',
-        #                                                 'order_type',
-        #                                                 'order_quantity',
-        #                                                 'date_start_plan',
-        #                                                 'date_end_plan' ,
-        #                                                 'fixation',
-        #                                                 'date_reordo',
-        #                                                 'message',
-        #                                                 'order_stat',
-        #                                                 'customer_order',
-        #                                                 'date_end_real', 
-        #                                                 'AllocatedTime', 
-        #                                                 'Leadtime', 
-        #                                                 'workstation',
-        #                                                 'Allocated_Time_On_Workstation', 
-        #                                                 'Smooth_Family',
-        #                                                 'Ranking', 
-        #                                                 'Freeze_end_date', 
-        #                                                 'Remain_to_do', 
-        #                                                 'closed')
-        # df_shopfloor_data=pd.DataFrame(shopfloor_data)
-        # # get calendar type
-        # calendar_type= 'official'
-        # # => smoothing_calculate (df, calendar type)
-        # df=smoothing_calculate(df_shopfloor_data,calendar_type)
-        # # delete key,freezed, key_start_day column
-        # del df['key']
-        # del df['freezed']
-        # del df['key_start_day']
-        # # delete index from df
-        # df=df.reset_index(drop=True)
-        # # =>  save_needs (df, product, planningapproval)
-        # save_needs(df,product,planningapproval)
 
 
 
