@@ -23,17 +23,17 @@
                         <h5 class="card-title custom-card-title">
                             Smoothing V  
                                 {% if selected_version %} 
-                                        {% if selected_version != version %} 
-                                            {{selected_version}}
+                                        {% if version_number != grater_version %} 
+                                            {{version_number}}
                                             <small class="badge badge-danger"><i class="fa-regular fa-circle-xmark"></i> Not the last version</small>
 
                                         {% else %}
-                                        {{selected_version}} 
+                                        {{version_number}} 
                                          <small class="badge badge-success"><i class="fa-solid fa-check-double"></i> Last version</small>
 
                                         {% endif %}
                                 {% else %}
-                                    {{version}}
+                                    {{grater_version}}
                                      <small class="badge badge-success"><i class="fa-solid fa-check-double"></i> Last version</small>
                                 {% endif %}
                         </h5>
@@ -164,7 +164,7 @@
                       </div>
                 </div>  
                 <center>
-                    <a href="{% url 'kpi' division product planningapproval %}">
+                    <a href="{% url 'kpis' division product planningapproval 'shopfloor' version_number %}">
                         <button class="bn632-hover-upload bn20" style="text-decoration:none !important;"><i class="fa-solid fa-angles-right"></i> 
                             Next 
                         </button>

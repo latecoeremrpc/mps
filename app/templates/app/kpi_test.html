@@ -63,10 +63,10 @@
             <div  class="card-body table-responsive p-0 " style="height: 250px;"">
                 <div class="card-body">
                     <table id ="cycleTime" class="table table-bordered text-nowrap table-sm">
-                        <tbody>    
+                        <tbody>     
                                 <tr>
                                     <th><label for="week_cycle" class="col-sm-4 control-label">Week</label></th>
-                                    {% for index,cycle in cycle_mean.iterrows%}
+                                    {% for index,cycle in cycle_mean_adjust_cycle.iterrows%}
                                     <input name="from" id="from" type="hidden" class=" form-control" value="{{from_date}}" required>
                                     <input name="to" id="to" type="hidden" class=" form-control" value="{{to_date}}" required> 
                                     <input name="version_selected" id="version_selected" type="hidden" class=" form-control" value="{{version_selected}}" required> 

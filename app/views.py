@@ -1722,12 +1722,12 @@ def result(request,division,product,planningapproval):
 
     return render(request,'app/Shopfloor/result.html',{'planningapproval_info':planningapproval_info,
     'planningapproval':planningapproval,'records':data,'division':division,'product':product,
-    'versions':versions,'selected_version':selected_version,'version':version})
+    'versions':versions,'version_number':selected_version,'grater_version':version})
 
 
 
 def kpis(request,division,product,planningapproval,come_from,version_number):
-
+    
     # initialization
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
@@ -1762,7 +1762,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
      # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     
-
+    #  get data from database
     cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval)
     shopfloor_data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval)
     # get workday to use in calcul of demonstrated capacity
@@ -1788,7 +1788,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
         
 
-    if come_from == 'result':
+    if come_from == 'shopfloor':
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(grater_version)]
         df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(grater_version)]
         #shopfloor
@@ -1932,7 +1932,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     return render(request,'app/kpi_test.html',{
     'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
     'cycles_data':df_cycles_data,
-    'cycle_mean':cycle_mean,
+    'cycle_mean_adjust_cycle':cycle_mean,
     'records':df_shopfloor_data,
     'division':division,
     'product':product,
@@ -1960,8 +1960,6 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 
     # if come_from == 'after_share':
     #     # cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
-
-
 
 
 
@@ -2028,14 +2026,14 @@ def filter_kpi(request,division,product,planningapproval):
 
     # ********to call functions***********************
     # to call function demand_prod_planning
-    demand_prod_planning(df_data,df_work_days,date_from,date_to)
+    # demand_prod_planning(df_data,df_work_days,date_from,date_to)
     # to call function demand_prod_planning
-    production_plan_kpi(df_data,date_from,date_to)
-    if cycle_data:
-        # to call function cycle_time_kpi 
-        cycle_time_kpi(df_cycle,date_from,date_to)   
-    # to call function logistic_stock_kpi
-    logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
+    # production_plan_kpi(df_data,date_from,date_to)
+    # if cycle_data:
+    #     # to call function cycle_time_kpi 
+    #     cycle_time_kpi(df_cycle,date_from,date_to)   
+    # # to call function logistic_stock_kpi
+    # logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
 
     # *******************Form **************************
 

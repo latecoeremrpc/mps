@@ -96,7 +96,7 @@
                 {%if 'newplanning' in request.get_full_path or 'uploadcoois' in request.get_full_path or 'uploadzpp' in request.get_full_path or 'needs' in request.get_full_path or 'result' in request.get_full_path %}
                   <a href=""></a> 
                 {%else%}
-                <a href="{% url 'kpi' division product planningapproval %}">
+                <a href="{%  url 'kpis' division product planningapproval 'shopfloor' version_number %}">
                 {% endif%}  
                   <div class="features-item fifth-feature last-features-item {%if 'kpi' in request.get_full_path %} features-item-selected features-item-selected-chart {% endif%}" data-wow-duration="1s" data-wow-delay="0.6s">
                     <div class="second-number number">
