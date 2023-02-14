@@ -1794,7 +1794,6 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         #shopfloor
 
     if come_from == 'form_after_update_cycle' and request.method == "POST":
-
         version_number = request.POST.get('version_number')
         smooth_family_list= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
@@ -1811,7 +1810,6 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         "cycle_type":cycle_type
         }
         df_cycle_input = pd.DataFrame(data)
-
         df_cycle_input['year']= df_cycle_input['week_cycle'].str.split('-W').str[0]
         df_cycle_input['week']= df_cycle_input['week_cycle'].str.split('-W').str[1]
         df_cycle_input['key']=df_cycle_input['week_cycle'].astype(str)+df_cycle_input['smooth_family'].astype(str)
@@ -1820,9 +1818,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 
 
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
-        df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
-
-
+        
         df_cycles_data['key']=df_cycles_data['work_day_week_year'].astype(str)+df_cycles_data['smooth_family'].astype(str)
 
         df_cycles_data['cycle_time']=df_cycles_data['key'].map(df_cycle_input_dict_cycle_time)
@@ -1835,7 +1831,6 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         df_cycles_data['start_time']= df_cycles_data['work_day'].map(df_work_data_dict_start_time)
         df_cycles_data['end_time']= df_cycles_data['work_day'].map(df_work_data_dict_end_time)
         df_cycles_data['work_hours']=(pd.to_datetime(df_cycles_data['end_time'],format='%H:%M:%S') - pd.to_datetime(df_cycles_data['start_time'],format='%H:%M:%S'))/ pd.Timedelta(hours=1)
-        
         df_cycles_data['cycle_time']=np.where(df_cycles_data['cycle_type'] == 'Days',df_cycles_data['cycle_time'].astype(float) * df_cycles_data['work_hours'].astype(float),df_cycles_data['cycle_time'])
         
         #Prepar DF to upload into DB
@@ -1915,6 +1910,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         df=df.reset_index(drop=True)
         # =>  save_needs (df, product, planningapproval)
         save_needs(df,product,planningapproval,grater_version+1)
+        df_shopfloor_data = df
 
     if come_from == 'form_filter_date_version' and request.method == "POST":
             version_selected = request.POST.get('version_selected')
@@ -1926,12 +1922,12 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 
 
     #********** Call here functions ************
-
+   
+    cycle_time_kpi(df_cycles_data)   
     demand_prod_planning(df_shopfloor_data,df_work_days)
     production_plan_kpi(df_shopfloor_data)
     logistic_stock_kpi()
-    cycle_time_kpi(df_cycles_data)   
-   
+    
 
     return render(request,'app/kpi_test.html',{
     'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
@@ -2193,20 +2189,16 @@ def update_cycle(data):
     conn.commit()
 
 
-
-
 # calculate nomber of OF and OP ( wek and month)
 def demand_prod_planning(df_data,df_work_days):
    
     df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     
-        
     # if date_from and date_to:
     #     # get df between two dates
     #     df_data_demand_prod_interval=df_data[(df_data['date'] >= date_from.date()) & (df_data['date'] <= date_to.date())]
     # else:
     df_data_demand_prod_interval= df_data 
-
     # week of date
     df_data_demand_prod_interval['date_week']=pd.to_datetime(df_data_demand_prod_interval['date'], errors='coerce').dt.week
     # month of date
@@ -2317,9 +2309,10 @@ def cycle_time_kpi(df_data):
     df_cycle_time_interval['work_year_week']=df_cycle_time_interval['work_day_year'].astype(str)+'-'+'W'+df_cycle_time_interval['work_day_week'].astype(str)
     #to concatenate year and month
     df_cycle_time_interval['work_year_month']=df_cycle_time_interval['work_day_year'].astype(str)+'-'+'M'+df_cycle_time_interval['work_day_month'].astype(str)
-
-
+    # convert cycle_time to numeric
+    df_cycle_time_interval["cycle_time"] = pd.to_numeric(df_cycle_time_interval["cycle_time"], downcast="float")
     cycle_mean= df_cycle_time_interval.groupby(['work_year_week','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    
     # split year week to sort orderd values
     cycle_mean['year']=cycle_mean['work_year_week'].str.split('-W').str[0].astype(int)
     cycle_mean['week']=cycle_mean['work_year_week'].str.split('-W').str[1].astype(int)
