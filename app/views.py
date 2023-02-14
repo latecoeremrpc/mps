@@ -1818,7 +1818,11 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         df_cycle_input_dict_cycle_time=dict(zip(df_cycle_input['key'],df_cycle_input['cycle_time']))
         df_cycle_input_dict_cycle_type=dict(zip(df_cycle_input['key'],df_cycle_input['cycle_type']))
 
+
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
+        df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
+
+
         df_cycles_data['key']=df_cycles_data['work_day_week_year'].astype(str)+df_cycles_data['smooth_family'].astype(str)
 
         df_cycles_data['cycle_time']=df_cycles_data['key'].map(df_cycle_input_dict_cycle_time)
