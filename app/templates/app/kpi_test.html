@@ -255,7 +255,7 @@
     </div>
 </div> 
 <!---------------------------------------------------------------- Share result ------------------------------------------------------->
-<form action="" method="POST">
+<form action="{% url 'kpis' division product planningapproval 'form_shared' version_number %}" method="POST">
     <!-- Security token by Django -->
     {% csrf_token %}
     <input type="hidden" value="{{version_selected}}" name="version">

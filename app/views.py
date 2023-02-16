@@ -1035,7 +1035,7 @@ def upload_coois(request,division,product,planningapproval):
         coois_data.delete()
         file=request.FILES['coois']
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
             import_coois(file,conn,product,planningapproval)
             messages.success(request,"COOIS file uploaded successfully!") 
             return redirect('./uploadzpp')
@@ -1124,7 +1124,7 @@ def upload_zpp(request,division,product,planningapproval):
         zpp_data.delete()
         #Save file to DB
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
             import_zpp(file,conn,product,planningapproval)
             messages.success(request,"ZPP file uploaded successfully!") 
             return redirect("../needs")    
@@ -1509,7 +1509,7 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
 # save shoploor to use in create_needs
 def save_needs(df,product,planningapproval,version):
    
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
     # # get version_data 
     # version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     # version = version_number['version']+1 if version_number else 1
@@ -1614,7 +1614,7 @@ def save_cycle_with_version_test(product,planningapproval):
     return True
 
 def save_cycle_with_version(product,planningapproval,version):
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
     #Get last cycle data shared
     if version == 1:
         cycles= Cycle.objects.all().filter(product=product,owner='officiel',shared=True)
@@ -1920,7 +1920,11 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 
             df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
 
-
+    if come_from=='form_shared':
+        print('version to share')
+        print(version_number)
+        data=Shopfloor.objects.all().filter(version=version_number,product= product,planning_approval=planningapproval)    
+        data.update(shared=True)
     #********** Call here functions ************
    
     cycle_time_kpi(df_cycles_data)   
@@ -2149,7 +2153,7 @@ def filter_kpi(request,division,product,planningapproval):
 # Adjust cycle time  
 def update_cycle(data):
 
-    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
     cycle_data = StringIO()
     #convert file to csv
     cycle_data.write(data.to_csv(index=False , header=None,sep=';'))
