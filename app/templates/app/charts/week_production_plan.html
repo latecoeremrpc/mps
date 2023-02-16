@@ -4,7 +4,7 @@
             <canvas id="week_production_plan_count" ></canvas>   
             <script>
                 var xValues = [{% for index, data in date_production_week.iterrows %}  '{{data.date_production_year_week}}', {% endfor %}];
-                var data = [{% for index, data in date_production_week.iterrows %} {{data.id}}, {% endfor %}];
+                var data = [{% for index, data in date_production_week.iterrows %} {{data.division}}, {% endfor %}];
                 const week_production_plan_count=new Chart("week_production_plan_count", {
                     // plugins: [ChartDataLabels],
                     type: "bar",

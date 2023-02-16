@@ -1746,18 +1746,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     logistic_stock_kpi.logistic_stock_week = None
     logistic_stock_kpi.logistic_stock_month =None
 
-    '''Check planning state:  '''
-    check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
-    check_zpp = Zpp.objects.filter(planning_approval=planningapproval).all()
-    check_shopfloor = Shopfloor.objects.filter(planning_approval=planningapproval).all()
 
-    if not check_coois:
-        return redirect(upload_coois,division=division,product=product,planningapproval=planningapproval)
-    if not check_zpp:
-        return redirect(upload_zpp,division=division,product=product,planningapproval=planningapproval)
-    if not check_shopfloor:
-        return redirect(needs,division=division,product=product,planningapproval=planningapproval)
-    '''End Check planning state:  '''
 
      # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
@@ -1784,6 +1773,18 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 
     
     if come_from == 'planning_list':
+        '''Check planning state:  '''
+        check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
+        check_zpp = Zpp.objects.filter(planning_approval=planningapproval).all()
+        check_shopfloor = Shopfloor.objects.filter(planning_approval=planningapproval).all()
+
+        if not check_coois:
+            return redirect(upload_coois,division=division,product=product,planningapproval=planningapproval)
+        if not check_zpp:
+            return redirect(upload_zpp,division=division,product=product,planningapproval=planningapproval)
+        if not check_shopfloor:
+            return redirect(needs,division=division,product=product,planningapproval=planningapproval)
+        '''End Check planning state:  '''
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
         df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
         
@@ -1911,7 +1912,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         # =>  save_needs (df, product, planningapproval)
         save_needs(df,product,planningapproval,grater_version+1)
         df_shopfloor_data = df
-
+        version_number=grater_version
     if come_from == 'form_filter_date_version' and request.method == "POST":
             version_selected = request.POST.get('version_selected')
             version_number=version_selected
@@ -2220,11 +2221,11 @@ def demand_prod_planning(df_data,df_work_days):
     # use unstack and stack to get duplicate data (for chart js)
     # *******************************
     #  to use in calcul of logistic stock
-    demand_prod_week=df_data_demand_prod_interval.groupby(['date_year_week'])['id'].count().reset_index()
-    demand_prod_month=df_data_demand_prod_interval.groupby(['date_year_month'])['id'].count().reset_index()
+    demand_prod_week=df_data_demand_prod_interval.groupby(['date_year_week'])['division'].count().reset_index()
+    demand_prod_month=df_data_demand_prod_interval.groupby(['date_year_month'])['division'].count().reset_index()
     
     # *******************************
-    week_count=df_data_demand_prod_interval.groupby(['date_year_week','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
+    week_count=df_data_demand_prod_interval.groupby(['date_year_week','order_nature_closed'])['division'].count().unstack().fillna(0).stack().reset_index()
     # get year from date_year_week 
     week_count['year']=week_count['date_year_week'].str.split('-W').str[0].astype(int)
     # get week from date_year_week 
@@ -2235,7 +2236,7 @@ def demand_prod_planning(df_data,df_work_days):
     week_count_axis_x=week_count['date_year_week'].unique()
     
     ### month
-    month_count=df_data_demand_prod_interval.groupby(['date_year_month','order_nature_closed'])['id'].count().unstack().fillna(0).stack().reset_index()
+    month_count=df_data_demand_prod_interval.groupby(['date_year_month','order_nature_closed'])['division'].count().unstack().fillna(0).stack().reset_index()
     month_count['year']=month_count['date_year_month'].str.split('-M').str[0].astype(int)
     month_count['week']=month_count['date_year_month'].str.split('-M').str[1].astype(int)
     month_count=month_count.sort_values(by=['year','week']).reset_index()
@@ -2382,8 +2383,8 @@ def production_plan_kpi(df_data):
     df_production_plan_kpi_interval['date_production_year_month']=df_production_plan_kpi_interval['date_production_year'].astype(str)+'-'+'M'+df_production_plan_kpi_interval['date_production_month'].astype(str)
     
 
-    date_production_week=df_production_plan_kpi_interval.groupby(['date_production_year_week'])['id'].count().reset_index()
-    date_production_month=df_production_plan_kpi_interval.groupby(['date_production_year_month'])['id'].count().reset_index()
+    date_production_week=df_production_plan_kpi_interval.groupby(['date_production_year_week'])['division'].count().reset_index()
+    date_production_month=df_production_plan_kpi_interval.groupby(['date_production_year_month'])['division'].count().reset_index()
     # to delete date production when equal 1900-W1
     date_production_week.drop(date_production_week[date_production_week['date_production_year_week'] == "1900-W1"].index, inplace = True)
     date_production_week.drop(date_production_week[date_production_week['date_production_year_week'] == "0-W0"].index, inplace = True)
@@ -2399,8 +2400,8 @@ def production_plan_kpi(df_data):
 def logistic_stock_kpi(): 
     
     # to reate new dataframes 
-    Df_calcul_logistic_stock_week = production_plan_kpi.date_production_week[['date_production_year_week','id']].copy()
-    Df_calcul_logistic_stock_month = production_plan_kpi.date_production_month[['date_production_year_month','id']].copy()
+    Df_calcul_logistic_stock_week = production_plan_kpi.date_production_week[['date_production_year_week','division']].copy()
+    Df_calcul_logistic_stock_month = production_plan_kpi.date_production_month[['date_production_year_month','division']].copy()
     
     # to filter data frame between two dates
     # if date_from_year_week and date_to_year_week and date_from_year_month and date_to_year_month:
@@ -2444,12 +2445,12 @@ def logistic_stock_kpi():
 
 
     # to map date_production_year_month and dict_demand_prod_date_id
-    dict_demand_prod_date_week_value=dict(zip(demand_prod_planning.demand_prod_week['date_year_week'],demand_prod_planning.demand_prod_week['id']))
+    dict_demand_prod_date_week_value=dict(zip(demand_prod_planning.demand_prod_week['date_year_week'],demand_prod_planning.demand_prod_week['division']))
     Df_calcul_logistic_stock_week['date_demand_prod_value'] =Df_calcul_logistic_stock_week['date_production_year_week'].map(dict_demand_prod_date_week_value).fillna(0)
 
 
     # to map date_production_year_month and dict_demand_prod_date_id
-    dict_demand_prod_date_month_value=dict(zip(demand_prod_planning.demand_prod_month['date_year_month'],demand_prod_planning.demand_prod_month['id']))
+    dict_demand_prod_date_month_value=dict(zip(demand_prod_planning.demand_prod_month['date_year_month'],demand_prod_planning.demand_prod_month['division']))
     Df_calcul_logistic_stock_month['dict_demand_prod_date_month_value'] = Df_calcul_logistic_stock_month['date_production_year_month'].map(dict_demand_prod_date_month_value).fillna(0)
 
 
@@ -2482,9 +2483,9 @@ def logistic_stock_kpi():
 
    
     # to calculate logitic stock per week 
-    Df_calcul_logistic_stock_week['logistic_stock_week_count'] = Df_calcul_logistic_stock_week['plan_date_value'] + Df_calcul_logistic_stock_week['id'] - Df_calcul_logistic_stock_week['date_demand_prod_value']
+    Df_calcul_logistic_stock_week['logistic_stock_week_count'] = Df_calcul_logistic_stock_week['plan_date_value'] + Df_calcul_logistic_stock_week['division'] - Df_calcul_logistic_stock_week['date_demand_prod_value']
     # to calculate logitic stock per month
-    Df_calcul_logistic_stock_month['logistic_stock_month_count'] = Df_calcul_logistic_stock_month['plan_date_value'] + Df_calcul_logistic_stock_month['id'] - Df_calcul_logistic_stock_month['dict_demand_prod_date_month_value']
+    Df_calcul_logistic_stock_month['logistic_stock_month_count'] = Df_calcul_logistic_stock_month['plan_date_value'] + Df_calcul_logistic_stock_month['division'] - Df_calcul_logistic_stock_month['dict_demand_prod_date_month_value']
 
     
     logistic_stock_kpi.logistic_stock_week = Df_calcul_logistic_stock_week
