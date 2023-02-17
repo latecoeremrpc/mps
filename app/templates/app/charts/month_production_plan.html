@@ -4,7 +4,7 @@
             <canvas id="month_production_plan_count" ></canvas>
             <script>
                 var xValues = [{% for index, data in date_production_month.iterrows %}  '{{data.date_production_year_month}}', {% endfor %}];
-                var data = [{% for index, data in date_production_month.iterrows %} {{data.division}}, {% endfor %}];
+                var data = [{% for index, data in date_production_month.iterrows %} {{data.date_production_month_count}}, {% endfor %}];
                 
                 const month_production_plan_count=new Chart("month_production_plan_count", {
                     // plugins: [ChartDataLabels],

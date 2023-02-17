@@ -5,8 +5,8 @@
                     <canvas id="week" ></canvas>
                     <script>
                         var xValues_week_count = [{% for index, data in week_count.iterrows %}  '{{data.date_year_week}}', {% endfor %}];
-                        var data_week_count_of = [ {% for index, data in week_count.iterrows %}{%if data.order_nature == 'OF' %}  {{data.id}} , {%endif%}{% endfor %}];
-                        var data_week_count_op = [ {% for index, data in week_count.iterrows %}{%if data.order_nature == 'OP' %}  {{data.id}} , {%endif%}{% endfor %}];
+                        var data_week_count_of = [ {% for index, data in week_count.iterrows %}{%if data.order_nature == 'OF' %}  {{data.demand_prod_week_count}} , {%endif%}{% endfor %}];
+                        var data_week_count_op = [ {% for index, data in week_count.iterrows %}{%if data.order_nature == 'OP' %}  {{data.demand_prod_week_count}} , {%endif%}{% endfor %}];
                         var data_work_days_count_week = [{% for index, data in work_days_count_week.iterrows %} {{data.result_demonstrated_capacity|floatformat:2}}, {% endfor %}];
                         
                         var demand_prod_planning_week_data = {
@@ -89,7 +89,7 @@
                                 data:[                             
                                     {% for index, data in week_count.iterrows %} 
                                         {%if data.order_nature_closed == 'OFFalse' %} 
-                                            {{data.0}},
+                                            {{data.demand_prod_week_count}},
                                         {%endif%}
                                     {% endfor %}
                                 ],
@@ -112,7 +112,7 @@
                                 data:[                             
                                     {% for index, data in week_count.iterrows %} 
                                         {%if data.order_nature_closed == 'OPFalse' %} 
-                                            {{data.0}},
+                                            {{data.demand_prod_week_count}},
                                         {%endif%}
                                     
                                     {% endfor %} ],
@@ -135,7 +135,7 @@
                                 data:[                             
                                     {% for index, data in week_count.iterrows %} 
                                         {%if data.order_nature_closed == 'OFTrue' %} 
-                                            {{data.0}},
+                                            {{data.demand_prod_week_count}},
                                         {%endif%}
                                     
                                     {% endfor %} ],

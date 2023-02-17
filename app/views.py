@@ -1035,7 +1035,7 @@ def upload_coois(request,division,product,planningapproval):
         coois_data.delete()
         file=request.FILES['coois']
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
             import_coois(file,conn,product,planningapproval)
             messages.success(request,"COOIS file uploaded successfully!") 
             return redirect('./uploadzpp')
@@ -1124,7 +1124,7 @@ def upload_zpp(request,division,product,planningapproval):
         zpp_data.delete()
         #Save file to DB
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
             import_zpp(file,conn,product,planningapproval)
             messages.success(request,"ZPP file uploaded successfully!") 
             return redirect("../needs")    
@@ -1509,7 +1509,7 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
 # save shoploor to use in create_needs
 def save_needs(df,product,planningapproval,version):
    
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     # # get version_data 
     # version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     # version = version_number['version']+1 if version_number else 1
@@ -1614,7 +1614,7 @@ def save_cycle_with_version_test(product,planningapproval):
     return True
 
 def save_cycle_with_version(product,planningapproval,version):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #Get last cycle data shared
     if version == 1:
         cycles= Cycle.objects.all().filter(product=product,owner='officiel',shared=True)
@@ -1711,15 +1711,16 @@ def result(request,division,product,planningapproval):
     except Exception:
         messages.error(request,"Empty data here, Please fill in needs") 
         return redirect("../needs")  
-    
+
     if request.method=='POST':
         selected_version= request.POST.get('selected_version')
         # convert selected_version (str to int) 
         selected_version=int(selected_version)
         data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=selected_version,planning_approval_id=planningapproval)
     # name of planning approval for info page
-    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()   
-
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()
+    if selected_version is None:
+        selected_version= version
     return render(request,'app/Shopfloor/result.html',{'planningapproval_info':planningapproval_info,
     'planningapproval':planningapproval,'records':data,'division':division,'product':product,
     'versions':versions,'version_number':selected_version,'grater_version':version})
@@ -1768,7 +1769,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     grater_version=df_cycles_data['version'].max()
     available_versions=df_cycles_data['version'].unique()
     #Mean of cycle time to show them in front table adjust cycle
-    cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
 
 
     
@@ -1788,11 +1789,10 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
         df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
         
-
     if come_from == 'shopfloor':
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(grater_version)]
         df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(grater_version)]
-        #shopfloor
+        version_number = grater_version
 
     if come_from == 'form_after_update_cycle' and request.method == "POST":
         version_number = request.POST.get('version_number')
@@ -1912,22 +1912,20 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         # =>  save_needs (df, product, planningapproval)
         save_needs(df,product,planningapproval,grater_version+1)
         df_shopfloor_data = df
-        version_number=grater_version
+        version_number = grater_version
     if come_from == 'form_filter_date_version' and request.method == "POST":
             version_selected = request.POST.get('version_selected')
             version_number=version_selected
             df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
-            cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
-
+            cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
             df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
-
+            
     if come_from=='form_shared':
         print('version to share')
         print(version_number)
         data=Shopfloor.objects.all().filter(version=version_number,product= product,planning_approval=planningapproval)    
         data.update(shared=True)
     #********** Call here functions ************
-   
     cycle_time_kpi(df_cycles_data)   
     demand_prod_planning(df_shopfloor_data,df_work_days)
     production_plan_kpi(df_shopfloor_data)
@@ -2154,7 +2152,7 @@ def filter_kpi(request,division,product,planningapproval):
 # Adjust cycle time  
 def update_cycle(data):
 
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     cycle_data = StringIO()
     #convert file to csv
     cycle_data.write(data.to_csv(index=False , header=None,sep=';'))
@@ -2221,11 +2219,12 @@ def demand_prod_planning(df_data,df_work_days):
     # use unstack and stack to get duplicate data (for chart js)
     # *******************************
     #  to use in calcul of logistic stock
-    demand_prod_week=df_data_demand_prod_interval.groupby(['date_year_week'])['division'].count().reset_index()
-    demand_prod_month=df_data_demand_prod_interval.groupby(['date_year_month'])['division'].count().reset_index()
+    demand_prod_week=df_data_demand_prod_interval.groupby(['date_year_week']).agg(demand_prod_count_week=('division','count')).reset_index()
+    demand_prod_month=df_data_demand_prod_interval.groupby(['date_year_month']).agg(demand_prod_of_month_count=('division','count')).reset_index()
     
     # *******************************
-    week_count=df_data_demand_prod_interval.groupby(['date_year_week','order_nature_closed'])['division'].count().unstack().fillna(0).stack().reset_index()
+    week_count=df_data_demand_prod_interval.groupby(['date_year_week','order_nature_closed']).agg(demand_prod_week_count=('division','count')).unstack().fillna(0).stack().reset_index()
+    
     # get year from date_year_week 
     week_count['year']=week_count['date_year_week'].str.split('-W').str[0].astype(int)
     # get week from date_year_week 
@@ -2236,12 +2235,12 @@ def demand_prod_planning(df_data,df_work_days):
     week_count_axis_x=week_count['date_year_week'].unique()
     
     ### month
-    month_count=df_data_demand_prod_interval.groupby(['date_year_month','order_nature_closed'])['division'].count().unstack().fillna(0).stack().reset_index()
+    month_count=df_data_demand_prod_interval.groupby(['date_year_month','order_nature_closed']).agg(demand_prod_month_count=('division','count')).unstack().fillna(0).stack().reset_index()
     month_count['year']=month_count['date_year_month'].str.split('-M').str[0].astype(int)
     month_count['week']=month_count['date_year_month'].str.split('-M').str[1].astype(int)
     month_count=month_count.sort_values(by=['year','week']).reset_index()
     month_count_axis_x=month_count['date_year_month'].unique()
-    
+
     demand_prod_planning.week_count=week_count
     demand_prod_planning.week_count_axis_x=week_count_axis_x
     demand_prod_planning.month_count=month_count
@@ -2272,13 +2271,13 @@ def demand_prod_planning(df_data,df_work_days):
     # calcul number of work_days in period(week)
     df_work_days['date_week']=pd.to_datetime(df_work_days['date'], errors='coerce').dt.week
     df_work_days['date_year']=pd.to_datetime(df_work_days['date'], errors='coerce').dt.year
-    work_days_count=df_work_days.groupby(['date_week','date_year'])['id'].count().reset_index()
+    work_days_count=df_work_days.groupby(['date_week','date_year']).agg(work_days_count_week=('id','count')).reset_index()
     
     work_days_count['date_year_week']= work_days_count['date_year'].astype(str)+'-'+'W'+work_days_count['date_week'].astype(str)
     work_days_count = work_days_count[work_days_count['date_year_week'].isin(week_count_axis_x)]
     # calcul number of work_days in period(month)
     df_work_days['date_month']=pd.to_datetime(df_work_days['date'], errors='coerce').dt.month
-    work_days_count_month=df_work_days.groupby(['date_month','date_year'])['id'].count().reset_index()
+    work_days_count_month=df_work_days.groupby(['date_month','date_year']).agg(work_days_count_month=('id','count')).reset_index()
     work_days_count_month['date_year_month']= work_days_count_month['date_year'].astype(str)+'-'+'M'+work_days_count_month['date_month'].astype(str)
     work_days_count_month = work_days_count_month[work_days_count_month['date_year_month'].isin(month_count_axis_x)]
     
@@ -2288,13 +2287,12 @@ def demand_prod_planning(df_data,df_work_days):
         work_days_count['result_demonstrated_capacity'] = 0
         work_days_count_month['result_demonstrated_capacity'] = 0
     else:
-        work_days_count['result_demonstrated_capacity'] = work_days_count['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
-        work_days_count_month['result_demonstrated_capacity'] = work_days_count_month['id'] * (previous_month_closed_count / work_days_in_previous_month_count)
+        work_days_count['result_demonstrated_capacity'] = work_days_count['work_days_count_week'] * (previous_month_closed_count / work_days_in_previous_month_count)
+        work_days_count_month['result_demonstrated_capacity'] = work_days_count_month['work_days_count_month'] * (previous_month_closed_count / work_days_in_previous_month_count)
 
    
     demand_prod_planning.work_days_count=work_days_count
     demand_prod_planning.work_days_count_month=work_days_count_month
-
 
 # to display Kpi cycle time per smooth family (week and month)
 def cycle_time_kpi(df_data):
@@ -2316,7 +2314,8 @@ def cycle_time_kpi(df_data):
     df_cycle_time_interval['work_year_month']=df_cycle_time_interval['work_day_year'].astype(str)+'-'+'M'+df_cycle_time_interval['work_day_month'].astype(str)
     # convert cycle_time to numeric
     df_cycle_time_interval["cycle_time"] = pd.to_numeric(df_cycle_time_interval["cycle_time"], downcast="float")
-    cycle_mean= df_cycle_time_interval.groupby(['work_year_week','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    # cycle_mean= df_cycle_time_interval.groupby(['work_year_week','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    cycle_mean= df_cycle_time_interval.groupby(['work_year_week','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
     
     # split year week to sort orderd values
     cycle_mean['year']=cycle_mean['work_year_week'].str.split('-W').str[0].astype(int)
@@ -2327,7 +2326,7 @@ def cycle_time_kpi(df_data):
     smooth_family= cycle_mean['smooth_family'].unique()
 
 
-    cycle_mean_month= df_cycle_time_interval.groupby(['work_year_month','smooth_family'])['cycle_time'].mean().unstack().fillna(0).stack().reset_index()
+    cycle_mean_month= df_cycle_time_interval.groupby(['work_year_month','smooth_family']).agg(cycle_mean_month_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
     # split year month to sort orderd values
     cycle_mean_month['year']=cycle_mean_month['work_year_month'].str.split('-M').str[0].astype(int)
     cycle_mean_month['week']=cycle_mean_month['work_year_month'].str.split('-M').str[1].astype(int)
@@ -2383,8 +2382,8 @@ def production_plan_kpi(df_data):
     df_production_plan_kpi_interval['date_production_year_month']=df_production_plan_kpi_interval['date_production_year'].astype(str)+'-'+'M'+df_production_plan_kpi_interval['date_production_month'].astype(str)
     
 
-    date_production_week=df_production_plan_kpi_interval.groupby(['date_production_year_week'])['division'].count().reset_index()
-    date_production_month=df_production_plan_kpi_interval.groupby(['date_production_year_month'])['division'].count().reset_index()
+    date_production_week=df_production_plan_kpi_interval.groupby(['date_production_year_week']).agg(date_production_week_count=('division','count')).reset_index()
+    date_production_month=df_production_plan_kpi_interval.groupby(['date_production_year_month']).agg(date_production_month_count=('division','count')).reset_index()
     # to delete date production when equal 1900-W1
     date_production_week.drop(date_production_week[date_production_week['date_production_year_week'] == "1900-W1"].index, inplace = True)
     date_production_week.drop(date_production_week[date_production_week['date_production_year_week'] == "0-W0"].index, inplace = True)
@@ -2400,8 +2399,8 @@ def production_plan_kpi(df_data):
 def logistic_stock_kpi(): 
     
     # to reate new dataframes 
-    Df_calcul_logistic_stock_week = production_plan_kpi.date_production_week[['date_production_year_week','division']].copy()
-    Df_calcul_logistic_stock_month = production_plan_kpi.date_production_month[['date_production_year_month','division']].copy()
+    Df_calcul_logistic_stock_week = production_plan_kpi.date_production_week[['date_production_year_week','date_production_week_count']].copy()
+    Df_calcul_logistic_stock_month = production_plan_kpi.date_production_month[['date_production_year_month','date_production_month_count']].copy()
     
     # to filter data frame between two dates
     # if date_from_year_week and date_to_year_week and date_from_year_month and date_to_year_month:
@@ -2419,8 +2418,8 @@ def logistic_stock_kpi():
     #     Df_calcul_logistic_stock_week=Df_calcul_logistic_stock_week[(Df_calcul_logistic_stock_week['monday_date_production_year_week'] >= monday_date_from_year_week) & (Df_calcul_logistic_stock_week['monday_date_production_year_week'] <= monday_date_to_year_week)]
     #     Df_calcul_logistic_stock_month=Df_calcul_logistic_stock_month[(Df_calcul_logistic_stock_month['first_date_production_year_month'] >= first_day_date_from_year_month) & (Df_calcul_logistic_stock_month['first_date_production_year_month'] <= first_date_to_year_month)]
     # else:
-    Df_calcul_logistic_stock_week
-    Df_calcul_logistic_stock_month
+        # Df_calcul_logistic_stock_week
+        # Df_calcul_logistic_stock_month
     
     # to get data from zpp
     zpp_data=Zpp.objects.values('plan_date','element')
@@ -2439,23 +2438,23 @@ def logistic_stock_kpi():
     zpp_data_df['plan_date_year_week']=zpp_data_df['plan_date_year'].astype(str)+'-'+'W'+zpp_data_df['plan_date_week'].astype(str)
     zpp_data_df['plan_date_year_month']=zpp_data_df['plan_date_year'].astype(str)+'-'+'M'+zpp_data_df['plan_date_month'].astype(str)
 
-
-    week_initial_stock_count=zpp_data_df.groupby(['plan_date_year_week','element_stock_stkcli'])['id'].count().reset_index()
-    month_initial_stock_count=zpp_data_df.groupby(['plan_date_year_month','element_stock_stkcli'])['id'].count().reset_index()
+    #  to calculate stock initial from zpp file
+    week_initial_stock_count=zpp_data_df.groupby(['plan_date_year_week','element_stock_stkcli']).agg(week_initial_stock_count=('id','count')).reset_index()
+    month_initial_stock_count=zpp_data_df.groupby(['plan_date_year_month','element_stock_stkcli']).agg(month_initial_stock_count=('id','count')).reset_index()
 
 
     # to map date_production_year_month and dict_demand_prod_date_id
-    dict_demand_prod_date_week_value=dict(zip(demand_prod_planning.demand_prod_week['date_year_week'],demand_prod_planning.demand_prod_week['division']))
+    dict_demand_prod_date_week_value=dict(zip(demand_prod_planning.demand_prod_week['date_year_week'],demand_prod_planning.demand_prod_week['demand_prod_count_week']))
     Df_calcul_logistic_stock_week['date_demand_prod_value'] =Df_calcul_logistic_stock_week['date_production_year_week'].map(dict_demand_prod_date_week_value).fillna(0)
 
 
     # to map date_production_year_month and dict_demand_prod_date_id
-    dict_demand_prod_date_month_value=dict(zip(demand_prod_planning.demand_prod_month['date_year_month'],demand_prod_planning.demand_prod_month['division']))
+    dict_demand_prod_date_month_value=dict(zip(demand_prod_planning.demand_prod_month['date_year_month'],demand_prod_planning.demand_prod_month['demand_prod_of_month_count']))
     Df_calcul_logistic_stock_month['dict_demand_prod_date_month_value'] = Df_calcul_logistic_stock_month['date_production_year_month'].map(dict_demand_prod_date_month_value).fillna(0)
 
 
     # to map date_production_year_week and dict_demand_prod_date_id
-    dict_demand_prod_date_id=dict(zip(week_initial_stock_count['plan_date_year_week'],week_initial_stock_count['id'])) 
+    dict_demand_prod_date_id=dict(zip(week_initial_stock_count['plan_date_year_week'],week_initial_stock_count['week_initial_stock_count'])) 
     Df_calcul_logistic_stock_week['week-1']= Df_calcul_logistic_stock_week['date_production_year_week'].str[6:].astype(int) - 1
     Df_calcul_logistic_stock_week['year'] = Df_calcul_logistic_stock_week['date_production_year_week'].str[:4].astype(str)
     
@@ -2470,7 +2469,7 @@ def logistic_stock_kpi():
 
 
     # to map date_production_year_month and dict_demand_prod_date_month_value
-    dict_demand_prod_date_month_value=dict(zip(month_initial_stock_count['plan_date_year_month'],month_initial_stock_count['id']))
+    dict_demand_prod_date_month_value=dict(zip(month_initial_stock_count['plan_date_year_month'],month_initial_stock_count['month_initial_stock_count']))
     Df_calcul_logistic_stock_month['month-1']= Df_calcul_logistic_stock_month['date_production_year_month'].str[6:].astype(int) - 1
     Df_calcul_logistic_stock_month['year'] = Df_calcul_logistic_stock_month['date_production_year_month'].str[:4].astype(str)
     Df_calcul_logistic_stock_month['year-1'] = np.where(Df_calcul_logistic_stock_month['month-1'] == 0, (Df_calcul_logistic_stock_month['year'].astype(int) - 1), Df_calcul_logistic_stock_month['year'])
@@ -2483,9 +2482,9 @@ def logistic_stock_kpi():
 
    
     # to calculate logitic stock per week 
-    Df_calcul_logistic_stock_week['logistic_stock_week_count'] = Df_calcul_logistic_stock_week['plan_date_value'] + Df_calcul_logistic_stock_week['division'] - Df_calcul_logistic_stock_week['date_demand_prod_value']
+    Df_calcul_logistic_stock_week['logistic_stock_week_count'] = Df_calcul_logistic_stock_week['plan_date_value'] + Df_calcul_logistic_stock_week['date_production_week_count'] - Df_calcul_logistic_stock_week['date_demand_prod_value']
     # to calculate logitic stock per month
-    Df_calcul_logistic_stock_month['logistic_stock_month_count'] = Df_calcul_logistic_stock_month['plan_date_value'] + Df_calcul_logistic_stock_month['division'] - Df_calcul_logistic_stock_month['dict_demand_prod_date_month_value']
+    Df_calcul_logistic_stock_month['logistic_stock_month_count'] = Df_calcul_logistic_stock_month['plan_date_value'] + Df_calcul_logistic_stock_month['date_production_month_count'] - Df_calcul_logistic_stock_month['dict_demand_prod_date_month_value']
 
     
     logistic_stock_kpi.logistic_stock_week = Df_calcul_logistic_stock_week

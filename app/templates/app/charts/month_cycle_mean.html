@@ -4,7 +4,7 @@
         <canvas id="month_cycle_mean"></canvas>
         <script>
             var xValues = [{% for months in month_cycle_mean_axis_x %} '{{months}}', {% endfor %}];
-            var data = [{% for index, data in cycle_mean_month.iterrows %} {{data.0|floatformat:2}}, {% endfor %}];
+            var data = [{% for index, data in cycle_mean_month.iterrows %} {{data.cycle_mean_month_count|floatformat:2}}, {% endfor %}];
 
 
             
@@ -23,7 +23,7 @@
                                 data: 
                                     [{% for index, data in cycle_mean_month.iterrows %} 
                                         {% if smooth == data.smooth_family %}
-                                            {{data.0}}.toFixed(2), 
+                                            {{data.cycle_mean_month_count}}.toFixed(2), 
                                         {% endif %}
                                     
                                     {% endfor %}]

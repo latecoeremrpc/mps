@@ -3,6 +3,7 @@
     <div style="height: 400px" >
         <canvas id="month"></canvas> 
         <script>
+            // for demonstrated_capacity
             var data_work_days_count_month = [{% for index, data in work_days_count_month.iterrows %} {{data.result_demonstrated_capacity|floatformat:2}}, {% endfor %}];
             var barChartData = {
                 labels: [{% for months in month_count_axis_x %} '{{months}}', {% endfor %}],
@@ -86,7 +87,7 @@
                     data:[                             
                         {% for index, data in month_count.iterrows %} 
                             {%if data.order_nature_closed == 'OFFalse' %} 
-                                {{data.0}},
+                                {{data.demand_prod_month_count}},
                         {%endif%}
                         {% endfor %}
 
@@ -111,7 +112,7 @@
                     data:[                             
                         {% for index, data in month_count.iterrows %} 
                             {%if data.order_nature_closed == 'OPFalse' %} 
-                                {{data.0}},
+                                {{data.demand_prod_month_count}},
                             {%endif%}
                         
                         {% endfor %} ],
@@ -134,7 +135,7 @@
                     data:[                             
                         {% for index, data in month_count.iterrows %} 
                             {%if data.order_nature_closed == 'OFTrue' %} 
-                                {{data.0}},
+                                {{data.demand_prod_month_count}},
                             {%endif%}
                         
                         {% endfor %} ],

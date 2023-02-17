@@ -17,12 +17,13 @@
 <!-- ***************************************************************************************************** -->
 
 <!-- Form Filter  -->
+
 <form method="POST" action="{% url 'kpis' division product planningapproval 'form_filter_date_version' version_number %}">
     {% csrf_token %}
-    <div class="row">
+    <div class="row"> 
         <div class="col-6 offset-3">
             <div class="input-group">
-                <span class="input-group-text">Version</span>
+                <span class="input-group-text">Version</span> 
                 <select name="version_selected" class="custom-select form-control-border" id="exampleSelectBorder" required>
                     <!-- <option>Select version</option>   -->
                     {% for item in available_versions %}
@@ -89,7 +90,7 @@
                                     <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
                                     {% for index,cycle in cycle_mean.iterrows%}
                                     <td>
-                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.0}}" class="form-control" required step="0.01" > 
+                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.cycle_mean_week_count}}" class="form-control" required step="0.01" > 
                                     </td>
                                     {%endfor%} 
                                 </tr>

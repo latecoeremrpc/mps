@@ -4,7 +4,7 @@
         <canvas id="week_cycle_mean"></canvas>
         <script>
             var xValues = [{% for weeks in week_cycle_mean_axis_x %} '{{weeks}}', {% endfor %}];
-            var data = [{% for index, data in cycle_mean.iterrows %} {{data.0|floatformat:2}}, {% endfor %}];
+            var data = [{% for index, data in cycle_mean.iterrows %} {{data.cycle_mean_week_count|floatformat:2}}, {% endfor %}];
 
 
             
@@ -23,7 +23,7 @@
                                 data: 
                                     [{% for index, data in cycle_mean.iterrows %} 
                                         {% if smooth == data.smooth_family %}
-                                            {{data.0}}.toFixed(2), 
+                                            {{data.cycle_mean_week_count}}.toFixed(2), 
                                         {% endif %}
                                     
                                     {% endfor %}]
