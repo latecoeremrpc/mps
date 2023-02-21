@@ -1910,7 +1910,8 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         # =>  save_needs (df, product, planningapproval)
         save_needs(df,product,planningapproval,grater_version+1)
         df_shopfloor_data = df
-        version_number = grater_version
+        version_number = grater_version+1
+
     if come_from == 'form_filter_date_version' and request.method == "POST":
             version_selected = request.POST.get('version_selected')
             version_number=version_selected

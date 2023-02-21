@@ -90,12 +90,12 @@
                                     <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
                                     {% for index,cycle in cycle_mean.iterrows%}
                                     <td>
-                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.cycle_mean_week_count}}" class="form-control" required step="0.01" > 
+                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.cycle_mean_week_count}}" class="form-control" required step=any > 
                                     </td>
                                     {%endfor%} 
                                 </tr>
                                 <tr>
-                                    <th><label for="cycle-time-type" class="col-sm-4 control-label">Type</label></th>
+                                    <th><label for="cycle-time-type" class="col-sm-4 control-label">Type (default: Hours)</label></th>
                                     {% for index,cycle in cycle_mean.iterrows%}
                                     <td>
                                         <div class="inline-radio-input col-sm-8">
