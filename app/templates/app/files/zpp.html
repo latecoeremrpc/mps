@@ -33,7 +33,9 @@
                     <label for="uploadzpp" class="btn btn-light m-0 rounded-pill px-4"><i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choose a ZPP file</small></label>
                 </div>
               </div>
-              <center><button type="submit" class="bn632-hover-upload bn20" value="Upload" ><i class="fa-solid fa-angles-right"></i> Next</button></center>
+              <center><button onclick="showLoader()" type="submit" class="bn632-hover-upload bn20" value="Upload" ><i class="fa-solid fa-angles-right"></i> Next</button>
+                <span id="loader" class="loader" style="display:none"></span>
+              </center>
             </form>
             <table class="table table-sm">
               <thead>
@@ -57,6 +59,14 @@
       </div>
     </div>
 </div>
+
+<!-- Script for downloading -->
+<script>
+  function showLoader() {
+    document.getElementById("loader").style.display = "block";
+  }
+</script>
+  
 
 <script>
     var inputzpp = document.getElementById('uploadzpp')

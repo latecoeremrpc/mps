@@ -967,9 +967,11 @@ def copy_calendar(request,division,product):
 
 #All Planning Approval
 def all_planning(request,division,product):
+    # to use in info barre
     product_info=Product.objects.all().filter(id=product).first()
+    # get all planning from database with product
     all_planning=PlanningApproval.objects.all().filter(product=product)
-    #Convert data to dict to get number of versions and shered status and ather informations
+    #Convert data to dict to get number of versions and shered status and other informations
     planning_informations=[]
     for planning in all_planning:
         informations=dict()
@@ -992,7 +994,6 @@ def all_planning(request,division,product):
             informations['last_version']=max(set(version_count))
 
         planning_informations.append(informations)
-    print(planning_informations)
     return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info,'planning_informations':planning_informations})
    
 #Save new Planning Approval
@@ -1217,7 +1218,7 @@ def import_zpp(file,conn,product,planningapproval):
 # @allowed_users(allowed_roles=["Planificateur"])
 # merge between coois and zpp and material
 def needs(request,division,product,planningapproval):
-    # name of planning approval for info page
+    # to diplay for info page
     planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()  
     # data for merge
     zpp_data=Zpp.objects.filter(created_by= 'Marwa',product=product,planning_approval_id=planningapproval).values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
@@ -1426,10 +1427,7 @@ def smoothing_calculate(df_data,calendar_type,product):
         # test if df_closed_false not freezed calculate smoothing end date 
         if (df_closed_false.loc[i+1,'freezed']=='not_freezed'):
             df_closed_false.loc[i+1,'smoothing_end_date'] = smooth_date_calcul(df_closed_false.loc[i,'smoothing_end_date'],df_dict_cycle.items(),df_closed_false.loc[i,'division'],df_closed_false.loc[i,'profit_centre'],df_closed_false.loc[i,'Smooth_Family'])
-    print('endfor')
     df_data = pd.concat([df_closed_true, df_closed_false])
-    print('end concat')
-
     return df_data
  
 #calcul smooth end date(Recursive Function) to use in smoothing_calculate
@@ -1437,7 +1435,6 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
     
     #Get cycle for current day
     key_date=str(division)+str(profit_center)+str(Smooth_Family)+str(current_date).split(' ')[0]
-    
     #initial case treatment (when prev_date =  current_date)
     if prev_date is None:
         prev_date=current_date
@@ -1752,7 +1749,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
      # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     
-    #  get data from database
+    # get data from database
     cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval)
     shopfloor_data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval)
     # get workday to use in calcul of demonstrated capacity

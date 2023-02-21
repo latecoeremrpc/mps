@@ -37,9 +37,11 @@
               </div>
             </div>
             <center>
-              <button type="submit" class="bn632-hover-upload bn20" value="Upload" ><i class="fa-solid fa-angles-right"></i> Next</button>
+              <button onclick="showLoader()" type="submit" class="bn632-hover-upload bn20" value="Upload" ><i class="fa-solid fa-angles-right"></i> Next</button>
+              <span id="loader" class="loader" style="display:none"></span>
             </center>
           </form>
+          <br>
           <table class="table table-sm">
             <thead>
               <tr>
@@ -62,6 +64,16 @@
     </div>
   </div>   
 </div>
+
+
+<!-- Script for downloading -->
+<script>
+  function showLoader() {
+    document.getElementById("loader").style.display = "block";
+  }
+</script>
+  
+
 
 <script>
 /*  ==========================================
