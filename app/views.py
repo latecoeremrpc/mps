@@ -1697,14 +1697,21 @@ def filter(request):
 # def result diplay result of shoploor data with version  
 def result(request,division,product,planningapproval):
     data= versions= selected_version = None
-    # get info to use in fiter of shopfloor to get version 
-    product_data=Product.objects.values('Profit_center','planning','division__name').filter(id =product).first()
-    version = Shopfloor.objects.values_list('version', flat=True).filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],planning_approval_id=planningapproval).order_by('-version').first()
-    # get all versions of shopfloor to display in result page
-    versions =Shopfloor.objects.values('version').filter(product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],planning_approval_id=planningapproval).distinct().order_by('version')
+    # name of planning approval for info page
+    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()
 
     try:
-        data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=version,planning_approval_id=planningapproval)
+        data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(planning_approval_id=planningapproval)
+        df_data=pd.DataFrame(data.values())
+        df_data['Freeze_end_date'] = df_data['Freeze_end_date'].astype(object).where(df_data['Freeze_end_date'].notnull(), None)
+        df_data['smoothing_end_date'] = df_data['smoothing_end_date'].astype(object).where(df_data['smoothing_end_date'].notnull(), None)
+        #Get all verison to show them in input list
+        versions=sorted(df_data['version'].unique(),reverse=True)
+        #return data with last version
+        grater_version=max(versions)
+        records=df_data[df_data['version']==grater_version]
+        version_number=grater_version
+
     except Exception:
         messages.error(request,"Empty data here, Please fill in needs") 
         return redirect("../needs")  
@@ -1713,14 +1720,15 @@ def result(request,division,product,planningapproval):
         selected_version= request.POST.get('selected_version')
         # convert selected_version (str to int) 
         selected_version=int(selected_version)
-        data=Shopfloor.objects.all().order_by('smoothing_end_date','closed','Smooth_Family','Ranking').filter(division=product_data['division__name'],product=product,profit_centre=product_data['Profit_center'],designation= product_data['planning'],version=selected_version,planning_approval_id=planningapproval)
-    # name of planning approval for info page
-    planningapproval_info=PlanningApproval.objects.all().filter(id=planningapproval).first()
+        records=df_data[df_data['version']==selected_version]
+        version_number=selected_version
+
     if selected_version is None:
-        selected_version= version
+        selected_version= grater_version
+
     return render(request,'app/Shopfloor/result.html',{'planningapproval_info':planningapproval_info,
-    'planningapproval':planningapproval,'records':data,'division':division,'product':product,
-    'versions':versions,'version_number':selected_version,'grater_version':version})
+    'planningapproval':planningapproval,'records':records,'division':division,'product':product,
+    'versions':versions,'version_number':version_number,'grater_version':grater_version})
 
 
 

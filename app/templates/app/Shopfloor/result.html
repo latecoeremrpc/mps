@@ -22,20 +22,12 @@
                       <div class="card-header custom-card-header custom-card-title">
                         <h5 class="card-title custom-card-title">
                             Smoothing V  
-                                {% if selected_version %} 
-                                        {% if version_number != grater_version %} 
-                                            {{version_number}}
-                                            <small class="badge badge-danger"><i class="fa-regular fa-circle-xmark"></i> Not the last version</small>
-
-                                        {% else %}
-                                        {{version_number}} 
-                                         <small class="badge badge-success"><i class="fa-solid fa-check-double"></i> Last version</small>
-
-                                        {% endif %}
-                                {% else %}
-                                    {{grater_version}}
-                                     <small class="badge badge-success"><i class="fa-solid fa-check-double"></i> Last version</small>
-                                {% endif %}
+                            {{version_number}}
+                            {% if grater_version == version_number %}
+                                <small class="badge badge-success"><i class="fa-solid fa-check-double"></i> Last version</small>
+                            {% else %}
+                                <small class="badge badge-danger"><i class="fa-regular fa-circle-xmark"></i> Not the last version</small>
+                            {% endif %}
                         </h5>
                         <!--card tools-->
                         <div class="card-tools"> 
@@ -61,8 +53,8 @@
                                     Versions
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                        {% for v in versions %}
-                                            <button type="submit" name="selected_version" class="dropdown-item" value="{{v.version}}">{{v.version}}</button>
+                                        {% for version in versions %}
+                                            <button type="submit" name="selected_version" class="dropdown-item" value="{{version}}">{{version}}</button>
                                         {% endfor %}
                                     </div>
                                 </div>
@@ -116,7 +108,7 @@
                             </thead>
                             <tbody>
             
-                                {% for data in records %}
+                                {% for index,data in records.iterrows %}
                                     <tr>
                                         <!--coois-->
                                         <!-- <td>{{data.id}}</td> -->
@@ -147,8 +139,13 @@
                                         <td>{{ data.Smooth_Family}} </td>
                                         <!--User Input-->
                                         <td>{{ data.Ranking | date:'d/m/Y'}}  </td>
-                                        <td>{{data.Freeze_end_date | date:'d/m/Y'}} {{data.Freeze_end_date | time:'H:i'}}</td>
 
+                                        {% if data.Freeze_end_date %}
+                                            <td>{{data.Freeze_end_date | date:'d/m/Y'}} {{data.Freeze_end_date | time:'H:i'}}</td>
+                                        {% else %}
+                                            <td>{{data.Freeze_end_date }} {{data.Freeze_end_date}}</td>
+                                        {% endif %}
+                                        
                                         <td>{{ data.Remain_to_do}} </td>
                                         <!--Smoothing-->
                                         <td>{{data.smoothing_end_date | date:'d/m/Y'}} {{data.smoothing_end_date | time:'H:i'}}</td>
