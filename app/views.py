@@ -1036,7 +1036,7 @@ def upload_coois(request,division,product,planningapproval):
         coois_data.delete()
         file=request.FILES['coois']
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
             import_coois(file,conn,product,planningapproval)
             messages.success(request,"COOIS file uploaded successfully!") 
             return redirect('./uploadzpp')
@@ -1125,7 +1125,7 @@ def upload_zpp(request,division,product,planningapproval):
         zpp_data.delete()
         #Save file to DB
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
             import_zpp(file,conn,product,planningapproval)
             messages.success(request,"ZPP file uploaded successfully!") 
             return redirect("../needs")    
@@ -1506,7 +1506,7 @@ def smooth_date_calcul(current_date,table,division,profit_center,Smooth_Family,p
 # save shoploor to use in create_needs
 def save_needs(df,product,planningapproval,version):
    
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     # # get version_data 
     # version_number = Shopfloor.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
     # version = version_number['version']+1 if version_number else 1
@@ -1611,7 +1611,7 @@ def save_cycle_with_version_test(product,planningapproval):
     return True
 
 def save_cycle_with_version(product,planningapproval,version):
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #Get last cycle data shared
     if version == 1:
         cycles= Cycle.objects.all().filter(product=product,owner='officiel',shared=True)
@@ -1731,10 +1731,10 @@ def result(request,division,product,planningapproval):
     'versions':versions,'version_number':version_number,'grater_version':grater_version})
 
 
-
 def kpis(request,division,product,planningapproval,come_from,version_number):
     
     # initialization
+    from_date = to_date = date_from = date_to =date_from_year_week = date_to_year_week= date_from_year_month= date_to_year_month = None
     demand_prod_planning.week_count=None
     demand_prod_planning.week_count_axis_x=None
     demand_prod_planning.month_count=None
@@ -1922,21 +1922,35 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 
     if come_from == 'form_filter_date_version' and request.method == "POST":
             version_selected = request.POST.get('version_selected')
+            from_date= request.POST.get('from')
+            to_date= request.POST.get('to') 
             version_number=version_selected
+
+            df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
             df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
             cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
-            df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
             
     if come_from=='form_shared':
-        print('version to share')
-        print(version_number)
         data=Shopfloor.objects.all().filter(version=version_number,product= product,planning_approval=planningapproval)    
         data.update(shared=True)
+
+    
+    #********** convert dates ************
+    if  from_date and  to_date != 'None': 
+        date_from = datetime.strptime(from_date,'%Y-%m-%d')
+        date_to = datetime.strptime(to_date,'%Y-%m-%d')  
+        
+        date_from_year_week= date_from.strftime('%Y' '-W' '%V')
+        date_to_year_week = date_to.strftime('%Y' '-W' '%V')
+        date_from_year_month= date_from.strftime('%Y' '-M' '%m')
+        date_to_year_month = date_to.strftime('%Y' '-M' '%m')
+        
     #********** Call here functions ************
-    cycle_time_kpi(df_cycles_data)   
-    demand_prod_planning(df_shopfloor_data,df_work_days)
-    production_plan_kpi(df_shopfloor_data)
-    logistic_stock_kpi()
+    cycle_time_kpi(df_cycles_data,date_from,date_to)   
+    demand_prod_planning(df_shopfloor_data,df_work_days,date_from,date_to)
+    production_plan_kpi(df_shopfloor_data,date_from,date_to)
+    logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
+
     
 
     return render(request,'app/kpi_test.html',{
@@ -1946,6 +1960,8 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     'records':df_shopfloor_data,
     'division':division,
     'product':product,
+    'from_date':from_date,
+    'to_date':to_date,
     'planningapproval':planningapproval,
     'planningapproval_info':planningapproval_info,
     'week_count':demand_prod_planning.week_count,
@@ -1966,10 +1982,6 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     'smooth_family_month':cycle_time_kpi.smooth_family_month,
     })
     
-
-
-    # if come_from == 'after_share':
-    #     # cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
 
 
 
@@ -1993,7 +2005,7 @@ def filter_kpi(request,division,product,planningapproval):
     # name of planning approval for info page
     planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     # list of version
-    planning_versions_shared =Shopfloor.objects.values('version', 'shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
+    planning_versions_shared =Shopfloor.objects.values('version','shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
     planning_versions=[]
     version=None
     # to test versions of shofloor if one version shared so version equal version shared else version equal max of all versions
@@ -2159,7 +2171,7 @@ def filter_kpi(request,division,product,planningapproval):
 # Adjust cycle time  
 def update_cycle(data):
 
-    conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+    conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     cycle_data = StringIO()
     #convert file to csv
     cycle_data.write(data.to_csv(index=False , header=None,sep=';'))
@@ -2200,15 +2212,16 @@ def update_cycle(data):
 
 
 # calculate nomber of OF and OP ( wek and month)
-def demand_prod_planning(df_data,df_work_days):
+def demand_prod_planning(df_data,df_work_days,date_from,date_to):
    
     df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
     
-    # if date_from and date_to:
-    #     # get df between two dates
-    #     df_data_demand_prod_interval=df_data[(df_data['date'] >= date_from.date()) & (df_data['date'] <= date_to.date())]
-    # else:
-    df_data_demand_prod_interval= df_data 
+    if date_from and date_to:
+        # get df between two dates
+        df_data_demand_prod_interval=df_data[(df_data['date'] >= date_from.date()) & (df_data['date'] <= date_to.date())]
+    else:
+        df_data_demand_prod_interval= df_data 
+    
     # week of date
     df_data_demand_prod_interval['date_week']=pd.to_datetime(df_data_demand_prod_interval['date'], errors='coerce').dt.week
     # month of date
@@ -2302,12 +2315,12 @@ def demand_prod_planning(df_data,df_work_days):
     demand_prod_planning.work_days_count_month=work_days_count_month
 
 # to display Kpi cycle time per smooth family (week and month)
-def cycle_time_kpi(df_data):
+def cycle_time_kpi(df_data,date_from,date_to):
 
-    # if date_from and date_to:
-    #     df_cycle_time_interval = df_data[(df_data['work_day'] >= date_from.date()) & (df_data['work_day'] <= date_to.date())]
-    # else :
-    df_cycle_time_interval= df_data
+    if date_from and date_to:
+        df_cycle_time_interval = df_data[(df_data['work_day'] >= date_from.date()) & (df_data['work_day'] <= date_to.date())]
+    else :
+        df_cycle_time_interval= df_data
 
     # work_day_week
     df_cycle_time_interval['work_day_week']=pd.to_datetime(df_cycle_time_interval['work_day'],errors='coerce').dt.week
@@ -2362,15 +2375,15 @@ def cycle_time_kpi(df_data):
 
    
 # to calculate production plan (Freeze_end_date or smoothing_end_date) (week and month)
-def production_plan_kpi(df_data): 
+def production_plan_kpi(df_data,date_from,date_to): 
 
     df_data['date_production']=np.where((pd.to_datetime(df_data['Freeze_end_date'],errors='coerce').dt.date),(pd.to_datetime(df_data['smoothing_end_date'],errors='coerce').dt.date),(pd.to_datetime(df_data['Freeze_end_date'],errors='coerce').dt.date))
-    # df_data['date_production']=np.where(((pd.to_datetime(df_data['Freeze_end_date'],errors='coerce')).dt.date).isna(),(pd.to_datetime(df_data['smoothing_end_date'],errors='coerce').dt.date),(df_data['Freeze_end_date']))
-    # if date_from and date_to:
-    #     # get df between two dates
-    #     df_production_plan_kpi_interval= df_data[(df_data['date_production'] >= date_from.date()) & (df_data['date_production'] <= date_to.date())]
-    # else:
-    df_production_plan_kpi_interval = df_data
+    if date_from and date_to:
+
+        # get df between two dates
+        df_production_plan_kpi_interval= df_data[(df_data['date_production'] >= date_from.date()) & (df_data['date_production'] <= date_to.date())]
+    else:
+        df_production_plan_kpi_interval = df_data
     
     
     # week of date date_production
@@ -2403,7 +2416,7 @@ def production_plan_kpi(df_data):
    
 
 # to calculate logistic stock per week and per month 
-def logistic_stock_kpi(): 
+def logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month): 
     
     # to reate new dataframes 
     Df_calcul_logistic_stock_week = production_plan_kpi.date_production_week[['date_production_year_week','date_production_week_count']].copy()
@@ -2425,8 +2438,8 @@ def logistic_stock_kpi():
     #     Df_calcul_logistic_stock_week=Df_calcul_logistic_stock_week[(Df_calcul_logistic_stock_week['monday_date_production_year_week'] >= monday_date_from_year_week) & (Df_calcul_logistic_stock_week['monday_date_production_year_week'] <= monday_date_to_year_week)]
     #     Df_calcul_logistic_stock_month=Df_calcul_logistic_stock_month[(Df_calcul_logistic_stock_month['first_date_production_year_month'] >= first_day_date_from_year_month) & (Df_calcul_logistic_stock_month['first_date_production_year_month'] <= first_date_to_year_month)]
     # else:
-        # Df_calcul_logistic_stock_week
-        # Df_calcul_logistic_stock_month
+    Df_calcul_logistic_stock_week
+    Df_calcul_logistic_stock_month
     
     # to get data from zpp
     zpp_data=Zpp.objects.values('plan_date','element')
