@@ -257,7 +257,7 @@ class Cycle(BaseModel,SoftDeleteModel):
     profit_center= models.CharField(max_length=200)
     work_day= models.DateField()
     smooth_family= models.CharField(max_length=100)
-    cycle_time=models.FloatField()
+    cycle_time=models.FloatField(null=True)
     workdata=models.ForeignKey(WorkData,on_delete=models.CASCADE,null=True)
     owner = models.CharField(default='officiel',max_length=30)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,null=True)

@@ -1588,28 +1588,8 @@ def save_needs(df,product,planningapproval,version):
     conn.commit()
 
 
-#To Delete
-# save cycle with version ==> call function in save needs 
-def save_cycle_with_version_test(product,planningapproval):
-    # get all planning approval id from table cycle
-    planningapproval_cycle = Cycle.objects.values_list('planning_approval',flat=True).filter(product=product)
-    # get planningapproval object to add in cycle table when we save with version 
-    planningapproval_object= PlanningApproval.objects.get(id=planningapproval)
-    version_number = Cycle.objects.values('version').filter(product=product,planning_approval_id=planningapproval).order_by('-version').first()
-    version = version_number['version'] + 1 if version_number else 1 
-    cycles=Cycle.objects.all().filter(product=product) 
-    for cycle in cycles:
-         # create version for each update 
-            if all(i is None for i in planningapproval_cycle): 
-                cycle_data =Cycle(division=cycle.division,product=cycle.product,version =1,workdata=cycle.workdata,work_day=cycle.work_day,planning_approval=planningapproval_object,cycle_time=cycle.cycle_time,profit_center=cycle.profit_center,smooth_family=cycle.smooth_family)
-            if int(planningapproval) in planningapproval_cycle:
-                cycle_data =Cycle(division=cycle.division,product=cycle.product,version =version,workdata=cycle.workdata,work_day=cycle.work_day,planning_approval=planningapproval_object,cycle_time=cycle.cycle_time,profit_center=cycle.profit_center,smooth_family=cycle.smooth_family)
-            else:
-                cycle_data =Cycle(division=cycle.division,product=cycle.product,version =1,workdata=cycle.workdata,work_day=cycle.work_day,planning_approval=planningapproval_object,cycle_time=cycle.cycle_time,profit_center=cycle.profit_center,smooth_family=cycle.smooth_family)
-            cycle_data.save()
-    
-    return True
 
+# save cycle with version ==> call function in save needs 
 def save_cycle_with_version(product,planningapproval,version):
     conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
     #Get last cycle data shared
@@ -1662,39 +1642,9 @@ def save_cycle_with_version(product,planningapproval,version):
         )
     conn.commit()
 
-#To Delete
-# filter by division, profit_center and panning, week to get versions
-def filter(request):
-    divisions_list= Division.undeleted_objects.values('name').distinct().order_by('name')
-    center_profit_list= Product.undeleted_objects.values('Profit_center').distinct().order_by('Profit_center')
-    planning_list= Product.undeleted_objects.values('planning').distinct().order_by('planning')
-    dates= Shopfloor.objects.values('created_at__year','created_at__week').distinct()
-
-    division= profit_center= planning=versions= date =None
-
-    if request.method == "POST":
-        division= request.POST.get('division_name')
-        profit_center= request.POST.get('center_profit')
-        planning= request.POST.get('planning')
-        date= request.POST.get('week')
-        
-
-        year=date.split(',')[0]
-        week=date.split(',')[1]
-
-        versions = Shopfloor.objects.values('version','shared').filter(division=division,profit_centre= profit_center,designation=planning,created_at__week__gte=week, created_at__year=year).distinct().order_by('version')
-        
-    return render( request,'app/Shopfloor/filter.html',{'divisions_list':divisions_list,'center_profit_list':center_profit_list,'planning_list':planning_list,
-    'versions':versions,
-    'division':division,
-    'date':date,
-    'profit_center':profit_center,
-    'planning':planning,
-    'dates':dates
-    })
 
 
-# def result diplay result of shoploor data with version  
+# def result display result of shoploor data with version  
 def result(request,division,product,planningapproval):
     data= versions= selected_version = None
     # name of planning approval for info page
@@ -1731,6 +1681,7 @@ def result(request,division,product,planningapproval):
     'versions':versions,'version_number':version_number,'grater_version':grater_version})
 
 
+# filter planning result
 def kpis(request,division,product,planningapproval,come_from,version_number):
     
     # initialization
@@ -1752,33 +1703,43 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     logistic_stock_kpi.logistic_stock_week = None
     logistic_stock_kpi.logistic_stock_month =None
 
-
-
-     # name of planning approval for info page
-    planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
+    # get cuurent year for filter cycle data dates (for adjust cycle)
+    current_year=datetime.now().year
     
+    # name of planning approval for info page
+    planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
     # get data from database
-    cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval)
+    cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,  work_day__year= current_year)
+    # cycles_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval)
     shopfloor_data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval)
     # get workday to use in calcul of demonstrated capacity
     work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
     
+    # to convert data objects  to dataframe
     df_cycles_data=pd.DataFrame(cycles_data.values())
     df_shopfloor_data=pd.DataFrame(shopfloor_data.values())
     df_work_days=pd.DataFrame(work_days.values())
     
+
     if df_cycles_data.size:
-        df_cycles_data['work_day_week']=pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
-        df_cycles_data['work_day_year']=pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+        df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+        df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
         df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
-
-        grater_version=df_cycles_data['version'].max()
-        available_versions=df_cycles_data['version'].unique()
+        grater_version= df_cycles_data['version'].max()
+        available_versions= df_cycles_data['version'].unique()
+        df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
         #Mean of cycle time to show them in front table adjust cycle
-        cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
+        cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
+        
+        print('#'*50)
+        print(cycle_mean)
+        # 
+        cycle_mean=cycle_mean[cycle_mean['work_day_year']==current_year]
+
+        # Convert the work_day_week_year column to date objects and use them as the sort key
+        cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
 
 
-    
     if come_from == 'planning_list':
         '''Check planning state:  '''
         check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
@@ -1805,11 +1766,9 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         smooth_family_list= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
         week_cycle_list= request.POST.getlist('week_cycle')
-        
         cycle_type=[]
         for date in week_cycle_list:
             cycle_type.append(request.POST.get('cycle-type-'+ date))
-
         data = {
         "smooth_family": smooth_family_list,
         "cycle_time": cycle_time_list,
@@ -1819,18 +1778,19 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         df_cycle_input = pd.DataFrame(data)
         df_cycle_input['year']= df_cycle_input['week_cycle'].str.split('-W').str[0]
         df_cycle_input['week']= df_cycle_input['week_cycle'].str.split('-W').str[1]
-        df_cycle_input['key']=df_cycle_input['week_cycle'].astype(str)+df_cycle_input['smooth_family'].astype(str)
+        df_cycle_input['key']= df_cycle_input['week_cycle'].astype(str)+df_cycle_input['smooth_family'].astype(str)
         df_cycle_input_dict_cycle_time=dict(zip(df_cycle_input['key'],df_cycle_input['cycle_time']))
         df_cycle_input_dict_cycle_type=dict(zip(df_cycle_input['key'],df_cycle_input['cycle_type']))
-
-
+        #  get cycle data with version selected 
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
-        
+        #  make new column key (work_day_week_year and smooth_family)
         df_cycles_data['key']=df_cycles_data['work_day_week_year'].astype(str)+df_cycles_data['smooth_family'].astype(str)
-
+        #  map cycle time
         df_cycles_data['cycle_time']=df_cycles_data['key'].map(df_cycle_input_dict_cycle_time)
-
+        #  map cycle type 
         df_cycles_data['cycle_type']=df_cycles_data['key'].map(df_cycle_input_dict_cycle_type)
+
+
         work_data=WorkData.undeleted_objects.all().filter(product=product)
         df_work_data=pd.DataFrame(work_data.values())
         df_work_data_dict_start_time=dict(zip(df_work_data['date'],df_work_data['startTime'])) 
@@ -1918,6 +1878,17 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         # =>  save_needs (df, product, planningapproval)
         save_needs(df,product,planningapproval,grater_version+1)
         df_shopfloor_data = df
+
+        #Get new cycle data after update
+        df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+        df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+        df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
+        df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
+        cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
+        cycle_mean=cycle_mean[cycle_mean['work_day_year']==current_year]
+        cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
+
+
         version_number = grater_version+1
 
     if come_from == 'form_filter_date_version' and request.method == "POST":
@@ -1928,8 +1899,11 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 
             df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
             df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
+
             cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
-            
+            # Convert the work_day_week_year column to date objects and use them as the sort key
+            cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
+
     if come_from=='form_shared':
         data=Shopfloor.objects.all().filter(version=version_number,product= product,planning_approval=planningapproval)    
         data.update(shared=True)
@@ -1943,8 +1917,8 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         date_from_year_week= date_from.strftime('%Y' '-W' '%V')
         date_to_year_week = date_to.strftime('%Y' '-W' '%V')
         date_from_year_month= date_from.strftime('%Y' '-M' '%m')
-        date_to_year_month = date_to.strftime('%Y' '-M' '%m')
-        
+        date_to_year_month = date_to.strftime('%Y' '-M' '%m') 
+
     #********** Call here functions ************
     cycle_time_kpi(df_cycles_data,date_from,date_to)   
     demand_prod_planning(df_shopfloor_data,df_work_days,date_from,date_to)
@@ -1982,191 +1956,6 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     'smooth_family_month':cycle_time_kpi.smooth_family_month,
     })
     
-
-
-
-# filter planning result
-def filter_kpi(request,division,product,planningapproval):
-    version_to_share = None
-
-    ''' Check planning state:  '''
-    check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
-    check_zpp = Zpp.objects.filter(planning_approval=planningapproval).all()
-    check_shopfloor = Shopfloor.objects.filter(planning_approval=planningapproval).all()
-
-    if not check_coois:
-        return redirect(upload_coois,division=division,product=product,planningapproval=planningapproval)
-    if not check_zpp:
-        return redirect(upload_zpp,division=division,product=product,planningapproval=planningapproval)
-    if not check_shopfloor:
-        return redirect(needs,division=division,product=product,planningapproval=planningapproval)
-    '''End Check planning state:  '''
-
-    # name of planning approval for info page
-    planningapproval_info = PlanningApproval.objects.all().filter(id=planningapproval).first()
-    # list of version
-    planning_versions_shared =Shopfloor.objects.values('version','shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
-    planning_versions=[]
-    version=None
-    # to test versions of shofloor if one version shared so version equal version shared else version equal max of all versions
-    for item in planning_versions_shared:
-        planning_versions.append(item['version'])
-        #Check if exist a shared version
-        if item['shared']:
-            version= item['version']
-    if not version:
-        version = max(planning_versions)
-    
-    # variables initialization 
-    df_data=df_work_days=smooth_family_selected=material_selected=from_date=to_date =date_from= date_to=version_selected=date_from_year_week =  date_to_year_week=date_from_year_month=date_to_year_month=None
-    demand_prod_planning.week_count=None
-    demand_prod_planning.week_count_axis_x=None
-    demand_prod_planning.month_count=None
-    demand_prod_planning.month_count_axis_x=None
-    cycle_time_kpi.cycle_mean=None
-    cycle_time_kpi.week_cycle_mean_axis_x=None
-    cycle_time_kpi.smooth_family=None
-    cycle_time_kpi.smooth_family_month=None
-    cycle_time_kpi.cycle_mean_month=None
-    cycle_time_kpi.month_cycle_mean_axis_x=None
-    production_plan_kpi.date_production_week=None
-    production_plan_kpi.date_production_month=None
-    demand_prod_planning.work_days_count =None
-    demand_prod_planning.work_days_count_month=None
-    logistic_stock_kpi.logistic_stock_week = None
-    logistic_stock_kpi.logistic_stock_month =None
-    
-    # to display all 
-    data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version)
-    cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version)
-    # get workday to use in calcul 
-    work_days=WorkData.undeleted_objects.values('date').filter(product__division=division,product=product,owner='officiel')
-    # to convert data to dataframe
-    df_data=pd.DataFrame(data.values())
-    df_cycle=pd.DataFrame(cycle_data.values())
-    df_work_days=pd.DataFrame(work_days.values())
-
-    # ********to call functions***********************
-    # to call function demand_prod_planning
-    # demand_prod_planning(df_data,df_work_days,date_from,date_to)
-    # to call function demand_prod_planning
-    # production_plan_kpi(df_data,date_from,date_to)
-    # if cycle_data:
-    #     # to call function cycle_time_kpi 
-    #     cycle_time_kpi(df_cycle,date_from,date_to)   
-    # # to call function logistic_stock_kpi
-    # logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
-
-    # *******************Form **************************
-
-    if request.method == "POST":
-        # filter kpi's
-        if 'filter_sbumit' in request.POST:
-            version_selected = request.POST.get('version_planning')
-            from_date= request.POST.get('from')
-            to_date= request.POST.get('to')  
-        # update cycle
-        if 'update_cycle_sbumit' in request.POST:
-            version_selected = request.POST.get('version_selected')
-            from_date= request.POST.get('from')
-            to_date= request.POST.get('to')
-            if version_selected == 'None':
-                version_selected = version 
-            #Update Cycle
-            update_cycle(request,division,product,planningapproval,version_selected)
-            # to redirect to the last version after update
-            planning_versions_shared =Shopfloor.objects.values('version','shared').filter(product=product,planning_approval_id=planningapproval).distinct().order_by('-version') 
-            planning_versions=[]
-            for item in planning_versions_shared:
-                planning_versions.append(item['version'])
-            version_selected = max(planning_versions)
-        # share result   
-        if 'share' in request.POST:
-            version_to_share= request.POST.get('version')
-            from_date= request.POST.get('from')
-            to_date= request.POST.get('to')
-            data=Shopfloor.objects.all().filter(product= product,planning_approval=planningapproval)
-            data.update(shared=False)
-            if version_to_share == 'None':
-                version_to_share = version 
-            print(version_to_share)
-            data=Shopfloor.objects.all().filter(version=version_to_share,product= product,planning_approval=planningapproval)    
-            data.update(shared=True)
-            version = version_to_share
-    
-        
-        if  from_date and  to_date != 'None': 
-            date_from = datetime.strptime(from_date,'%Y-%m-%d')
-            date_to = datetime.strptime(to_date,'%Y-%m-%d')  
-            
-            date_from_year_week= date_from.strftime('%Y' '-W' '%V')
-            date_to_year_week = date_to.strftime('%Y' '-W' '%V')
-            date_from_year_month= date_from.strftime('%Y' '-M' '%m')
-            date_to_year_month = date_to.strftime('%Y' '-M' '%m')
-            
-                
-        #  get data for version
-        if version_selected:
-            data=Shopfloor.objects.all().filter(product=product,planning_approval_id=planningapproval,version=version_selected)
-            cycle_data=Cycle.undeleted_objects.all().filter(division=division,product=product,owner='officiel',planning_approval_id=planningapproval,version=version_selected).distinct()
-        
-
-        if not data:
-                messages.error(request,"No data with selected filter!") 
-                return render(request,'app/kpi.html',{'division':division,'product':product,'from_date':from_date,'to_date':to_date,'planningapproval':planningapproval,'planningapproval_info':planningapproval_info,'planning_versions':planning_versions,'version_selected':version_selected})
-
-
-        df_data=pd.DataFrame(data.values())
-        df_cycle=pd.DataFrame(cycle_data.values())
-        df_work_days=pd.DataFrame(work_days.values())
-        # date
-        # df_data['date']=np.where((df_data['date_reordo'].isna()),(df_data['date_end_plan']),(df_data['date_reordo']))
-        # call function demand_prod_planning
-        demand_prod_planning(df_data,df_work_days,date_from,date_to)
-        # to call function ligistic stock 
-        logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_month,date_to_year_month)
-        # call function demand_prod_planning
-        production_plan_kpi(df_data,date_from,date_to)
-        if cycle_data:
-            # call function cycle_time_kpi 
-            cycle_time_kpi(df_cycle,date_from,date_to)
-    if not version_selected:
-        version_selected = version
-    else:
-        version_selected = int(version_selected)
-    return render(request,'app/kpi.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,
-    'version_to_share':version_to_share,
-    'version_selected':version_selected,
-    'planning_versions_shared':planning_versions_shared,
-    'version':version,
-    'planning_versions':planning_versions,
-    'division':division,'product':product,
-    'records':df_data,
-    'df_cycle':df_cycle,
-    'df_work_days':df_work_days,
-    'from_date':from_date,
-    'to_date':to_date,
-    'date_from':date_from,
-    'date_to':date_to,
-    'smooth_family_selected':smooth_family_selected,
-    'material_selected':material_selected,
-    'week_count':demand_prod_planning.week_count,
-    'week_count_axis_x':demand_prod_planning.week_count_axis_x,
-    'month_count':demand_prod_planning.month_count,
-    'month_count_axis_x':demand_prod_planning.month_count_axis_x,
-    'cycle_mean':cycle_time_kpi.cycle_mean,
-    'week_cycle_mean_axis_x':cycle_time_kpi.week_cycle_mean_axis_x,
-    'smooth_family': cycle_time_kpi.smooth_family,
-    'cycle_mean_month':cycle_time_kpi.cycle_mean_month,
-    'month_cycle_mean_axis_x':cycle_time_kpi.month_cycle_mean_axis_x,
-    'smooth_family_month':cycle_time_kpi.smooth_family_month,
-    'date_production_week':production_plan_kpi.date_production_week,
-    'date_production_month':production_plan_kpi.date_production_month,
-    'work_days_count_week': demand_prod_planning.work_days_count,
-    'work_days_count_month':demand_prod_planning.work_days_count_month,
-    'logistic_stock_week':logistic_stock_kpi.logistic_stock_week,
-    'logistic_stock_month':logistic_stock_kpi.logistic_stock_month,
-    })
 
 # Adjust cycle time  
 def update_cycle(data):
@@ -2244,7 +2033,6 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     
     # *******************************
     week_count=df_data_demand_prod_interval.groupby(['date_year_week','order_nature_closed']).agg(demand_prod_week_count=('division','count')).unstack().fillna(0).stack().reset_index()
-    
     # get year from date_year_week 
     week_count['year']=week_count['date_year_week'].str.split('-W').str[0].astype(int)
     # get week from date_year_week 
@@ -2279,7 +2067,8 @@ def demand_prod_planning(df_data,df_work_days,date_from,date_to):
     # get previous_month
     previous_month =current_date - relativedelta(months=1)
     df_prev_month = df_data[(df_data['date'] > previous_month.date()) & (df_data['date'] <= current_date.date())]
-
+    df_data.to_csv('df_data.csv')
+    # df_prev_month.to_csv('df_prev_month.csv')
     #  calcul sum of closed in previous_month
     df_prev_month_closed=df_prev_month[df_prev_month['closed']==True]
     previous_month_closed_count=df_prev_month_closed.shape[0]
