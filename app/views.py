@@ -1733,13 +1733,12 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         
         print('#'*50)
         print(cycle_mean)
-        # 
-        cycle_mean=cycle_mean[cycle_mean['work_day_year']==current_year]
+         
+        cycle_mean=cycle_mean[cycle_mean['work_day_year']== current_year]
 
         # Convert the work_day_week_year column to date objects and use them as the sort key
         cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
-
-
+        
     if come_from == 'planning_list':
         '''Check planning state:  '''
         check_coois = Coois.objects.filter(planning_approval=planningapproval).all()

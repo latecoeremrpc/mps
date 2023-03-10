@@ -90,7 +90,7 @@
                                     <th><label for="cycle_time" class="col-sm-4 control-label">Cycle time</label></th>
                                     {% for index,cycle in cycle_mean_adjust_cycle.iterrows%}
                                     <td>
-                                        <input style="width: 100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.cycle_mean_week_count}}" class="form-control" required step=any > 
+                                        <input style="width:100px;" id="cycle_time" name="cycle_time" type="number" value="{{cycle.cycle_mean_week_count}}" class="form-control" required> 
                                     </td>
                                     {%endfor%} 
                                 </tr>
