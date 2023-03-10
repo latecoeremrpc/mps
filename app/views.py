@@ -1765,15 +1765,21 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         smooth_family_list= request.POST.getlist('smooth_family')
         cycle_time_list= request.POST.getlist('cycle_time')
         week_cycle_list= request.POST.getlist('week_cycle')
-        cycle_type=[]
-        for date in week_cycle_list:
-            cycle_type.append(request.POST.get('cycle-type-'+ date))
+        cycle_type = request.POST.get('cycle-type')
+        print('#' * 50)
+        print(cycle_type)
+        # cycle_type=[]
+        # for date in week_cycle_list:
+        #     cycle_type.append(request.POST.get('cycle-type-'+ date))
         data = {
         "smooth_family": smooth_family_list,
         "cycle_time": cycle_time_list,
         "week_cycle": week_cycle_list,
         "cycle_type":cycle_type
         }
+        print('my data')
+        print(data)
+
         df_cycle_input = pd.DataFrame(data)
         df_cycle_input['year']= df_cycle_input['week_cycle'].str.split('-W').str[0]
         df_cycle_input['week']= df_cycle_input['week_cycle'].str.split('-W').str[1]
