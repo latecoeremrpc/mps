@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 from io import StringIO
+import zipfile, io
+from django.http import HttpResponse
 import numpy as np
 import pandas as pd
 import psycopg2
@@ -1683,7 +1685,10 @@ def result(request,division,product,planningapproval):
 
 # filter planning result
 def kpis(request,division,product,planningapproval,come_from,version_number):
+
+    data=Shopfloor.objects.filter(product=product,planning_approval_id=planningapproval).values('order','date_start_plan','smoothing_end_date').order_by('Smooth_Family','Ranking')
     
+
     # initialization
     from_date = to_date = date_from = date_to =date_from_year_week = date_to_year_week= date_from_year_month= date_to_year_month = None
     demand_prod_planning.week_count=None
@@ -1721,24 +1726,21 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     df_work_days=pd.DataFrame(work_days.values())
     
 
-    if df_cycles_data.size:
-        df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
-        df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
-        df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
-        grater_version= df_cycles_data['version'].max()
-        available_versions= df_cycles_data['version'].unique()
-        df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
-        #Mean of cycle time to show them in front table adjust cycle
-        cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
-        
-        print('#'*50)
-        print(cycle_mean)
-         
-        cycle_mean=cycle_mean[cycle_mean['work_day_year']== current_year]
+    # if df_cycles_data.size:
+        # df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+        # df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+        # df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
 
-        # Convert the work_day_week_year column to date objects and use them as the sort key
-        cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
-        
+        # grater_version= df_cycles_data['version'].max()
+        # available_versions= df_cycles_data['version'].unique()
+        # df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
+        # #Mean of cycle time to show them in front table adjust cycle
+        # cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()         
+        # cycle_mean=cycle_mean[cycle_mean['work_day_year']== current_year]
+        # # Convert the work_day_week_year column to date objects and use them as the sort key
+        # cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
+    grater_version= df_cycles_data['version'].max()
+    available_versions= df_cycles_data['version'].unique()
     if come_from == 'planning_list':
         '''Check planning state:  '''
         check_coois = Coois.objects.filter(planning_approval=planningapproval).all()
@@ -1753,10 +1755,35 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
             return redirect(needs,division=division,product=product,planningapproval=planningapproval)
         '''End Check planning state:  '''
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
+
+        df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+        df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+        df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
+
+        df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
+        #Mean of cycle time to show them in front table adjust cycle
+        cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()         
+        cycle_mean=cycle_mean[cycle_mean['work_day_year']== current_year]
+        # Convert the work_day_week_year column to date objects and use them as the sort key
+        cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
+
         df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
         
     if come_from == 'shopfloor':
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(grater_version)]
+
+        df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+        df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+        df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
+        grater_version= df_cycles_data['version'].max()
+        available_versions= df_cycles_data['version'].unique()
+        df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
+        #Mean of cycle time to show them in front table adjust cycle
+        cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()         
+        cycle_mean=cycle_mean[cycle_mean['work_day_year']== current_year]
+        # Convert the work_day_week_year column to date objects and use them as the sort key
+        cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
+
         df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(grater_version)]
         version_number = grater_version
 
@@ -1766,8 +1793,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         cycle_time_list= request.POST.getlist('cycle_time')
         week_cycle_list= request.POST.getlist('week_cycle')
         cycle_type = request.POST.get('cycle-type')
-        print('#' * 50)
-        print(cycle_type)
+
         # cycle_type=[]
         # for date in week_cycle_list:
         #     cycle_type.append(request.POST.get('cycle-type-'+ date))
@@ -1777,8 +1803,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         "week_cycle": week_cycle_list,
         "cycle_type":cycle_type
         }
-        print('my data')
-        print(data)
+
 
         df_cycle_input = pd.DataFrame(data)
         df_cycle_input['year']= df_cycle_input['week_cycle'].str.split('-W').str[0]
@@ -1789,6 +1814,9 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         #  get cycle data with version selected 
         df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
         #  make new column key (work_day_week_year and smooth_family)
+        df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+        df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+        df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
         df_cycles_data['key']=df_cycles_data['work_day_week_year'].astype(str)+df_cycles_data['smooth_family'].astype(str)
         #  map cycle time
         df_cycles_data['cycle_time']=df_cycles_data['key'].map(df_cycle_input_dict_cycle_time)
@@ -1889,8 +1917,11 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
         df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
         df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
         df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
-        cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
-        cycle_mean=cycle_mean[cycle_mean['work_day_year']==current_year]
+
+        #Mean of cycle time to show them in front table adjust cycle
+        cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()         
+        cycle_mean=cycle_mean[cycle_mean['work_day_year']== current_year]
+        # Convert the work_day_week_year column to date objects and use them as the sort key
         cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
 
 
@@ -1905,14 +1936,93 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
             df_shopfloor_data=df_shopfloor_data[df_shopfloor_data['version'] == int(version_number)]
             df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
 
-            cycle_mean= df_cycles_data.groupby(['work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()
+            df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+            df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+            df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
+
+            df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
+            #Mean of cycle time to show them in front table adjust cycle
+            cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()         
+            cycle_mean=cycle_mean[cycle_mean['work_day_year']== current_year]
             # Convert the work_day_week_year column to date objects and use them as the sort key
             cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
 
     if come_from=='form_shared':
-        data=Shopfloor.objects.all().filter(version=version_number,product= product,planning_approval=planningapproval)    
-        data.update(shared=True)
+        df_cycles_data=df_cycles_data[df_cycles_data['version'] == int(version_number)]
 
+        df_cycles_data['work_day_week']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().week
+        df_cycles_data['work_day_year']= pd.to_datetime(df_cycles_data['work_day'],errors='coerce').dt.isocalendar().year
+        df_cycles_data['work_day_week_year']= df_cycles_data['work_day_year'].astype(str)+'-'+'W'+df_cycles_data['work_day_week'].astype(str)
+        grater_version= df_cycles_data['version'].max()
+        available_versions= df_cycles_data['version'].unique()
+        df_cycles_data["cycle_time"] = pd.to_numeric(df_cycles_data["cycle_time"], downcast="float")
+        #Mean of cycle time to show them in front table adjust cycle
+        cycle_mean= df_cycles_data.groupby(['work_day_year','work_day_week_year','smooth_family']).agg(cycle_mean_week_count=('cycle_time','mean')).unstack().fillna(0).stack().reset_index()         
+        cycle_mean=cycle_mean[cycle_mean['work_day_year']== current_year]
+        # Convert the work_day_week_year column to date objects and use them as the sort key
+        cycle_mean = cycle_mean.sort_values(by='work_day_week_year', key=lambda x: pd.to_datetime(x + '-1', format='%Y-W%W-%w'))
+
+        data_Shopfloor=Shopfloor.objects.all().filter(version=version_number,product= product,planning_approval=planningapproval)    
+        data_Shopfloor.update(shared=True)
+
+        data_Shopfloor_df = pd.DataFrame(data_Shopfloor.values())
+        data_Shopfloor_df['order_nature']=np.where((data_Shopfloor_df['order_type'].str.startswith('YP')),'OF','OP')
+        
+
+        df_OP = data_Shopfloor_df[(data_Shopfloor_df['order_nature']== 'OP') & (data_Shopfloor_df['closed']==False)]
+        #Select columns to download
+        df_OP_result = df_OP[['order','smoothing_end_date']]
+        df_OP_result['smoothing_end_date']= pd.to_datetime( df_OP_result['smoothing_end_date'], format='%Y/%m/%d')
+        df_OP_result['smoothing_end_date'] = df_OP_result['smoothing_end_date'].dt.strftime('%d.%m.%Y')
+        df_OP_result = df_OP_result.rename(mapper={'order': 'Planned order number', 'smoothing_end_date': 'End date (String : DD.MM.YYYY)'},axis='columns') 
+        df_OP_result.insert(0,"Journal d'execution Winshuttle TRANSACTION ",'')
+        
+        
+        df_OF = data_Shopfloor_df[(data_Shopfloor_df['order_nature']== 'OF') & (data_Shopfloor_df['closed']==False)]
+        #Select columns to download
+        df_OF_result = df_OF[['order', 'date_start_plan','smoothing_end_date']]
+        df_OF_result['date_start_plan']= pd.to_datetime( df_OF_result['date_start_plan'], format='%Y/%m/%d')
+        df_OF_result['date_start_plan'] = df_OF_result['date_start_plan'].dt.strftime('%d.%m.%Y')
+        df_OF_result['smoothing_end_date']= pd.to_datetime( df_OF_result['smoothing_end_date'], format='%Y/%m/%d')
+        df_OF_result['smoothing_end_date'] = df_OF_result['smoothing_end_date'].dt.strftime('%d.%m.%Y')
+        # Third position would be at index 2, because of zero-indexing.
+        # df_OF_result.insert(1, 'LOG (Do not write values in this column)',)
+
+        df_OF_result = df_OF_result.rename(mapper={'order': 'Work order number', 'date_start_plan': 'Start date (String : DD.MM.YYYY)', 'smoothing_end_date': 'End date (String : DD.MM.YYYY)'},axis='columns') 
+        df_OF_result.insert(0,"LOG",'')
+        
+        # response = HttpResponse(content_type='text/csv')
+        # response['Content-Disposition'] = 'attachment; filename=Smooth work orders.csv'
+        # df_OF_result.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+        
+
+    
+        # response = HttpResponse(content_type='text/csv')
+        # response['Content-Disposition'] = 'attachment; filename=Smooth work orders.csv'
+        # df_OP_result.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+        # return response
+    
+        output = StringIO() ## temp output file
+        # writer = csv.writer(output, dialect='excel')
+
+        #code for writing csv file go here...
+
+        response = HttpResponse(content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=backup.csv.zip'
+
+        # z.writestr(df_OP_result.to_excel(), output.getvalue())  ## write csv file to zip
+        # z.writestr(df_OP_result.to_excel(), output.getvalue())  ## write csv file to zip
+        
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+            zip_file.writestr(df_OP_result.to_excel(), output.getvalue())  ## write csv file to zip
+            zip_file.writestr(df_OP_result.to_excel(), output.getvalue())  ## write csv file to zip
+        zip_buffer.seek(0)
+
+        response = HttpResponse(zip_buffer, content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="excel_files.zip"'
+        return response
+        
     
     #********** convert dates ************
     if  from_date and  to_date != 'None': 
@@ -1961,7 +2071,6 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     'smooth_family_month':cycle_time_kpi.smooth_family_month,
     })
     
-
 # Adjust cycle time  
 def update_cycle(data):
 
@@ -2303,5 +2412,6 @@ def logistic_stock_kpi(date_from_year_week, date_to_year_week,date_from_year_mon
     
     logistic_stock_kpi.logistic_stock_week = Df_calcul_logistic_stock_week
     logistic_stock_kpi.logistic_stock_month = Df_calcul_logistic_stock_month
+
 
 
