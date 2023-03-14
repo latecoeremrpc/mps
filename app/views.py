@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from io import StringIO
-import zipfile, io
+import zipfile
+from io import BytesIO
 from django.http import HttpResponse
 import numpy as np
 import pandas as pd
@@ -1990,39 +1991,35 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
 
         df_OF_result = df_OF_result.rename(mapper={'order': 'Work order number', 'date_start_plan': 'Start date (String : DD.MM.YYYY)', 'smoothing_end_date': 'End date (String : DD.MM.YYYY)'},axis='columns') 
         df_OF_result.insert(0,"LOG",'')
-        
-        # response = HttpResponse(content_type='text/csv')
-        # response['Content-Disposition'] = 'attachment; filename=Smooth work orders.csv'
-        # df_OF_result.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
-        
 
-    
-        # response = HttpResponse(content_type='text/csv')
-        # response['Content-Disposition'] = 'attachment; filename=Smooth work orders.csv'
-        # df_OP_result.to_csv(path_or_buf=response,sep=';',float_format='%.2f',index=False,decimal=",")
+
+        # store dataframes as Excel files in BytesIO
+        file1 = BytesIO()
+        df_OF_result.to_excel(file1, index=False)
+        file1.seek(0)
+
+        file2 = BytesIO()
+        df_OP_result.to_excel(file2, index=False)
+        file2.seek(0)
+
+        # create a zipfile of the two Excel files
+        zip_file = BytesIO()
+        with zipfile.ZipFile(zip_file, mode='w') as z:
+            z.writestr('Smooth work orders.xlsx', file1.read())
+            z.writestr('Smooth Planned orders.xlsx', file2.read())
+        zip_file.seek(0)
+
+        # create Django response with ZIP file
+        response = HttpResponse(zip_file.getvalue(), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=files.zip'
+
         # return response
-    
-        output = StringIO() ## temp output file
-        # writer = csv.writer(output, dialect='excel')
-
-        #code for writing csv file go here...
-
-        response = HttpResponse(content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename=backup.csv.zip'
-
-        # z.writestr(df_OP_result.to_excel(), output.getvalue())  ## write csv file to zip
-        # z.writestr(df_OP_result.to_excel(), output.getvalue())  ## write csv file to zip
-        
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
-            zip_file.writestr(df_OP_result.to_excel(), output.getvalue())  ## write csv file to zip
-            zip_file.writestr(df_OP_result.to_excel(), output.getvalue())  ## write csv file to zip
-        zip_buffer.seek(0)
-
-        response = HttpResponse(zip_buffer, content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename="excel_files.zip"'
         return response
-        
+
+
+
+
+
     
     #********** convert dates ************
     if  from_date and  to_date != 'None': 
