@@ -911,6 +911,10 @@ def config_cpordo(request,division,product):
 #********************** Home***********************************
 
 def home_page(request):
+    try:
+        username=request.META['REMOTE_USER']
+    except:
+        username ="Marwa"
     divisions = Division.undeleted_objects.all()
     division=products=None
     current_user = request.user

@@ -61,6 +61,37 @@
                                                     <td>{{ d.product}}</td>
                                                     <td>{{ d.planning}}</td>
                                                     <td>{{d.Profit_center}}</td>
+                                                    <!-- <td><center><a class="btn data_btn" href="{% url 'material' division d.id  %}" >Material</a></center></td> 
+                                                    <td><center><a class="btn data_btn" href="{% url 'calendar' division d.id %}" >Calendar</a></center></td>  -->
+                                                    <!-- {%if d.has_treatement %}
+                                                    <td><center><a class="btn data_btn" href="{% url 'configTrait' division d.id %}" >Calendar Config Treatment</a></center></td> 
+                                                    <td><center><a class="btn data_btn" href="{% url 'configCpordo' division d.id %}" >Calendar Config CpOrdo</a></center></td> 
+                                                    {%else%}
+                                                        <td>N/A</td>
+                                                        <td>N/A</td>
+                                                    {%endif%}
+                                                    <td>
+                                                        <center>
+                                                            <a class="btn data_btn" href="{% url 'allplanning' division d.id %}">Planning</a>
+                                                        </center>
+                                                    </td>  -->
+                                                    {% if d.is_deleted%} 
+                                                    <td><center><a class="btn data_btn" href="{% url 'material' division d.id %}" style="pointer-events:none">Material</a></center></td> 
+                                                    <td><center><a class="btn data_btn" href="{% url 'calendar' division d.id %}" style="pointer-events:none">Calendar</a></center></td> 
+                                                    {%if d.has_treatement %}
+                                                    <td><center><a class="btn data_btn" href="{% url 'configTrait' division d.id %}" style="pointer-events:none">Calendar Config Treatment</a></center></td> 
+                                                    <td><center><a class="btn data_btn" href="{% url 'configCpordo' division d.id %}" style="pointer-events:none">Calendar Config CpOrdo</a></center></td> 
+                                                    {%else%}
+                                                        <td>N/A</td>
+                                                        <td>N/A</td>
+                                                    {%endif%}
+                                                    <td>
+                                                        <center>
+                                                            <a class="btn data_btn" href="{% url 'allplanning' division d.id %}" style="pointer-events:none">Planning</a>
+                                                        </center>
+                                                    </td> 
+                                                    <td style="color: red;">Deleted</td> 
+                                                    {%else%} 
                                                     <td><center><a class="btn data_btn" href="{% url 'material' division d.id  %}" >Material</a></center></td> 
                                                     <td><center><a class="btn data_btn" href="{% url 'calendar' division d.id %}" >Calendar</a></center></td> 
                                                     {%if d.has_treatement %}
@@ -75,9 +106,8 @@
                                                             <a class="btn data_btn" href="{% url 'allplanning' division d.id %}">Planning</a>
                                                         </center>
                                                     </td> 
-                                                    {% if d.is_deleted%} 
-                                                    <td style="color: red;">Deleted</td> 
-                                                    {%else%} 
+
+
                                                     <td >Active</td> 
                                                     {%endif%}
                                                     <td>

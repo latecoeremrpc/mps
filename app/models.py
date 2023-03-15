@@ -57,7 +57,7 @@ class SoftDeleteModel(models.Model):
 
 # Division Model
 class Division(BaseModel,SoftDeleteModel):
-     name = models.CharField(max_length=20 , unique= True)
+     name = models.IntegerField(unique= True)
      description = models.CharField(max_length=200,unique=True)
 
     # renames the instances of the Division
