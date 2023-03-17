@@ -1050,7 +1050,7 @@ def upload_coois(request,division,product,planningapproval):
         coois_data.delete()
         file=request.FILES['coois']
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
             import_coois(file,conn,product,planningapproval)
             messages.success(request,"COOIS file uploaded successfully!") 
             return redirect('./uploadzpp')
@@ -1138,7 +1138,7 @@ def upload_zpp(request,division,product,planningapproval):
         zpp_data.delete()
         #Save file to DB
         try:
-            conn = psycopg2.connect(host='localhost',dbname='mps_db',user='postgres',password='054Ibiza',port='5432')
+            conn = psycopg2.connect(host='localhost',dbname='mps_database',user='postgres',password='admin',port='5432')
             import_zpp(file,conn,product,planningapproval)
             messages.success(request,"ZPP file uploaded successfully!") 
             return redirect("../needs")    
@@ -1250,12 +1250,12 @@ def needs(request,division,product,planningapproval):
         # rename df_zpp column 
         df_zpp=df_zpp.rename(columns={'product__division__name':'division','product__Profit_center':'profit_center'})
         
-        # add column key for zpp (concatinate  material and data_element_planif and created_by)
+        # add column key for zpp (concatinate  material and data_element_planif and created_by) to map with df_coois['key']
         df_zpp['key']=df_zpp['material'].astype(str)+df_zpp['division'].astype(str)+df_zpp['profit_center'].astype(str)+df_zpp['data_element_planif'].astype(str)+df_zpp['created_by'].astype(str)
         #add column key for coois (concatinate material, order, created_by)    
         df_coois['key']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
 
-        # add column key for material (concatinate material, created_by)  
+        # add column key for material (concatinate material, created_by) to map with df_coois['key2']
         df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)+df_material['profit_center'].astype(str)+df_material['created_by'].astype(str)
         #add column key for coois (concatinate material,division,profit_centre, created_by )    
         df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['created_by'].astype(str)
@@ -1287,9 +1287,9 @@ def needs(request,division,product,planningapproval):
         df_coois['Ranking']=np.where((df_coois['date_reordo'].isna()),(pd.to_datetime(df_coois['date_end_plan'])),(pd.to_datetime(df_coois['date_reordo'])))
         # 2: for closed  : equal true where order_stat containes TCLO ou LIVR
         df_coois['closed']=np.where(df_coois['order_stat'].str.contains('TCLO|LIVR'),True,False)
-        filter_product_info= Product.undeleted_objects.values('Profit_center','planning','division__name').filter(id = product).first()
+        filter_product_info= Product.undeleted_objects.values('Profit_center','division__name').filter(id = product).first()
         # filter df_coois by division and product
-        df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == filter_product_info['Profit_center']) & (df_coois['division'] == int(filter_product_info['division__name'])) & (df_coois['designation'] == filter_product_info['planning'])]
+        df_coois_by_division_product = df_coois[ (df_coois['profit_centre'] == filter_product_info['Profit_center']) & (df_coois['division'] == int(filter_product_info['division__name']))]
         records=df_coois_by_division_product.sort_values(['Smooth_Family','Ranking'])
     else :
         messages.error(request,"Import files and Input Materials Please !") 
