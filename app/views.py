@@ -24,6 +24,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 #Comment Marwa
 #*********************CRUD Division************************
 
+
+# function to get user connected 
+def username(request):
+    try:
+        username=request.META['REMOTE_USER']
+    except Exception:
+        username ="Marwa"
+    return username
+
+
 # add new object(Division)
 def create_division(request):
     form = DivisionForm(request.POST)
@@ -42,7 +52,7 @@ def read_division(request):
     form = DivisionForm()
     # undeleted_objects object of soft delete manager
     data = Division.objects.all().order_by('id')  
-    return render(request, "app/division/home_division.html", {'data':data,'form':form})
+    return render(request, "app/division/home_division.html", {'data':data,'form':form,'username':username(request)})
 
 
 #update object(Division) by id
@@ -140,7 +150,7 @@ def product(request,division):
     # undeleted_objects object of soft delete manager
     data = Product.objects.filter(division__pk = division ).order_by('id') 
     division_info=Division.objects.all().filter(id=division).first()  
-    return render(request, "app/product/product.html", {'data':data,'division':division,'form':form,'division_info':division_info})
+    return render(request, "app/product/product.html", {'data':data,'division':division,'form':form,'division_info':division_info,'username':username(request)})
 
 
 #*********************CRUD Material**************************
@@ -204,7 +214,7 @@ def material(request,division,product):
     # undeleted_objects object of soft delete manager
     data = Material.objects.filter(product__pk = product ).order_by('id') 
     product_info=Product.objects.all().filter(id=product).first()  
-    return render(request, "app/material/material.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info})
+    return render(request, "app/material/material.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info,'username':username(request)})
 
 #******************** calendar*******************************
 
@@ -222,7 +232,7 @@ def calendar(request,division,product):
     holidays = HolidaysCalendar.undeleted_objects.all().filter(product_id = product, owner = 'officiel') 
     # get cycle ifo and workdata infos to display in Calendar
     product_info = Product.objects.all().filter(id=product).first()  
-    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'smooth_family': smooth_family,'cycle': cycle,'product_info':product_info})
+    return render(request, "app/calendar/calendar.html",{'product':product,'division':division,'holidays':holidays,'workdata':workdata,'products_data':products_data,'smooth_family': smooth_family,'cycle': cycle,'product_info':product_info,'username':username(request)})
 
 
 # create calendar for product 
@@ -364,7 +374,7 @@ def custom_calendar(request,division,product):
     # get all work data objects to display in Calendar    
     work = WorkData.undeleted_objects.all().filter(product_id = product ,owner = 'marwa')
     product_info = Product.objects.all().filter(id=product).first()  
-    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'smooth_family': smooth_family,'cycle':cycle,'product_info':product_info})
+    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division,'holidays':holidays,'work':work,'smooth_family': smooth_family,'cycle':cycle,'product_info':product_info,'username':username(request)})
     
 #create custom calendar
 def create_custom_calendar(request,division,product):
@@ -788,7 +798,7 @@ def custom_work(request,division,product):
                             cycle_data=Cycle(work_day=day,division=division,profit_center=profit_center.get('Profit_center'),smooth_family=i,cycle_time=new_cycle_time,workdata_id=data.id,owner = owner,product_id = product)
                             cycle_data.save() 
                 return redirect("../customcalendar")
-    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division, 'work':work}) 
+    return render(request,"app/calendar/custom_calendar.html",{'product':product,'division':division, 'work':work,'username':username(request)}) 
 
 #***********CRUD CalendarConfigurationTraitement*****************
 
@@ -847,7 +857,7 @@ def config_trait(request, division,product):
     # undeleted_objects object of soft delete manager
     data = CalendarConfigurationTreatement.objects.filter(product__pk = product ).order_by('id')   
     product_info=Product.objects.all().filter(id=product).first()  
-    return render(request, "app/CalendarConfigurationTraitement/home_conf_traitement.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info})
+    return render(request, "app/CalendarConfigurationTraitement/home_conf_traitement.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info,'username':username(request)})
 
 
 #***************CRUD CalendarConfigurationCpOrdo*****************
@@ -906,15 +916,12 @@ def config_cpordo(request,division,product):
     # undeleted_objects object of soft delete manager
     data = CalendarConfigurationCpordo.objects.filter(product__pk = product ).order_by('id') 
     product_info=Product.objects.all().filter(id=product).first()  
-    return render(request, "app/CalendarConfigurationCpordo/home_conf_cpordo.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info})
+    return render(request, "app/CalendarConfigurationCpordo/home_conf_cpordo.html", {'data':data,'division':division,'product':product,'form':form,'product_info':product_info,'username':username(request)})
 
 #********************** Home***********************************
 
 def home_page(request):
-    try:
-        username=request.META['REMOTE_USER']
-    except:
-        username ="Marwa"
+
     divisions = Division.undeleted_objects.all()
     division=products=None
     current_user = request.user
@@ -932,7 +939,7 @@ def home_page(request):
         messages.error(request,"User not connected!")  
 
 
-    return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'products':products})
+    return render(request,'app/home/index.html', {'division':division, 'divisions':divisions,'products':products,'username':username(request)})
 
 #*******************copy calendar*************************
 def copy_calendar(request,division,product):
@@ -1001,7 +1008,7 @@ def all_planning(request,division,product):
             informations['last_version']=max(set(version_count))
 
         planning_informations.append(informations)
-    return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info,'planning_informations':planning_informations})
+    return render(request,'app/Shopfloor/all_planning.html',{'all_planning':all_planning,'division':division,'product':product,'product_info':product_info,'planning_informations':planning_informations,'username':username(request)})
    
 #Save new Planning Approval
 def new_planning(request,division,product):
@@ -1021,14 +1028,14 @@ def new_planning(request,division,product):
         else:
             messages.error(request,"Name exist! try again")
             return redirect('../newplanning')
-    return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product,'product_info':product_info})
+    return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product,'product_info':product_info,'username':username(request)})
 
 #To DO
 def update_planning(request,division,product,planningapproval):
     
     planning_approval_name_list=list(PlanningApproval.objects.values_list('name',flat=True).filter(product=product))
 
-    return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product})
+    return render(request,'app/Shopfloor/new_planning.html',{'division':division,'product':product, 'username':username(request)})
 
 
 #*********************Upload To DB COOIS************************
@@ -1050,7 +1057,7 @@ def upload_coois(request,division,product,planningapproval):
         except Exception:
             messages.error(request,"unable to upload files, not exist or unreadable") 
  
-    return render(request,'app/files/coois.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'planningapproval':planningapproval,'coois_files':coois_files})  
+    return render(request,'app/files/coois.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'planningapproval':planningapproval,'coois_files':coois_files,'username':username(request)})  
 
 def import_coois(file,conn,product,planningapproval):
     #read file with pandas
@@ -1067,7 +1074,6 @@ def import_coois(file,conn,product,planningapproval):
     dc.insert(8,'restored_by','Marwa')
     dc.insert(24,'product_id',product)
     dc.insert(25,'planning_approval_id',planningapproval)
-
 
     # Using the StringIO method to set
     # as file object
@@ -1139,7 +1145,7 @@ def upload_zpp(request,division,product,planningapproval):
         except Exception:
             messages.error(request,"unable to upload ZPP files, not exist or unreadable") 
 
-    return render(request,'app/files/zpp.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'planningapproval':planningapproval, 'zpp_files':zpp_files})  
+    return render(request,'app/files/zpp.html',{'planningapproval_info':planningapproval_info,'division':division,'product':product,'planningapproval':planningapproval, 'zpp_files':zpp_files,'username':username(request)})  
 
 
 def import_zpp(file,conn,product,planningapproval):
@@ -1230,7 +1236,7 @@ def needs(request,division,product,planningapproval):
     # data for merge
     zpp_data=Zpp.objects.filter(created_by= 'Marwa',product=product,planning_approval_id=planningapproval).values('material','data_element_planif','created_by','message','date_reordo','product__Profit_center','product__division__name')
     coois_data= Coois.objects.all().filter(created_by= 'Marwa',product=product,planning_approval_id=planningapproval).values()
-    material_data=Material.undeleted_objects.values('material','product__Profit_center','product__planning','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family').filter(product=product)
+    material_data=Material.undeleted_objects.values('material','product__Profit_center','product__division__name','created_by','workstation','AllocatedTime','Leadtime','Allocated_Time_On_Workstation','Smooth_Family').filter(product=product)
     #  check if data existe
     if zpp_data and coois_data and material_data:
        
@@ -1240,7 +1246,7 @@ def needs(request,division,product,planningapproval):
         df_material=pd.DataFrame(list(material_data))
         
         # rename df_material column 
-        df_material=df_material.rename(columns={'product__planning':'planning','product__division__name':'division','product__Profit_center':'profit_center'})
+        df_material=df_material.rename(columns={'product__division__name':'division','product__Profit_center':'profit_center'})
         # rename df_zpp column 
         df_zpp=df_zpp.rename(columns={'product__division__name':'division','product__Profit_center':'profit_center'})
         
@@ -1250,9 +1256,9 @@ def needs(request,division,product,planningapproval):
         df_coois['key']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['order'].astype(str)+df_coois['created_by'].astype(str)
 
         # add column key for material (concatinate material, created_by)  
-        df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)++df_material['profit_center'].astype(str)+df_material['created_by'].astype(str)+df_material['planning'].astype(str)
+        df_material['key']=df_material['material'].astype(str)+df_material['division'].astype(str)+df_material['profit_center'].astype(str)+df_material['created_by'].astype(str)
         #add column key for coois (concatinate material,division,profit_centre, created_by )    
-        df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['created_by'].astype(str)+df_coois['designation'].astype(str)
+        df_coois['key2']=df_coois['material'].astype(str)+df_coois['division'].astype(str)+df_coois['profit_centre'].astype(str)+df_coois['created_by'].astype(str)
         
         #Convert df_zpp to dict
         df_zpp_dict_message=dict(zip(df_zpp.key, df_zpp.message))
@@ -1289,7 +1295,7 @@ def needs(request,division,product,planningapproval):
         messages.error(request,"Import files and Input Materials Please !") 
         return render(request,'app/Shopfloor/Shopfloor.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'division':division,'product':product}) 
         
-    return render(request,'app/Shopfloor/Shopfloor.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'records': records,'division':division,'product':product}) 
+    return render(request,'app/Shopfloor/Shopfloor.html',{'planningapproval_info':planningapproval_info,'planningapproval':planningapproval,'records': records,'division':division,'product':product,'username':username(request)}) 
 
 #create needs
 # get inputs value, calculate smoothing end date and save 
@@ -2032,6 +2038,7 @@ def kpis(request,division,product,planningapproval,come_from,version_number):
     
 
     return render(request,'app/kpi_test.html',{
+    'username':username(request),
     'version_number':version_number,'available_versions':available_versions,'grater_version':grater_version,
     'cycles_data':df_cycles_data,
     'cycle_mean_adjust_cycle':cycle_mean,
