@@ -1,6 +1,6 @@
 from django import forms
 from app.models import Division,Material,Product,CalendarConfigurationTreatement,CalendarConfigurationCpordo
-
+from django.forms import DateInput
 
 
 # creating a form for Division
@@ -32,8 +32,7 @@ class ProductForm(forms.ModelForm):
             "product",
             "planning",
             "Profit_center",
-            "has_treatement",
-            
+            "has_treatement",   
         ]  
 
 
@@ -66,6 +65,10 @@ class CalendarConfigurationTreatementForm(forms.ModelForm):
     class Meta:
         # specify model to be used
         model = CalendarConfigurationTreatement
+        EndDate = forms.DateField(
+        widget=DateInput(attrs={'type': 'date'}),
+        input_formats=['%d/%m/%Y']
+    )
  
         # specify fields to be used 
         fields = [

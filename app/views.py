@@ -812,7 +812,7 @@ def create_conf_trait(request,division,product):
         instance.save()
         messages.success(request,"CalendarConfigurationTraitement created successfully!")
      else:
-         messages.error(request,"Form not valid! try again")
+        messages.error(request,"Form not valid! try again")
     return redirect(f'../{product}/configTrait')
     
 
@@ -1152,9 +1152,13 @@ def import_zpp(file,conn,product,planningapproval):
 
     #read file with pandas
     # to read csv because the type of zpp file is text
-    dc=pd.read_csv(file.temporary_file_path(),header=0,skiprows=4,encoding='UTF-16 LE', error_bad_lines=False, sep ='\t', names=['A','material','plan_date','B','element','data_element_planif','message','needs','qte_available','date_reordo','supplier','customer'])
+    dc=pd.read_csv(file.temporary_file_path(),header=0,skiprows=4,encoding='UTF-16 LE', error_bad_lines=False, sep ='\t', names=['A','material','plan_date','B','element','data_element_planif','message','needs','qte_available','date_reordo','supplier','customer','M','N','O'])
     # to drop empty columns
-    dc=dc.drop(columns=['A','B',])
+    dc=dc.drop(columns=['A','B','M','N','O'])
+    # dc.to_csv('my_test.csv')
+    # delete the last 3 columns
+    # dc = dc.iloc[:, :-3]
+
     
     # dc.rename(columns ={'material','plan_date','element','data_element_planif','message','needs','qte_available','date_reordo','supplier','customer'} , inplace=True)
     #insert informations into file
