@@ -31,7 +31,7 @@
                                         <select name="product_copied" size="1" style="height:40px;" class="custom-select form-control-border" id="exampleSelectBorder">
                                             <!--list of product-->
                                             {% for p in products_data %}
-                                            <option value="{{p.id}}">{{p.division.name}} | {{p.product}}</option>
+                                            <option value="{{p.id}}">{{p.division.name}} | {{p.product}} | {{p.planning}}</option>
                                             {% endfor %}
                                         </select>
                                         <span class="input-group-append">
@@ -261,21 +261,21 @@
                     </div>  
                     
                     <div class="form-group row">
-                        <label for="Absenteeism-ratio" class="col-sm-4 control-label">Absenteeism ratio</label>
+                        <label for="Absenteeism-ratio" class="col-sm-4 control-label">Absenteeism Ratio</label>
                         <div class="col-sm-8">
                             <input id="Absenteeism-ratio" name="Absenteeism-ratio" type="number" class="form-control" required=""step="0.01">
                         </div>     
                     </div>  
                     
                     <div class="form-group row">
-                        <label for="Unproductiveness-ratio" class="col-sm-4 control-label">Unproductiveness ratio</label>
+                        <label for="Unproductiveness-ratio" class="col-sm-4 control-label">Unproductiveness Ratio</label>
                         <div class="col-sm-8">
                             <input id="Unproductiveness-ratio" name="Unproductiveness-ratio" type="number" class="form-control" required="" step="0.01" >
                         </div>     
                     </div>  
                     
                     <div class="form-group row">
-                        <label for="Efficienty-ratio" class="col-sm-4 control-label">Efficienty ratio</label>
+                        <label for="Efficienty-ratio" class="col-sm-4 control-label">Productivity Ratio</label>
                         <div class="col-sm-8">
                             <input id="Efficienty-ratio" name="Efficienty-ratio" type="number" class="form-control" required=""step="0.01" >
                         </div>     
